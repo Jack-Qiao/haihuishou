@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>嗨回收抢单工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --text-muted: #8b9cb3;
+      --accent: #22c55e;
+      --accent-hover: #16a34a;
+      --primary: #22c55e;
+      --danger: #ef4444;
+      --radius: 10px;
+      --font: 'Noto Sans SC', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .main-tabs {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .tab-nav-item {
+      padding: 14px 20px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab-nav-item:hover {
+      color: var(--text);
+    }
+
+    .tab-nav-item.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel {
+      display: block;
+    }
+
+    .tab-panel.hidden {
+      display: none;
+    }
+
+    .login-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-small {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .status {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .status.logged-in {
+      color: var(--accent);
+    }
+
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 20px;
+      padding: 20px;
+    }
+
+    section h2 {
+      margin: 0 0 16px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .form-row label {
+      min-width: 80px;
+      color: var(--text-muted);
+    }
+
+    .form-row input,
+    .form-row select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      min-width: 120px;
+    }
+
+    .brands-chosen {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .order-state-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-state-row .order-state-label {
+      color: var(--text-muted);
+      font-size: 14px;
+      min-width: 72px;
+    }
+
+    .order-state-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .order-state-option:hover {
+      border-color: var(--primary);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .order-state-option input {
+      margin: 0;
+      accent-color: var(--primary);
+    }
+
+    .order-state-option:has(input:checked) {
+      border-color: var(--primary);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .pagination-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .pagination-total {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-right: auto;
+    }
+
+    .pagination-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pagination-btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .pagination-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-ellipsis {
+      padding: 0 4px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .pagination-size,
+    .pagination-jump input {
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .pagination-jump {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pagination-jump input {
+      width: 48px;
+      text-align: center;
+    }
+
+    .section-collapsible h2 {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-collapsible h2 .collapse-icon {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .section-collapsible.collapsed .collapse-icon {
+      transform: rotate(-90deg);
+    }
+
+    .section-collapsible .section-collapse-body {
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+    }
+
+    .section-collapsible.collapsed .section-collapse-body {
+      max-height: 0 !important;
+      overflow: hidden;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    tr:hover {
+      background: rgba(34, 197, 94, 0.06);
+    }
+
+    .msg {
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .msg.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+    }
+
+    .msg.success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+    }
+
+    .msg.info {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #orderListBody .btn-small {
+      margin-right: 6px;
+    }
+
+    .order-countdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--bg);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .order-countdown.ended {
+      color: var(--text-muted);
+    }
+
+    .product-name {
+      font-weight: 600;
+    }
+
+    .toast-wrap {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .toast.success {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .toast.error {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .modal h3 {
+      margin: 0 0 16px 0;
+      font-size: 1rem;
+    }
+
+    .modal .form-row {
+      margin-bottom: 14px;
+    }
+
+    .modal .form-row input {
+      width: 100%;
+    }
+
+    .input-readonly {
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: default;
+    }
+
+    .quote-apprize-display {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .login-card h1 {
+      margin: 0 0 8px 0;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    .login-card .sub {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .login-card .form-row {
+      margin-bottom: 16px;
+    }
+
+    .login-card .form-row label {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .login-card input {
+      width: 100%;
+    }
+
+    .login-card .btn-primary {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loginScreen">
+    <div class="login-card">
+      <h1>嗨回收抢单工具</h1>
+      <p class="sub">请先登录后使用</p>
+      <div class="form-row">
+        <label>手机号</label>
+        <input type="text" id="loginName" placeholder="请输入手机号" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label>密码</label>
+        <input type="password" id="loginPwd" placeholder="请输入密码" autocomplete="off">
+      </div>
+      <div id="loginMsg" class="msg hidden"></div>
+      <button type="button" class="btn btn-primary" id="btnLogin">登录</button>
+    </div>
+  </div>
+
+  <div id="appContent" class="hidden">
+    <header>
+      <h1>嗨回收抢单工具</h1>
+      <div class="login-row">
+        <span class="status logged-in" id="loginStatus">已登录</span>
+        <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
+      </div>
+    </header>
+    <div class="main-tabs">
+      <nav class="tab-nav">
+        <span class="tab-nav-item active" data-tab="grab">抢单</span>
+        <span class="tab-nav-item" data-tab="schedule">定时抢单任务</span>
+      </nav>
+    </div>
+    <div id="tabPanelGrab" class="tab-panel">
+      <div class="container">
+        <section id="sectionBasicData" class="section-collapsible collapsed">
+          <h2 id="toggleBasicData">1. 电子产品信息选择 <span class="collapse-icon">▼</span></h2>
+          <div class="section-collapse-body" style="max-height:800px">
+            <div id="categoriesMsg" class="msg info hidden"></div>
+            <div id="manufacturersArea" class="hidden" style="margin-top:8px">
+              <div style="color:var(--text-muted); margin-bottom:6px">选择厂商</div>
+              <div id="manufacturersList" class="brands-chosen"></div>
+            </div>
+            <div id="categoryArea" class="hidden" style="margin-top:14px">
+              <div style="color:var(--text-muted); margin-bottom:6px">选择电子类型</div>
+              <div id="categoryRadioGroup" class="brands-chosen"></div>
+            </div>
+            <div id="brandsArea" class="hidden" style="margin-top:14px">
+              <div style="color:var(--text-muted); margin-bottom:6px">选择品牌</div>
+              <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
+                  id="btnBrandsAll">全部</button></div>
+              <div id="brandsList" class="brands-chosen"></div>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2>抢单列表</h2>
+          <div class="order-state-row">
+            <span class="order-state-label">订单状态</span>
+            <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
+              <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
+                <span>待报价</span></label>
+              <label class="order-state-option"><input type="radio" name="orderState" value="20">
+                <span>报价中</span></label>
+              <label class="order-state-option"><input type="radio" name="orderState" value="30">
+                <span>已报价</span></label>
+            </span>
+          </div>
+          <div class="form-row">
+            <label>最低价</label>
+            <input type="text" id="inputMinPrice" value="" style="width:90px">
+            <label>最高价</label>
+            <input type="text" id="inputMaxPrice" value="" style="width:90px">
+            <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
+            <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
+          </div>
+          <div id="orderListMsg" class="msg info hidden"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr id="orderListHead">
+                  <th>产品名称</th>
+                  <th>预估金额</th>
+                  <th>规格</th>
+                  <th>厂商</th>
+                  <th>倒计时</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="orderListBody">
+                <tr>
+                  <td colspan="6" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="order-list-footer pagination-wrap">
+            <span id="orderListTotal" class="pagination-total"></span>
+            <div class="pagination-right" style="display:flex; align-items:center; gap:10px;">
+              <div class="pagination-nav">
+                <button type="button" class="pagination-btn" id="btnPagePrev" title="上一页">&lt;</button>
+                <span id="paginationPages"></span>
+                <button type="button" class="pagination-btn" id="btnPageNext" title="下一页">&gt;</button>
+              </div>
+              <select id="inputPageSize" class="pagination-size">
+                <option value="10">10条/页</option>
+                <option value="20" selected>20条/页</option>
+                <option value="50">50条/页</option>
+                <option value="100">100条/页</option>
+              </select>
+              <span class="pagination-jump"><span>跳至</span><input type="number" id="inputPage" value="1" min="1"
+                  placeholder="1"><span>页</span></span>
+              <button type="button" class="btn btn-ghost btn-small" id="btnPageGo">跳转</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div id="tabPanelSchedule" class="tab-panel hidden">
+      <div class="container">
+        <section>
+          <h2>定时抢单任务设置</h2>
+          <p style="color:var(--text-muted); margin-top:8px;">在此配置定时抢单任务（功能开发中）。</p>
+          <div class="form-row" style="margin-top:16px;">
+            <label>任务名称</label>
+            <input type="text" placeholder="例如：每日 9 点抢单" style="width:280px;">
+          </div>
+          <div class="form-row">
+            <label>执行时间</label>
+            <input type="time" value="09:00">
+          </div>
+          <div class="form-row">
+            <button type="button" class="btn btn-primary">保存任务</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="quoteModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>提交报价</h3>
+      <div class="form-row">
+        <label>recordId</label>
+        <input type="text" id="quoteRecordId" readonly class="input-readonly">
+      </div>
+      <div class="form-row">
+        <label>orderId</label>
+        <input type="text" id="quoteOrderId" readonly class="input-readonly">
+      </div>
+      <div class="form-row">
+        <label>预估金额</label>
+        <span id="quoteApprizeDisplay" class="quote-apprize-display">-</span>
+        <input type="hidden" id="quoteApprizeValue" value="">
+      </div>
+      <div class="form-row">
+        <label>报价金额</label>
+        <input type="text" id="quoteActualPrice" placeholder="手动填写，如 100">
+      </div>
+      <div class="form-row">
+        <label>备注</label>
+        <input type="text" id="quoteRemark" placeholder="手动填写，选填">
+      </div>
+      <input type="hidden" id="quoteIsUpdate" value="">
+      <div id="quoteMsg" class="msg hidden"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btnQuoteCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="btnQuoteSubmit">提交报价</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = '';
+    let authUserId = '';
+    const api = async (path, options = {}) => {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      if (authToken) headers['token'] = authToken;
+      const res = await fetch(path, { ...options, headers });
+      const text = await res.text();
+      try { return text ? JSON.parse(text) : {}; } catch (_) {
+        return { success: false, message: '服务器返回异常，请检查是否已登录或刷新重试' };
+      }
+    };
+    function showMsg(el, text, type) {
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'msg ' + (type || 'info');
+      el.classList.remove('hidden');
+    }
+    function hideMsg(el) { if (el) el.classList.add('hidden'); }
+    let toastTimer = null;
+    function showToast(text, type) {
+      const wrap = document.getElementById('toastWrap') || (() => {
+        const w = document.createElement('div');
+        w.id = 'toastWrap';
+        w.className = 'toast-wrap';
+        document.body.appendChild(w);
+        return w;
+      })();
+      if (toastTimer) clearTimeout(toastTimer);
+      wrap.innerHTML = '';
+      const el = document.createElement('div');
+      el.className = 'toast ' + (type || 'success');
+      el.textContent = text;
+      wrap.appendChild(el);
+      wrap.style.display = 'block';
+      toastTimer = setTimeout(() => { wrap.innerHTML = ''; wrap.style.display = 'none'; toastTimer = null; }, type === 'error' ? 4500 : 2500);
+    }
+    function setLoginScreen(showLogin) {
+      document.getElementById('loginScreen').classList.toggle('hidden', !showLogin);
+      document.getElementById('appContent').classList.toggle('hidden', showLogin);
+    }
+    async function loadBrandsForCategory(catId) {
+      if (!catId) return;
+      try {
+        const r = await api('/api/brands?catId=' + catId);
+        if (!r.success) return;
+        currentBrands = r.data || [];
+        const list = document.getElementById('brandsList');
+        list.innerHTML = currentBrands.map(b => {
+          const bid = String(b.key ?? b.id ?? b.brandId ?? '').trim();
+          const bname = String(b.value ?? b.name ?? b.brandName ?? '').trim() || bid;
+          return '<label class="tag"><input type="checkbox" data-key="' + bid + '"> ' + bname + ' (' + bid + ')</label>';
+        }).join('');
+        document.getElementById('brandsArea').classList.remove('hidden');
+      } catch (_) { }
+    }
+    async function loadCategoriesAndSelectPhone() {
+      const msg = document.getElementById('categoriesMsg');
+      try {
+        const r = await api('/api/categories');
+        if (!r.success) { showMsg(msg, r.message || '获取失败', 'error'); return; }
+        const catList = r.data.catList || [];
+        const manufacturerList = r.data.manufacturerList || [];
+        const mList = document.getElementById('manufacturersList');
+        mList.innerHTML = (manufacturerList || []).map(m => {
+          const name = m.text || m.value || '';
+          return '<label class="tag"><input type="checkbox" data-name="' + name + '"> ' + name + '</label>';
+        }).join('');
+        document.getElementById('manufacturersArea').classList.remove('hidden');
+        const radioGroup = document.getElementById('categoryRadioGroup');
+        radioGroup.innerHTML = catList.map(c => '<label class="tag" style="cursor:pointer"><input type="radio" name="categoryType" value="' + c.catId + '"> ' + c.catName + '</label>').join('');
+        document.getElementById('categoryArea').classList.remove('hidden');
+        const phoneOption = catList.find(c => c.catName === '手机');
+        const defaultCatId = phoneOption ? phoneOption.catId : (catList[0] && catList[0].catId);
+        if (defaultCatId) {
+          const defaultRadio = radioGroup.querySelector('input[value="' + defaultCatId + '"]');
+          if (defaultRadio) defaultRadio.checked = true;
+          showMsg(msg, '已加载厂商与分类，共 ' + catList.length + ' 个类型，已默认选中「手机」', 'success');
+          await loadBrandsForCategory(defaultCatId);
+        } else {
+          showMsg(msg, '已加载厂商与分类', 'success');
+        }
+      } catch (e) { showMsg(msg, String(e), 'error'); }
+    }
+    async function updateUserDisplay() {
+      const el = document.getElementById('loginStatus');
+      try {
+        const r = await api('/api/user-info');
+        if (r.success && r.data && r.data.realName) el.textContent = '已登录 ' + r.data.realName;
+        else el.textContent = '已登录 ' + (authUserId || '');
+      } catch (_) { el.textContent = '已登录 ' + (authUserId || ''); }
+    }
+    async function checkStatus() {
+      const r = await api('/api/status');
+      if (r.loggedIn) {
+        if (r.token) authToken = r.token;
+        if (r.userId) authUserId = r.userId;
+        document.getElementById('loginStatus').textContent = '已登录 ' + (authUserId || '');
+        setLoginScreen(false);
+        await updateUserDisplay();
+        await loadCategoriesAndSelectPhone();
+      } else {
+        authToken = '';
+        authUserId = '';
+        setLoginScreen(true);
+      }
+    }
+    document.getElementById('btnLogin').onclick = async () => {
+      const name = document.getElementById('loginName').value.trim();
+      const pwd = document.getElementById('loginPwd').value;
+      const msg = document.getElementById('loginMsg');
+      hideMsg(msg);
+      if (!name || !pwd) { showMsg(msg, '请填写手机号和密码', 'error'); return; }
+      const r = await api('/api/login', { method: 'POST', body: JSON.stringify({ loginName: name, loginPwd: pwd }) });
+      if (r.success) {
+        authToken = (r.data && r.data.token) || '';
+        authUserId = (r.data && (r.data.userId || r.data.user_id)) || '';
+        setLoginScreen(false);
+        document.getElementById('loginStatus').textContent = '已登录 ' + (authUserId || '');
+        await updateUserDisplay();
+        await loadCategoriesAndSelectPhone();
+      } else {
+        showMsg(msg, r.message || '登录失败', 'error');
+      }
+    };
+    document.getElementById('btnLogout').onclick = async () => {
+      authToken = '';
+      authUserId = '';
+      await api('/api/logout', { method: 'POST' });
+      setLoginScreen(true);
+      document.getElementById('loginName').value = '';
+      document.getElementById('loginPwd').value = '';
+      hideMsg(document.getElementById('loginMsg'));
+    };
+    let currentBrands = [];
+    let countdownTimerId = null;
+    function formatCountdown(sec) {
+      if (sec == null || sec < 0) return '已结束';
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      return (String(m).padStart(2, '0') + ' : ' + String(s).padStart(2, '0') + ' 后结束');
+    }
+    function startCountdownTimer() {
+      if (countdownTimerId != null) clearInterval(countdownTimerId);
+      countdownTimerId = setInterval(function () {
+        document.querySelectorAll('.order-countdown[data-countdown]').forEach(function (el) {
+          var sec = parseInt(el.getAttribute('data-countdown'), 10);
+          if (isNaN(sec) || sec <= 0) {
+            el.textContent = '已结束';
+            el.classList.add('ended');
+            el.removeAttribute('data-countdown');
+            return;
+          }
+          sec -= 1;
+          el.setAttribute('data-countdown', String(sec));
+          el.textContent = sec > 0 ? formatCountdown(sec) : '已结束';
+          if (sec <= 0) { el.classList.add('ended'); el.removeAttribute('data-countdown'); }
+        });
+      }, 1000);
+    }
+    async function doQueryOrders() {
+      var msg = document.getElementById('orderListMsg');
+      var tbody = document.getElementById('orderListBody');
+      var totalEl = document.getElementById('orderListTotal');
+      hideMsg(msg);
+      var catEl = document.querySelector("input[name=\"categoryType\"]:checked");
+      var catId = (catEl && catEl.value) ? String(catEl.value).trim() : '';
+      var checkedBrands = [].slice.call(document.querySelectorAll('#brandsList input[type="checkbox"]:checked'));
+      var brandIds = checkedBrands.map(function (el) { return String(el.getAttribute('data-key') || el.dataset.key || '').trim(); }).filter(Boolean);
+      var categoryBrands = catId ? [{ key: String(catId), value: brandIds }] : [];
+      var checkedManufacturers = [].slice.call(document.querySelectorAll('#manufacturersList input:checked'));
+      var subOrderSourceNames = checkedManufacturers.map(function (el) { return String(el.dataset.name || '').trim(); }).filter(Boolean);
+      var minPriceStr = document.getElementById('inputMinPrice').value.trim();
+      var maxPriceStr = document.getElementById('inputMaxPrice').value.trim();
+      var orderStateEl = document.querySelector("input[name=\"orderState\"]:checked");
+      var body = {
+        userId: authUserId,
+        categoryBrands: categoryBrands,
+        orderState: orderStateEl ? orderStateEl.value : '10',
+        subOrderSourceNames: subOrderSourceNames,
+        pageIndex: parseInt(document.getElementById('inputPage').value, 10) || 1,
+        pageSize: parseInt(document.getElementById('inputPageSize').value, 10) || 20
+      };
+      if (minPriceStr) body.minPrice = minPriceStr;
+      if (maxPriceStr) body.maxPrice = maxPriceStr;
+      try {
+        var r = await api('/api/order-list', { method: 'POST', body: JSON.stringify(body) });
+        if (!r.success) { showMsg(msg, r.message || '查询失败', 'error'); return; }
+        var data = r.data || {};
+        var results = data.results || data.list || [];
+        var total = data.totalCount !== undefined ? data.totalCount : (data.pageCount !== undefined ? data.pageCount : 0);
+        var orderState = (body.orderState || '10').toString();
+        var showQuoteCol = orderState === '30';
+        var colCount = showQuoteCol ? 7 : 6;
+        var theadTr = document.getElementById('orderListHead');
+        if (showQuoteCol) theadTr.innerHTML = '<th>产品名称</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        else theadTr.innerHTML = '<th>产品名称</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        totalEl.textContent = '共 ' + total + ' 项';
+        var currentPage = body.pageIndex || 1;
+        var pageSizeNum = body.pageSize || 20;
+        updatePagination(total, pageSizeNum, currentPage);
+        if (results.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="' + colCount + '" style="color:var(--text-muted)">暂无订单</td></tr>';
+          return;
+        }
+        tbody.innerHTML = results.map(function (o) {
+          var recordId = o.recordId !== undefined ? o.recordId : (o.grabOrderId !== undefined ? o.grabOrderId : (o.productId !== undefined ? o.productId : (o.id !== undefined ? o.id : '')));
+          var orderId = o.orderId !== undefined ? o.orderId : (o.orderNo !== undefined ? o.orderNo : (o.orderSn !== undefined ? o.orderSn : ''));
+          var productName = (o.brandName ? o.brandName + ' ' + (o.modelName || '') : (o.modelName || o.goodsName || '-'));
+          var isQuoted = String(o.orderState) === '30';
+          var apprizeRaw = o.apprizeAmount !== undefined ? o.apprizeAmount : o.apprize_amount;
+          var apprizeNum = (apprizeRaw !== null && apprizeRaw !== undefined && apprizeRaw !== '') ? Number(apprizeRaw) : NaN;
+          var apprizeStr = (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0) ? ('¥' + apprizeNum) : '-';
+          var quoteStr = isQuoted ? (o.actualPrice != null && o.actualPrice !== '' ? '¥' + o.actualPrice : '-') : '-';
+          var specParts = [o.catName || '手机', o.brandName || '', o.memory || ''].filter(Boolean);
+          var specStr = specParts.length ? specParts.join(' | ') : '-';
+          var manufacturer = o.subOrderSourceName || o.brandName || '-';
+          var countdownSec = o.countdown != null ? parseInt(o.countdown, 10) : null;
+          var countdownHtml = countdownSec != null ? '<span class="order-countdown" data-countdown="' + countdownSec + '">' + formatCountdown(countdownSec) + '</span>' : '<span class="order-countdown ended">-</span>';
+          var orderStateVal = String(o.orderState !== undefined ? o.orderState : '');
+          var actionLabel = orderStateVal === '10' ? '抢单' : (orderStateVal === '30' ? '修改报价' : '报价');
+          var actualPriceVal = (o.actualPrice != null && o.actualPrice !== '') ? String(o.actualPrice) : '';
+          var apprizeData = (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0) ? String(apprizeNum) : '';
+          var quoteTd = showQuoteCol ? '<td>' + quoteStr + '</td>' : '';
+          return '<tr><td class="product-name">' + productName + '</td><td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+        }).join('');
+        startCountdownTimer();
+        showMsg(msg, '查询成功', 'success');
+      } catch (e) { showMsg(msg, String(e), 'error'); }
+    }
+    function updatePagination(totalCount, pageSize, currentPage) {
+      var totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1);
+      var page = Math.max(1, Math.min(currentPage, totalPages));
+      document.getElementById('inputPage').value = page;
+      var sizeSelect = document.getElementById('inputPageSize');
+      if (sizeSelect.value !== String(pageSize)) sizeSelect.value = String(pageSize);
+      document.getElementById('btnPagePrev').disabled = page <= 1;
+      document.getElementById('btnPageNext').disabled = page >= totalPages;
+      var container = document.getElementById('paginationPages');
+      container.innerHTML = '';
+      function addPageBtn(p) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pagination-btn' + (p === page ? ' active' : '');
+        btn.textContent = p;
+        btn.dataset.page = String(p);
+        container.appendChild(btn);
+      }
+      function addEllipsis() {
+        var ell = document.createElement('span');
+        ell.className = 'pagination-ellipsis';
+        ell.textContent = '...';
+        container.appendChild(ell);
+      }
+      if (totalPages <= 7) {
+        for (var i = 1; i <= totalPages; i++) addPageBtn(i);
+      } else {
+        addPageBtn(1);
+        if (page > 3) addEllipsis();
+        for (var i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) addPageBtn(i);
+        if (page + 1 < totalPages - 1) addEllipsis();
+        if (totalPages > 1) addPageBtn(totalPages);
+      }
+      container.querySelectorAll('.pagination-btn').forEach(function (btn) {
+        btn.onclick = function () { document.getElementById('inputPage').value = btn.dataset.page; doQueryOrders(); };
+      });
+    }
+    document.getElementById('btnPageGo').onclick = function () { doQueryOrders(); };
+    document.getElementById('btnPagePrev').onclick = function () {
+      var input = document.getElementById('inputPage');
+      input.value = Math.max(1, (parseInt(input.value, 10) || 1) - 1);
+      doQueryOrders();
+    };
+    document.getElementById('btnPageNext').onclick = function () {
+      var input = document.getElementById('inputPage');
+      var total = parseInt(document.getElementById('orderListTotal').textContent.replace(/\D/g, ''), 10) || 0;
+      var pageSize = parseInt(document.getElementById('inputPageSize').value, 10) || 20;
+      var totalPages = Math.max(1, Math.ceil(total / pageSize));
+      input.value = Math.min(totalPages, (parseInt(input.value, 10) || 1) + 1);
+      doQueryOrders();
+    };
+    document.getElementById('inputPageSize').addEventListener('change', function () {
+      document.getElementById('inputPage').value = 1;
+      doQueryOrders();
+    });
+    document.getElementById('btnQueryOrders').onclick = doQueryOrders;
+    document.getElementById('btnResetQuery').onclick = async function () {
+      document.querySelector('input[name="orderState"][value="10"]').checked = true;
+      document.getElementById('inputMinPrice').value = '';
+      document.getElementById('inputMaxPrice').value = '';
+      document.getElementById('inputPage').value = '1';
+      document.getElementById('inputPageSize').value = '20';
+      document.querySelectorAll('#manufacturersList input:checked').forEach(function (el) { el.checked = false; });
+      var firstCat = document.querySelector('input[name="categoryType"]');
+      if (firstCat) { firstCat.checked = true; await loadBrandsForCategory(firstCat.value); }
+      doQueryOrders();
+    };
+    document.getElementById('orderStateRadioGroup').addEventListener('change', function (e) { if (e.target.name === 'orderState') doQueryOrders(); });
+    document.getElementById('toggleBasicData').onclick = function () { document.getElementById('sectionBasicData').classList.toggle('collapsed'); };
+    document.querySelectorAll('.tab-nav-item').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var tab = el.dataset.tab;
+        document.querySelectorAll('.tab-nav-item').forEach(function (n) { n.classList.remove('active'); });
+        el.classList.add('active');
+        document.getElementById('tabPanelGrab').classList.toggle('hidden', tab !== 'grab');
+        document.getElementById('tabPanelSchedule').classList.toggle('hidden', tab !== 'schedule');
+      });
+    });
+    document.getElementById('categoryRadioGroup').addEventListener('change', function (e) {
+      if (e.target.name === 'categoryType' && e.target.checked) loadBrandsForCategory(e.target.value);
+    });
+    document.getElementById('btnBrandsAll').onclick = function () {
+      var checkboxes = document.querySelectorAll('#brandsList input[type="checkbox"]');
+      if (!checkboxes.length) return;
+      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
+      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
+    };
+    document.getElementById('orderListBody').addEventListener('click', async function (e) {
+      var btn = e.target.closest('button[data-record-id]');
+      if (!btn) return;
+      var recordId = btn.dataset.recordId;
+      var orderId = btn.dataset.orderId;
+      var orderState = String(btn.dataset.orderState || '').trim();
+      hideMsg(document.getElementById('orderListMsg'));
+      function openQuoteModal() {
+        document.getElementById('quoteRecordId').value = recordId;
+        document.getElementById('quoteOrderId').value = orderId;
+        document.getElementById('quoteApprizeDisplay').textContent = btn.dataset.apprizeDisplay || '-';
+        document.getElementById('quoteApprizeValue').value = btn.dataset.apprize || '';
+        document.getElementById('quoteActualPrice').value = btn.dataset.actualPrice || '';
+        document.getElementById('quoteRemark').value = '';
+        document.getElementById('quoteIsUpdate').value = (orderState === '30') ? '1' : '';
+        document.getElementById('quoteMsg').classList.add('hidden');
+        document.getElementById('quoteModal').classList.remove('hidden');
+      }
+      if (orderState === '20' || orderState === '30') { openQuoteModal(); return; }
+      try {
+        var r = await api('/api/grab-order', { method: 'POST', body: JSON.stringify({ recordId: recordId, orderId: orderId, userId: authUserId }) });
+        if (!r.success) { showToast(r.message || '抢单失败', 'error'); return; }
+        showToast('抢单成功', 'success');
+        openQuoteModal();
+      } catch (err) { showToast(String(err), 'error'); }
+    });
+    document.getElementById('btnQuoteCancel').onclick = function () {
+      document.getElementById('quoteModal').classList.add('hidden');
+      doQueryOrders();
+    };
+    document.getElementById('btnQuoteSubmit').onclick = async function () {
+      var recordId = document.getElementById('quoteRecordId').value.trim();
+      var orderId = document.getElementById('quoteOrderId').value.trim();
+      var actualPrice = document.getElementById('quoteActualPrice').value.trim();
+      var remark = document.getElementById('quoteRemark').value.trim();
+      var isUpdate = document.getElementById('quoteIsUpdate').value === '1';
+      var msg = document.getElementById('quoteMsg');
+      if (!recordId || !orderId || !actualPrice) { showMsg(msg, '请填写报价金额', 'error'); return; }
+      var priceNum = parseFloat(actualPrice);
+      if (isNaN(priceNum) || priceNum < 1) { showMsg(msg, '报价金额必须大于等于1', 'error'); return; }
+      var apprizeVal = document.getElementById('quoteApprizeValue').value.trim();
+      var apprizeNum = apprizeVal ? parseFloat(apprizeVal) : NaN;
+      if (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0 && priceNum >= apprizeNum * 1.5) {
+        if (!confirm('报价金额已超过预估金额的1.5倍，确定要提交报价吗？')) return;
+      }
+      try {
+        var url = isUpdate ? '/api/update-quote' : '/api/quote';
+        var body = isUpdate
+          ? { recordId: Number(recordId), orderId: Number(orderId), actualPrice: actualPrice, remark: remark, userId: authUserId }
+          : { recordId: Number(recordId), orderId: Number(orderId), quoteResult: 1, actualPrice: actualPrice, remark: remark, userId: authUserId };
+        var r = await api(url, { method: 'POST', body: JSON.stringify(body) });
+        if (r.success) {
+          showMsg(msg, isUpdate ? '修改报价成功' : '报价成功', 'success');
+          setTimeout(function () {
+            document.getElementById('quoteModal').classList.add('hidden');
+            doQueryOrders();
+          }, 1500);
+        } else {
+          showMsg(msg, r.message || (isUpdate ? '修改报价失败' : '报价失败'), 'error');
+        }
+      } catch (e) { showMsg(msg, String(e), 'error'); }
+    };
+    checkStatus();
+  </script>
+</body>
+
+</html>
