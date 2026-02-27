@@ -241,6 +241,106 @@ def api_quote():
         return jsonify({"success": False, "message": str(e)}), 200
 
 
+@app.route("/api/execute-task", methods=["POST"])
+def api_execute_task():
+    """
+    执行定时任务：按条件查询待报价列表，对每条先抢单再报价（报价金额为任务设置值）。
+    body: taskName, manufacturerNames[], categoryId, brandIds[], minPrice, maxPrice, quoteAmount
+    """
+    data = request.get_json() or {}
+    token = request.headers.get("token") or session.get("token")
+    user_id = data.get("userId") or session.get("user_id") or session.get("userId")
+    if not token:
+        return jsonify({"success": False, "message": "请先登录（缺少 token）"}), 401
+    if not user_id:
+        return jsonify({"success": False, "message": "请先登录（缺少 userId）"}), 401
+    manufacturer_names = data.get("manufacturerNames") or []
+    if isinstance(manufacturer_names, str):
+        manufacturer_names = [x.strip() for x in manufacturer_names.split(",") if x.strip()]
+    category_id = (data.get("categoryId") or "").strip()
+    brand_ids = data.get("brandIds") or []
+    if isinstance(brand_ids, str):
+        brand_ids = [str(x).strip() for x in brand_ids.split(",") if str(x).strip()]
+    min_price = (data.get("minPrice") or "").strip() or None
+    max_price = (data.get("maxPrice") or "").strip() or None
+    quote_amount = (data.get("quoteAmount") or "").strip()
+    if not quote_amount:
+        return jsonify({"success": False, "message": "请设置报价金额"}), 400
+    task_name = (data.get("taskName") or "").strip()
+    remark = task_name or "定时任务"
+    category_brands = [{"key": category_id, "value": brand_ids}] if category_id else []
+    cond = GrabCondition(
+        category_brands=category_brands,
+        order_state="10",
+        min_price=min_price,
+        max_price=max_price,
+        sub_order_source_names=manufacturer_names,
+        page_size=1,
+    )
+    try:
+        api = HaihuishouAPI()
+        api.set_token(token, user_id)
+        tool = GrabOrderTool(api=api)
+        result = tool.step4_order_list(cond, page_index=1, user_id=user_id)
+        lst = None
+        if isinstance(result, dict):
+            res_obj = result.get("result")
+            if isinstance(res_obj, dict):
+                lst = res_obj.get("orderList")
+            if lst is None:
+                lst = (
+                    result.get("list")
+                    or result.get("orderList")
+                    or result.get("results")
+                    or result.get("records")
+                    or result.get("rows")
+                    or result.get("items")
+                )
+            if lst is None and isinstance(result.get("data"), list):
+                lst = result["data"]
+            if lst is None and isinstance(result.get("data"), dict):
+                inner = result["data"]
+                lst = (inner.get("result") or {}).get("orderList") if isinstance(inner.get("result"), dict) else None
+                lst = lst or inner.get("list") or inner.get("orderList") or inner.get("results") or []
+        if not isinstance(lst, list):
+            lst = []
+        grabbed = 0
+        quoted = 0
+        errors = []
+        for o in lst:
+            record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
+            order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+            if record_id is None or order_id is None:
+                continue
+            try:
+                raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
+                resp_data = raw.get("data") or {}
+                sub_code = resp_data.get("subCode")
+                if sub_code == 200:
+                    errors.append("recordId=%s 抢单失败: %s" % (record_id, (resp_data.get("subMessage") or "已被抢")))
+                    continue
+                if sub_code != 100:
+                    errors.append("recordId=%s 抢单异常 subCode=%s" % (record_id, sub_code))
+                    continue
+                grabbed += 1
+                api.submit_quotation(
+                    record_id=int(record_id),
+                    order_id=int(order_id),
+                    actual_price=quote_amount,
+                    remark=remark,
+                    user_id=user_id,
+                )
+                quoted += 1
+            except Exception as e:
+                errors.append("recordId=%s: %s" % (record_id, str(e)))
+        return jsonify({
+            "success": True,
+            "data": {"grabbed": grabbed, "quoted": quoted, "total": len(lst), "errors": errors[:20]},
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 200
+
+
 @app.route("/api/update-quote", methods=["POST"])
 def api_update_quote():
     """已报价列表的修改报价，调用 hsdupdatequotation。body: recordId, orderId, actualPrice, remark, userId。"""

@@ -46,6 +46,78 @@
       padding: 24px;
     }
 
+    #appContent {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    #tabPanelGrab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .grab-layout {
+      display: flex;
+      flex: 1;
+      gap: 0;
+      align-items: stretch;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .grab-left {
+      flex: 0 0 45%;
+      min-width: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .grab-right {
+      flex: 1 1 55%;
+      min-width: 0;
+      background: var(--surface);
+      padding: 16px;
+      overflow: auto;
+    }
+
+    #tabPanelSchedule {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .schedule-layout {
+      display: flex;
+      flex: 1;
+      gap: 0;
+      align-items: stretch;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .schedule-left {
+      flex: 0 0 45%;
+      min-width: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .schedule-right {
+      flex: 1 1 55%;
+      min-width: 0;
+      background: var(--surface);
+      padding: 16px;
+      overflow: auto;
+    }
+
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -73,8 +145,8 @@
       display: flex;
       gap: 0;
       max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
+      margin: 0 16px;
+      padding: 0 0;
     }
 
     .tab-nav-item {
@@ -159,7 +231,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      margin-top: 20px;
+      /* margin-top: 20px; */
       padding: 20px;
     }
 
@@ -185,7 +257,7 @@
       color: var(--text-muted);
     }
 
-    .form-row input,
+    .form-row input:not([type="checkbox"]):not([type="radio"]),
     .form-row select {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -204,14 +276,59 @@
     }
 
     .tag {
-      background: var(--bg);
+      background: var(--surface);
       border: 1px solid var(--border);
-      padding: 4px 10px;
+      padding: 3px 6px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 13px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .tag input[type="checkbox"],
+    .tag input[type="radio"] {
+      margin: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .tag input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      min-width: 12px;
+      min-height: 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: var(--bg);
+      box-sizing: border-box;
+    }
+
+    .tag input[type="checkbox"]:checked {
+      background: #fff;
+      border-color: #fff;
+    }
+
+    .tag input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      min-width: 12px;
+      min-height: 12px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--bg);
+      box-sizing: border-box;
+    }
+
+    .tag input[type="radio"]:checked {
+      background: #3b82f6;
+      border-color: #3b82f6;
     }
 
     .order-state-row {
@@ -356,6 +473,7 @@
     }
 
     .section-collapsible .section-collapse-body {
+      max-height: 80vh;
       overflow: hidden;
       transition: max-height 0.25s ease-out;
     }
@@ -419,6 +537,74 @@
 
     #orderListBody .btn-small {
       margin-right: 6px;
+    }
+
+    .schedule-task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .schedule-task-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .schedule-task-card-head {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .schedule-task-card-body {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .schedule-task-card-actions .btn-small {
+      margin-right: 8px;
+    }
+    .schedule-grabbed-count {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin: 8px 0 12px 0;
+    }
+    .schedule-grabbed-count .schedule-grabbed-num-link {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .schedule-grabbed-count .schedule-grabbed-num-link:hover {
+      opacity: 0.9;
+    }
+    .schedule-task-running-tag {
+      font-size: 12px;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+    .btn-loading {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    .schedule-task-empty {
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    .form-row-align-top {
+      align-items: flex-start;
+    }
+
+    .form-row-align-top label {
+      padding-top: 6px;
+    }
+
+    .schedule-field-wrap {
+      flex: 1;
+      min-width: 0;
     }
 
     .order-countdown {
@@ -597,112 +783,163 @@
     </header>
     <div class="main-tabs">
       <nav class="tab-nav">
-        <span class="tab-nav-item active" data-tab="grab">抢单</span>
-        <span class="tab-nav-item" data-tab="schedule">定时抢单任务</span>
+        <span class="tab-nav-item active" data-tab="grab">手动抢单</span>
+        <span class="tab-nav-item" data-tab="schedule">自动抢单</span>
       </nav>
     </div>
     <div id="tabPanelGrab" class="tab-panel">
-      <div class="container">
-        <section id="sectionBasicData" class="section-collapsible collapsed">
-          <h2 id="toggleBasicData">电子产品信息选择 <span class="collapse-icon">▼</span></h2>
-          <div class="section-collapse-body" style="max-height:800px">
-            <div id="categoriesMsg" class="msg info hidden"></div>
-            <div id="manufacturersArea" class="hidden" style="margin-top:8px">
-              <div style="color:var(--text-muted); margin-bottom:6px">选择厂商</div>
-              <div id="manufacturersList" class="brands-chosen"></div>
-            </div>
-            <div id="categoryArea" class="hidden" style="margin-top:14px">
-              <div style="color:var(--text-muted); margin-bottom:6px">选择电子类型</div>
-              <div id="categoryRadioGroup" class="brands-chosen"></div>
-            </div>
-            <div id="brandsArea" class="hidden" style="margin-top:14px">
-              <div style="color:var(--text-muted); margin-bottom:6px">选择品牌</div>
-              <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
-                  id="btnBrandsAll">全部</button></div>
-              <div id="brandsList" class="brands-chosen"></div>
-            </div>
-          </div>
-        </section>
-        <section>
-          <h2>抢单列表</h2>
-          <div class="order-state-row">
-            <span class="order-state-label">订单状态</span>
-            <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
-              <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
-                <span>待报价</span></label>
-              <label class="order-state-option"><input type="radio" name="orderState" value="20">
-                <span>报价中</span></label>
-              <label class="order-state-option"><input type="radio" name="orderState" value="30">
-                <span>已报价</span></label>
-            </span>
-          </div>
-          <div class="form-row">
-            <label>最低价</label>
-            <input type="text" id="inputMinPrice" value="" style="width:90px">
-            <label>最高价</label>
-            <input type="text" id="inputMaxPrice" value="" style="width:90px">
-            <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
-            <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
-          </div>
-          <div id="orderListMsg" class="msg info hidden"></div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr id="orderListHead">
-                  <th>产品名称</th>
-                  <th>预估金额</th>
-                  <th>规格</th>
-                  <th>厂商</th>
-                  <th>倒计时</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="orderListBody">
-                <tr>
-                  <td colspan="6" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="order-list-footer pagination-wrap">
-            <span id="orderListTotal" class="pagination-total"></span>
-            <div class="pagination-right" style="display:flex; align-items:center; gap:10px;">
-              <div class="pagination-nav">
-                <button type="button" class="pagination-btn" id="btnPagePrev" title="上一页">&lt;</button>
-                <span id="paginationPages"></span>
-                <button type="button" class="pagination-btn" id="btnPageNext" title="下一页">&gt;</button>
+      <div class="grab-layout">
+        <div class="grab-left">
+          <section id="sectionBasicData">
+            <h2>电子产品信息选择</h2>
+            <div>
+              <div id="categoriesMsg" class="msg info hidden"></div>
+              <div id="manufacturersArea" class="hidden" style="margin-top:8px">
+                <div id="manufacturersList" class="brands-chosen"></div>
               </div>
-              <select id="inputPageSize" class="pagination-size">
-                <option value="10">10条/页</option>
-                <option value="20" selected>20条/页</option>
-                <option value="50">50条/页</option>
-                <option value="100">100条/页</option>
-              </select>
-              <span class="pagination-jump"><span>跳至</span><input type="number" id="inputPage" value="1" min="1"
-                  placeholder="1"><span>页</span></span>
-              <button type="button" class="btn btn-ghost btn-small" id="btnPageGo">跳转</button>
+              <div id="categoryArea" class="hidden" style="margin-top:14px">
+                <div style="color:var(--text-muted); margin-bottom:6px">选择电子类型</div>
+                <div id="categoryRadioGroup" class="brands-chosen"></div>
+              </div>
+              <div id="brandsArea" class="hidden" style="margin-top:14px">
+                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
+                    id="btnBrandsAll">全部</button></div>
+                <div id="brandsList" class="brands-chosen"></div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
+        <div class="grab-right">
+          <section>
+            <h2>抢单列表</h2>
+            <div class="order-state-row">
+              <span class="order-state-label">订单状态</span>
+              <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
+                  <span>待报价</span></label>
+                <label class="order-state-option"><input type="radio" name="orderState" value="20">
+                  <span>报价中</span></label>
+                <label class="order-state-option"><input type="radio" name="orderState" value="30">
+                  <span>已报价</span></label>
+              </span>
+            </div>
+            <div class="form-row">
+              <label>最低价</label>
+              <input type="text" id="inputMinPrice" value="" style="width:90px">
+              <label>最高价</label>
+              <input type="text" id="inputMaxPrice" value="" style="width:90px">
+              <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
+              <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
+            </div>
+            <div id="orderListMsg" class="msg info hidden"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr id="orderListHead">
+                    <th>产品名称</th>
+                    <th>预估金额</th>
+                    <th>规格</th>
+                    <th>厂商</th>
+                    <th>倒计时</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="orderListBody">
+                  <tr>
+                    <td colspan="6" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="order-list-footer pagination-wrap">
+              <span id="orderListTotal" class="pagination-total"></span>
+              <div class="pagination-right" style="display:flex; align-items:center; gap:10px;">
+                <div class="pagination-nav">
+                  <button type="button" class="pagination-btn" id="btnPagePrev" title="上一页">&lt;</button>
+                  <span id="paginationPages"></span>
+                  <button type="button" class="pagination-btn" id="btnPageNext" title="下一页">&gt;</button>
+                </div>
+                <select id="inputPageSize" class="pagination-size">
+                  <option value="10" selected>10条/页</option>
+                  <option value="20">20条/页</option>
+                  <option value="50">50条/页</option>
+                  <option value="100">100条/页</option>
+                </select>
+                <span class="pagination-jump"><span>跳至</span><input type="number" id="inputPage" value="1" min="1"
+                    placeholder="1"><span>页</span></span>
+                <button type="button" class="btn btn-ghost btn-small" id="btnPageGo">跳转</button>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
     <div id="tabPanelSchedule" class="tab-panel hidden">
-      <div class="container">
-        <section>
-          <h2>定时抢单任务设置</h2>
-          <p style="color:var(--text-muted); margin-top:8px;">在此配置定时抢单任务（功能开发中）。</p>
-          <div class="form-row" style="margin-top:16px;">
-            <label>任务名称</label>
-            <input type="text" placeholder="例如：每日 9 点抢单" style="width:280px;">
-          </div>
-          <div class="form-row">
-            <label>执行时间</label>
-            <input type="time" value="09:00">
-          </div>
-          <div class="form-row">
-            <button type="button" class="btn btn-primary">保存任务</button>
-          </div>
-        </section>
+      <div class="schedule-layout">
+        <div class="schedule-left">
+          <section>
+            <h2>定时任务条件</h2>
+            <p style="color:var(--text-muted); margin-top:8px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。</p>
+            <div id="scheduleMsg" class="msg info hidden"></div>
+            <div class="form-row">
+              <label>任务名称</label>
+              <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:240px;">
+            </div>
+            <div class="form-row form-row-align-top">
+              <label>厂商</label>
+              <div class="schedule-field-wrap">
+                <div id="scheduleTaskManufacturersList" class="brands-chosen">切换到此 Tab 后自动加载</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>类型</label>
+              <span style="color:var(--text-muted);">手机</span>
+            </div>
+            <div class="form-row form-row-align-top">
+              <label>品牌</label>
+              <div class="schedule-field-wrap">
+                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
+                    id="btnScheduleBrandsAll">全部</button></div>
+                <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>抢单金额范围</label>
+              <input type="text" id="scheduleTaskMinPrice" placeholder="最低价" style="width:90px;">
+              <span style="color:var(--text-muted);">～</span>
+              <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
+            </div>
+            <div class="form-row">
+              <label>报价金额</label>
+              <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:140px;">
+            </div>
+            <div class="form-row">
+              <label>频率</label>
+              <select id="scheduleTaskFrequency" style="width:140px;">
+                <option value="1" selected>1秒/次</option>
+                <option value="2">2秒/次</option>
+                <option value="3">3秒/次</option>
+                <option value="5">5秒/次</option>
+                <option value="10">10秒/次</option>
+                <option value="30">30秒/次</option>
+                <option value="60">60秒/次</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <button type="button" class="btn btn-primary" id="btnScheduleSave">保存任务</button>
+            </div>
+          </section>
+        </div>
+        <div class="schedule-right">
+          <section>
+            <h2>任务列表</h2>
+            <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span id="scheduleGrabbedCountNum">0</span></p>
+            <div id="scheduleTaskListContainer">
+              <div id="scheduleTaskList" class="schedule-task-list"></div>
+              <p id="scheduleTaskListEmpty" class="schedule-task-empty">暂无任务，请在上方添加。</p>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </div>
@@ -921,7 +1158,7 @@
         orderState: orderStateEl ? orderStateEl.value : '10',
         subOrderSourceNames: subOrderSourceNames,
         pageIndex: parseInt(document.getElementById('inputPage').value, 10) || 1,
-        pageSize: parseInt(document.getElementById('inputPageSize').value, 10) || 20
+        pageSize: parseInt(document.getElementById('inputPageSize').value, 10) || 10
       };
       if (minPriceStr) body.minPrice = minPriceStr;
       if (maxPriceStr) body.maxPrice = maxPriceStr;
@@ -939,7 +1176,7 @@
         else theadTr.innerHTML = '<th>产品名称</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
         totalEl.textContent = '共 ' + total + ' 项';
         var currentPage = body.pageIndex || 1;
-        var pageSizeNum = body.pageSize || 20;
+        var pageSizeNum = body.pageSize || 10;
         updatePagination(total, pageSizeNum, currentPage);
         if (results.length === 0) {
           tbody.innerHTML = '<tr><td colspan="' + colCount + '" style="color:var(--text-muted)">暂无订单</td></tr>';
@@ -1016,7 +1253,7 @@
     document.getElementById('btnPageNext').onclick = function () {
       var input = document.getElementById('inputPage');
       var total = parseInt(document.getElementById('orderListTotal').textContent.replace(/\D/g, ''), 10) || 0;
-      var pageSize = parseInt(document.getElementById('inputPageSize').value, 10) || 20;
+      var pageSize = parseInt(document.getElementById('inputPageSize').value, 10) || 10;
       var totalPages = Math.max(1, Math.ceil(total / pageSize));
       input.value = Math.min(totalPages, (parseInt(input.value, 10) || 1) + 1);
       doQueryOrders();
@@ -1031,14 +1268,13 @@
       document.getElementById('inputMinPrice').value = '';
       document.getElementById('inputMaxPrice').value = '';
       document.getElementById('inputPage').value = '1';
-      document.getElementById('inputPageSize').value = '20';
+      document.getElementById('inputPageSize').value = '10';
       document.querySelectorAll('#manufacturersList input:checked').forEach(function (el) { el.checked = false; });
       var firstCat = document.querySelector('input[name="categoryType"]');
       if (firstCat) { firstCat.checked = true; await loadBrandsForCategory(firstCat.value); }
       doQueryOrders();
     };
     document.getElementById('orderStateRadioGroup').addEventListener('change', function (e) { if (e.target.name === 'orderState') doQueryOrders(); });
-    document.getElementById('toggleBasicData').onclick = function () { document.getElementById('sectionBasicData').classList.toggle('collapsed'); };
     document.querySelectorAll('.tab-nav-item').forEach(function (el) {
       el.addEventListener('click', function () {
         var tab = el.dataset.tab;
@@ -1046,8 +1282,277 @@
         el.classList.add('active');
         document.getElementById('tabPanelGrab').classList.toggle('hidden', tab !== 'grab');
         document.getElementById('tabPanelSchedule').classList.toggle('hidden', tab !== 'schedule');
+        if (tab === 'schedule') { loadScheduleOptions(); loadScheduleGrabbedCount(); }
       });
     });
+    var scheduleOptionsLoaded = false;
+    var schedulePhoneCatId = '';
+    async function loadScheduleOptions() {
+      if (scheduleOptionsLoaded) return;
+      var msg = document.getElementById('scheduleMsg');
+      hideMsg(msg);
+      try {
+        var r = await api('/api/categories');
+        if (!r.success) { showMsg(msg, r.message || '加载失败', 'error'); return; }
+        var catList = (r.data && r.data.catList) || [];
+        var manufacturerList = (r.data && r.data.manufacturerList) || [];
+        var mList = document.getElementById('scheduleTaskManufacturersList');
+        mList.innerHTML = (manufacturerList || []).map(function (m) {
+          var name = (m.text || m.value || '').trim() || '未命名';
+          return '<label class="tag"><input type="checkbox" data-name="' + name.replace(/"/g, '&quot;') + '"> ' + name + '</label>';
+        }).join('');
+        if (!manufacturerList.length) mList.innerHTML = '<span style="color:var(--text-muted)">暂无厂商</span>';
+        var phoneOption = catList.find(function (c) { return c.catName === '手机'; });
+        schedulePhoneCatId = phoneOption ? String(phoneOption.catId) : (catList[0] ? String(catList[0].catId) : '');
+        var bList = document.getElementById('scheduleTaskBrandsList');
+        if (schedulePhoneCatId) {
+          var br = await api('/api/brands?catId=' + schedulePhoneCatId);
+          if (br.success && Array.isArray(br.data) && br.data.length) {
+            bList.innerHTML = br.data.map(function (b) {
+              var bid = String(b.key || b.id || b.brandId || '').trim();
+              var bname = String(b.value || b.name || b.brandName || '').trim() || bid;
+              return '<label class="tag"><input type="checkbox" data-key="' + bid.replace(/"/g, '&quot;') + '"> ' + bname + '</label>';
+            }).join('');
+          } else { bList.innerHTML = '<span style="color:var(--text-muted)">暂无品牌</span>'; }
+        } else { bList.innerHTML = '<span style="color:var(--text-muted)">请先选择分类</span>'; }
+        scheduleOptionsLoaded = true;
+      } catch (e) { showMsg(msg, String(e), 'error'); }
+    }
+    var SCHEDULE_STORAGE_KEY = 'haihuishou_scheduled_tasks';
+    var scheduledTasks = [];
+    try { scheduledTasks = JSON.parse(localStorage.getItem(SCHEDULE_STORAGE_KEY) || '[]'); } catch (_) { scheduledTasks = []; }
+    var scheduleTaskTimers = {};
+    var scheduleTaskStarting = {};
+    var scheduleGrabbedCountTimer = null;
+    var scheduleGrabbedCountValue = 0;
+    function saveScheduledTasks() {
+      try { localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(scheduledTasks)); } catch (_) { }
+      renderScheduleTaskList();
+    }
+    function renderScheduleTaskList() {
+      var listEl = document.getElementById('scheduleTaskList');
+      var emptyEl = document.getElementById('scheduleTaskListEmpty');
+      if (!listEl) return;
+      if (scheduledTasks.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+      if (emptyEl) emptyEl.classList.add('hidden');
+      var freqLabels = { '1': '1秒/次', '2': '2秒/次', '3': '3秒/次', '5': '5秒/次', '10': '10秒/次', '30': '30秒/次', '60': '60秒/次' };
+      listEl.innerHTML = scheduledTasks.map(function (t) {
+        var manStr = (t.manufacturerNames && t.manufacturerNames.length) ? t.manufacturerNames.join('、') : '全部厂商';
+        var brandStr = (t.brandIds && t.brandIds.length) ? (t.brandIds.length + ' 个品牌') : '全部品牌';
+        var rangeStr = (t.minPrice || t.maxPrice) ? ((t.minPrice || '') + '～' + (t.maxPrice || '')) : '不限';
+        var freqStr = freqLabels[t.frequency] || t.frequency || '1秒/次';
+        var isRunning = !!scheduleTaskTimers[t.id];
+        var isStarting = !!scheduleTaskStarting[t.id];
+        var actions = '';
+        if (isRunning) {
+          actions = '<button type="button" class="btn btn-ghost btn-small schedule-btn-stop" data-id="' + t.id + '">停止</button>';
+        } else if (isStarting) {
+          actions = '<button type="button" class="btn btn-primary btn-small schedule-btn-auto btn-loading" data-id="' + t.id + '" disabled>执行中...</button> ' +
+            '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '" disabled>删除</button>';
+        } else {
+          actions = '<button type="button" class="btn btn-primary btn-small schedule-btn-auto" data-id="' + t.id + '">自动执行</button> ' +
+            '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '">删除</button>';
+        }
+        return '<div class="schedule-task-card" data-id="' + t.id + '">' +
+          '<div class="schedule-task-card-head">' + (t.name || '未命名') + (isRunning ? ' <span class="schedule-task-running-tag">执行中</span>' : '') + '</div>' +
+          '<div class="schedule-task-card-body">厂商: ' + manStr + ' | 品牌: ' + brandStr + ' | 金额: ' + rangeStr + ' | 报价: ' + (t.quoteAmount || '-') + ' | 频率: ' + freqStr + '</div>' +
+          '<div class="schedule-task-card-actions">' + actions + '</div></div>';
+      }).join('');
+      listEl.querySelectorAll('.schedule-btn-auto').forEach(function (btn) {
+        btn.onclick = function () { startScheduleTaskAuto(Number(btn.dataset.id)); };
+      });
+      listEl.querySelectorAll('.schedule-btn-stop').forEach(function (btn) {
+        btn.onclick = function () { stopScheduleTaskAuto(Number(btn.dataset.id)); };
+      });
+      listEl.querySelectorAll('.schedule-btn-delete').forEach(function (btn) {
+        btn.onclick = function () {
+          var id = Number(btn.dataset.id);
+          if (scheduleTaskTimers[id]) { showToast('请先停止任务后再删除', 'error'); return; }
+          scheduledTasks = scheduledTasks.filter(function (t) { return t.id !== id; });
+          saveScheduledTasks();
+        };
+      });
+    }
+    function getScheduleFormTask() {
+      var name = document.getElementById('scheduleTaskName').value.trim();
+      var quoteAmount = document.getElementById('scheduleTaskQuoteAmount').value.trim();
+      if (!name) return null;
+      if (!quoteAmount) return null;
+      var checkedM = [].slice.call(document.querySelectorAll('#scheduleTaskManufacturersList input[type="checkbox"]:checked'));
+      var manufacturerNames = checkedM.map(function (el) { return String(el.dataset.name || el.getAttribute('data-name') || '').trim(); }).filter(Boolean);
+      var checkedB = [].slice.call(document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]:checked'));
+      var brandIds = checkedB.map(function (el) { return String(el.dataset.key || el.getAttribute('data-key') || '').trim(); }).filter(Boolean);
+      var freqEl = document.getElementById('scheduleTaskFrequency');
+      return {
+        name: name,
+        manufacturerNames: manufacturerNames,
+        categoryId: schedulePhoneCatId,
+        brandIds: brandIds,
+        minPrice: document.getElementById('scheduleTaskMinPrice').value.trim() || undefined,
+        maxPrice: document.getElementById('scheduleTaskMaxPrice').value.trim() || undefined,
+        quoteAmount: quoteAmount,
+        frequency: freqEl ? freqEl.value : '1'
+      };
+    }
+    document.getElementById('btnScheduleSave').onclick = function () {
+      var msg = document.getElementById('scheduleMsg');
+      var t = getScheduleFormTask();
+      if (!t) { showMsg(msg, '请填写任务名称和报价金额', 'error'); return; }
+      var id = Date.now();
+      scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, frequency: t.frequency });
+      saveScheduledTasks();
+      showToast('添加成功', 'success');
+    };
+    async function startScheduleTaskAuto(taskId) {
+      var task = scheduledTasks.find(function (t) { return t.id === taskId; });
+      if (!task) { showToast('任务不存在', 'error'); return; }
+      if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
+      if (scheduleTaskStarting[taskId]) return;
+      var sec = Math.max(1, parseInt(task.frequency, 10) || 1);
+      scheduleTaskStarting[taskId] = true;
+      renderScheduleTaskList();
+      try {
+        await executeScheduleTask(taskId, true);
+        scheduleTaskTimers[taskId] = setInterval(function () {
+          if (!scheduledTasks.find(function (t) { return t.id === taskId; })) {
+            stopScheduleTaskAuto(taskId);
+            return;
+          }
+          executeScheduleTask(taskId, true);
+        }, sec * 1000);
+        updateScheduleGrabbedCountTimer();
+        showToast('已开始自动执行「' + (task.name || '') + '」，每 ' + sec + ' 秒执行一次', 'success');
+      } finally {
+        delete scheduleTaskStarting[taskId];
+        renderScheduleTaskList();
+      }
+    }
+    function stopScheduleTaskAuto(taskId) {
+      if (scheduleTaskTimers[taskId]) {
+        clearInterval(scheduleTaskTimers[taskId]);
+        delete scheduleTaskTimers[taskId];
+        updateScheduleGrabbedCountTimer();
+        renderScheduleTaskList();
+        showToast('已停止自动执行', 'success');
+      }
+    }
+    async function executeScheduleTask(taskId, isAuto) {
+      var task = scheduledTasks.find(function (t) { return t.id === taskId; });
+      if (!task) { if (!isAuto) showToast('任务不存在', 'error'); return; }
+      var msg = document.getElementById('scheduleMsg');
+      if (!isAuto) hideMsg(msg);
+      try {
+        var r = await api('/api/execute-task', {
+          method: 'POST',
+          body: JSON.stringify({
+            taskName: task.name,
+            manufacturerNames: task.manufacturerNames,
+            categoryId: task.categoryId,
+            brandIds: task.brandIds,
+            minPrice: task.minPrice,
+            maxPrice: task.maxPrice,
+            quoteAmount: task.quoteAmount,
+            userId: authUserId
+          })
+        });
+        if (r.success && r.data) {
+          var d = r.data;
+          var text = '共 ' + (d.total || 0) + ' 条，抢单 ' + (d.grabbed || 0) + '，报价 ' + (d.quoted || 0);
+          if (!isAuto) {
+            showMsg(msg, '执行完成：' + text + (d.errors && d.errors.length ? '；部分失败见控制台' : ''), 'success');
+          }
+          if (d.errors && d.errors.length) console.warn('execute-task errors', d.errors);
+        } else {
+          if (isAuto) showToast(r.message || '执行失败', 'error');
+          else showMsg(msg, r.message || '执行失败', 'error');
+        }
+      } catch (e) {
+        if (isAuto) showToast(String(e), 'error');
+        else showMsg(msg, String(e), 'error');
+      }
+    }
+    async function loadScheduleGrabbedCount() {
+      var numEl = document.getElementById('scheduleGrabbedCountNum');
+      var wrapEl = document.getElementById('scheduleGrabbedCount');
+      if (!numEl || !wrapEl) return;
+      var catId = schedulePhoneCatId || '100001';
+      try {
+        var r = await api('/api/order-list', {
+          method: 'POST',
+          body: JSON.stringify({
+            userId: authUserId,
+            categoryBrands: [{ key: catId, value: [] }],
+            orderState: '30',
+            subOrderSourceNames: [],
+            pageIndex: 1,
+            pageSize: 10
+          })
+        });
+        if (r.success && r.data) {
+          var total = r.data.totalCount !== undefined ? r.data.totalCount : (r.data.pageCount !== undefined ? r.data.pageCount : 0);
+          scheduleGrabbedCountValue = total;
+          if (total > 0) {
+            numEl.textContent = total;
+            numEl.className = 'schedule-grabbed-num-link';
+            numEl.title = '点击跳转到抢单列表（已报价）';
+          } else {
+            numEl.textContent = '0';
+            numEl.className = '';
+            numEl.title = '';
+          }
+        } else {
+          scheduleGrabbedCountValue = 0;
+          numEl.textContent = '0';
+          numEl.className = '';
+        }
+      } catch (_) {
+        scheduleGrabbedCountValue = 0;
+        numEl.textContent = '0';
+        numEl.className = '';
+      }
+    }
+    function goToGrabListQuoted() {
+      document.querySelectorAll('.tab-nav-item').forEach(function (n) { n.classList.remove('active'); });
+      var grabTab = document.querySelector('.tab-nav-item[data-tab="grab"]');
+      if (grabTab) { grabTab.classList.add('active'); }
+      document.getElementById('tabPanelGrab').classList.remove('hidden');
+      document.getElementById('tabPanelSchedule').classList.add('hidden');
+      var radio = document.querySelector('input[name="orderState"][value="30"]');
+      if (radio) { radio.checked = true; doQueryOrders(); }
+    }
+    document.getElementById('scheduleGrabbedCount').addEventListener('click', function (e) {
+      if (e.target.id === 'scheduleGrabbedCountNum' && scheduleGrabbedCountValue > 0) goToGrabListQuoted();
+    });
+    function updateScheduleGrabbedCountTimer() {
+      if (scheduleGrabbedCountTimer) {
+        clearInterval(scheduleGrabbedCountTimer);
+        scheduleGrabbedCountTimer = null;
+      }
+      var runningIds = Object.keys(scheduleTaskTimers);
+      if (runningIds.length === 0) return;
+      var minSec = Infinity;
+      runningIds.forEach(function (id) {
+        var task = scheduledTasks.find(function (t) { return t.id === Number(id); });
+        if (task) {
+          var sec = Math.max(1, parseInt(task.frequency, 10) || 1);
+          if (sec < minSec) minSec = sec;
+        }
+      });
+      if (minSec === Infinity) return;
+      loadScheduleGrabbedCount();
+      scheduleGrabbedCountTimer = setInterval(loadScheduleGrabbedCount, minSec * 1000);
+    }
+    renderScheduleTaskList();
+    document.getElementById('btnScheduleBrandsAll').onclick = function () {
+      var checkboxes = document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]');
+      if (!checkboxes.length) return;
+      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
+      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
+    };
     document.getElementById('categoryRadioGroup').addEventListener('change', function (e) {
       if (e.target.name === 'categoryType' && e.target.checked) loadBrandsForCategory(e.target.value);
     });
