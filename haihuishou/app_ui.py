@@ -6,6 +6,7 @@
 
 import os
 import sys
+import threading
 from typing import Any, Dict
 
 from flask import Flask, jsonify, render_template, request, session
@@ -19,6 +20,10 @@ _template_dir = os.path.join(_base_dir, "templates")
 app = Flask(__name__, template_folder=_template_dir)
 app.secret_key = os.environ.get("HAIHUISHOU_SECRET_KEY", "haihuishou-grab-dev-secret")
 app.config["JSON_AS_ASCII"] = False
+
+# 试用结束标记：写入用户目录，重启后再访问也无法使用
+_TRIAL_FLAG_FILE = os.path.join(os.path.expanduser("~"), ".haihuishou_trial_used")
+TRIAL_EXPIRED = os.path.isfile(_TRIAL_FLAG_FILE)
 
 
 def _api_with_session() -> HaihuishouAPI:
@@ -36,7 +41,7 @@ def _tool_with_session() -> GrabOrderTool:
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", trial_expired=TRIAL_EXPIRED)
 
 
 @app.route("/api/login", methods=["POST"])
@@ -370,6 +375,33 @@ def api_update_quote():
         return jsonify({"success": True, "data": res})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 200
+
+
+@app.route("/api/shutdown", methods=["POST"])
+def api_shutdown():
+    """试用结束：写入试用已用标记、返回响应后退出进程，下次启动检测到标记将拒绝使用。"""
+    try:
+        with open(_TRIAL_FLAG_FILE, "w") as f:
+            f.write("1")
+    except Exception:
+        pass
+
+    def _exit():
+        import time
+        time.sleep(0.5)
+        os._exit(0)
+
+    threading.Thread(target=_exit, daemon=False).start()
+    return jsonify({"success": True, "message": "服务即将关闭"})
+
+
+@app.before_request
+def _block_if_trial_expired():
+    if not TRIAL_EXPIRED:
+        return None
+    if request.path.startswith("/api/"):
+        return jsonify({"success": False, "message": "试用已结束，无法继续使用"}), 403
+    return None
 
 
 def main():

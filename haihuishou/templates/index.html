@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>嗨回收抢单工具</title>
+  <title>嗨回收抢单工具试用版</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -135,6 +135,65 @@
       font-weight: 700;
       color: var(--accent);
     }
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .trial-countdown {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #f59e0b;
+      animation: trial-pulse 1.5s ease-in-out infinite;
+    }
+    .trial-countdown.warning {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+    }
+    .login-trial-countdown {
+      margin: 10px 0 0 0;
+      display: inline-block;
+    }
+    @keyframes trial-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .trial-end-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .trial-end-overlay.hidden { display: none !important; }
+    .trial-end-box {
+      background: var(--surface);
+      border: 2px solid #ef4444;
+      border-radius: 12px;
+      padding: 32px 48px;
+      text-align: center;
+    }
+    .trial-end-box h2 { margin: 0 0 12px 0; color: #ef4444; font-size: 1.5rem; }
+    .trial-end-box p { margin: 0; color: var(--text-muted); }
+    .trial-expired-page {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .trial-expired-page.hidden { display: none !important; }
+    .trial-expired-page .trial-end-box { max-width: 360px; }
 
     .main-tabs {
       background: var(--surface);
@@ -311,6 +370,12 @@
     .tag input[type="checkbox"]:checked {
       background: #fff;
       border-color: #fff;
+    }
+
+    .tag:has(input[type="checkbox"]:checked),
+    .tag:has(input[type="radio"]:checked) {
+      border-color: var(--primary);
+      background: rgba(34, 197, 94, 0.12);
     }
 
     .tag input[type="radio"] {
@@ -566,24 +631,29 @@
     .schedule-task-card-actions .btn-small {
       margin-right: 8px;
     }
+
     .schedule-grabbed-count {
       color: var(--text-muted);
       font-size: 14px;
       margin: 8px 0 12px 0;
     }
+
     .schedule-grabbed-count .schedule-grabbed-num-link {
       color: var(--accent);
       cursor: pointer;
       text-decoration: underline;
     }
+
     .schedule-grabbed-count .schedule-grabbed-num-link:hover {
       opacity: 0.9;
     }
+
     .schedule-task-running-tag {
       font-size: 12px;
       color: var(--accent);
       margin-left: 8px;
     }
+
     .btn-loading {
       opacity: 0.8;
       cursor: not-allowed;
@@ -698,6 +768,30 @@
       color: var(--accent);
     }
 
+    .quote-product-name {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .quote-detail-block {
+      margin-bottom: 12px;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .quote-detail-block .form-row {
+      margin-bottom: 8px;
+    }
+
+    .quote-detail-block .form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .quote-detail-block label {
+      min-width: 72px;
+    }
+
     .modal-actions {
       display: flex;
       gap: 10px;
@@ -755,10 +849,17 @@
   </style>
 </head>
 
-<body>
-  <div id="loginScreen">
+<body data-trial-expired="{{ 'true' if trial_expired else 'false' }}">
+  <div id="trialExpiredPage" class="trial-expired-page {% if trial_expired %}visible{% else %}hidden{% endif %}">
+    <div class="trial-end-box">
+      <h2>试用已结束</h2>
+      <p>三分钟试用已使用完毕。再次打开链接也无法使用，请购买正式版。</p>
+    </div>
+  </div>
+  <div id="loginScreen" class="{% if trial_expired %}hidden{% endif %}">
     <div class="login-card">
-      <h1>嗨回收抢单工具</h1>
+      <h1>嗨回收抢单工具试用版</h1>
+      <p id="loginTrialCountdown" class="trial-countdown login-trial-countdown" title="试用剩余时间">试用剩余 <span id="loginTrialCountdownTime">00:30</span></p>
       <p class="sub">请先登录后使用</p>
       <div class="form-row">
         <label>手机号</label>
@@ -773,9 +874,12 @@
     </div>
   </div>
 
-  <div id="appContent" class="hidden">
+  <div id="appContent" class="hidden {% if trial_expired %}hidden{% endif %}">
     <header>
-      <h1>嗨回收抢单工具</h1>
+      <div class="header-title-row">
+        <h1>嗨回收抢单工具试用版</h1>
+        <span id="trialCountdown" class="trial-countdown" title="试用剩余时间">试用剩余 <span id="trialCountdownTime">00:30</span></span>
+      </div>
       <div class="login-row">
         <span class="status logged-in" id="loginStatus">已登录</span>
         <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
@@ -795,6 +899,8 @@
             <div>
               <div id="categoriesMsg" class="msg info hidden"></div>
               <div id="manufacturersArea" class="hidden" style="margin-top:8px">
+                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
+                    id="btnManufacturersAll">全部</button></div>
                 <div id="manufacturersList" class="brands-chosen"></div>
               </div>
               <div id="categoryArea" class="hidden" style="margin-top:14px">
@@ -888,6 +994,8 @@
             <div class="form-row form-row-align-top">
               <label>厂商</label>
               <div class="schedule-field-wrap">
+                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
+                    id="btnScheduleManufacturersAll">全部</button></div>
                 <div id="scheduleTaskManufacturersList" class="brands-chosen">切换到此 Tab 后自动加载</div>
               </div>
             </div>
@@ -911,7 +1019,7 @@
             </div>
             <div class="form-row">
               <label>报价金额</label>
-              <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:140px;">
+              <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:200px;">
             </div>
             <div class="form-row">
               <label>频率</label>
@@ -933,10 +1041,11 @@
         <div class="schedule-right">
           <section>
             <h2>任务列表</h2>
-            <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span id="scheduleGrabbedCountNum">0</span></p>
+            <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
+                id="scheduleGrabbedCountNum">0</span></p>
             <div id="scheduleTaskListContainer">
               <div id="scheduleTaskList" class="schedule-task-list"></div>
-              <p id="scheduleTaskListEmpty" class="schedule-task-empty">暂无任务，请在上方添加。</p>
+              <p id="scheduleTaskListEmpty" class="schedule-task-empty">暂无任务，请在左侧添加。</p>
             </div>
           </section>
         </div>
@@ -944,16 +1053,26 @@
     </div>
   </div>
 
+  <div id="trialEndOverlay" class="trial-end-overlay hidden">
+    <div class="trial-end-box">
+      <h2>试用已结束</h2>
+      <p>三分钟试用时间已到，服务即将关闭。再次打开页面将无法使用，需重新启动程序。</p>
+    </div>
+  </div>
+
   <div id="quoteModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>提交报价</h3>
+      <input type="hidden" id="quoteRecordId" value="">
+      <input type="hidden" id="quoteOrderId" value="">
       <div class="form-row">
-        <label>recordId</label>
-        <input type="text" id="quoteRecordId" readonly class="input-readonly">
+        <label>产品名称</label>
+        <span id="quoteProductName" class="quote-product-name">-</span>
       </div>
-      <div class="form-row">
-        <label>orderId</label>
-        <input type="text" id="quoteOrderId" readonly class="input-readonly">
+      <div id="quoteDetailBlock" class="quote-detail-block">
+        <div class="form-row"><label>品牌</label><span id="quoteBrand">-</span></div>
+        <div class="form-row"><label>型号</label><span id="quoteModel">-</span></div>
+        <div class="form-row"><label>存储容量</label><span id="quoteStorage">-</span></div>
       </div>
       <div class="form-row">
         <label>预估金额</label>
@@ -978,6 +1097,48 @@
   </div>
 
   <script>
+    window.TRIAL_EXPIRED = document.body.getAttribute('data-trial-expired') === 'true';
+    (function () {
+      if (window.TRIAL_EXPIRED) return;
+      var TRIAL_SECONDS = 30;
+      var remaining = TRIAL_SECONDS;
+      var elHeader = document.getElementById('trialCountdownTime');
+      var wrapHeader = document.getElementById('trialCountdown');
+      var elLogin = document.getElementById('loginTrialCountdownTime');
+      var wrapLogin = document.getElementById('loginTrialCountdown');
+      function formatTrial(sec) {
+        var m = Math.floor(sec / 60);
+        var s = sec % 60;
+        return (String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
+      }
+      function setTimeText(t) {
+        if (elHeader) elHeader.textContent = t;
+        if (elLogin) elLogin.textContent = t;
+      }
+      function onTrialEnd() {
+        if (wrapHeader) wrapHeader.classList.add('hidden');
+        if (wrapLogin) wrapLogin.classList.add('hidden');
+        var overlay = document.getElementById('trialEndOverlay');
+        if (overlay) overlay.classList.remove('hidden');
+        fetch('/api/shutdown', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(function () {});
+        try { window.close(); } catch (_) {}
+        setTimeout(function () { try { window.close(); } catch (_) {} }, 800);
+      }
+      if (elHeader || elLogin) {
+        var tid = setInterval(function () {
+          remaining--;
+          setTimeText(formatTrial(remaining));
+          if (remaining <= 5) {
+            if (wrapHeader) wrapHeader.classList.add('warning');
+            if (wrapLogin) wrapLogin.classList.add('warning');
+          }
+          if (remaining <= 0) {
+            clearInterval(tid);
+            onTrialEnd();
+          }
+        }, 1000);
+      }
+    })();
     let authToken = '';
     let authUserId = '';
     const api = async (path, options = {}) => {
@@ -1028,7 +1189,7 @@
         list.innerHTML = currentBrands.map(b => {
           const bid = String(b.key ?? b.id ?? b.brandId ?? '').trim();
           const bname = String(b.value ?? b.name ?? b.brandName ?? '').trim() || bid;
-          return '<label class="tag"><input type="checkbox" data-key="' + bid + '"> ' + bname + ' (' + bid + ')</label>';
+          return '<label class="tag"><input type="checkbox" data-key="' + bid + '"> ' + bname + '</label>';
         }).join('');
         document.getElementById('brandsArea').classList.remove('hidden');
       } catch (_) { }
@@ -1054,7 +1215,6 @@
         if (defaultCatId) {
           const defaultRadio = radioGroup.querySelector('input[value="' + defaultCatId + '"]');
           if (defaultRadio) defaultRadio.checked = true;
-          showMsg(msg, '已加载厂商与分类，共 ' + catList.length + ' 个类型，已默认选中「手机」', 'success');
           await loadBrandsForCategory(defaultCatId);
         } else {
           showMsg(msg, '已加载厂商与分类', 'success');
@@ -1201,10 +1361,13 @@
           var actualPriceVal = (o.actualPrice != null && o.actualPrice !== '') ? String(o.actualPrice) : '';
           var apprizeData = (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0) ? String(apprizeNum) : '';
           var quoteTd = showQuoteCol ? '<td>' + quoteStr + '</td>' : '';
-          return '<tr><td class="product-name">' + productName + '</td><td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          var brandVal = (o.brandName || o.brand || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          var modelVal = (o.modelName || o.model || o.goodsName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          var storageVal = (o.storageCapacity || o.storage || o.memory || '').replace(/"/g, '&quot;');
+          var productNameEsc = (productName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return '<tr><td class="product-name">' + productName + '</td><td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
-        showMsg(msg, '查询成功', 'success');
       } catch (e) { showMsg(msg, String(e), 'error'); }
     }
     function updatePagination(totalCount, pageSize, currentPage) {
@@ -1282,7 +1445,7 @@
         el.classList.add('active');
         document.getElementById('tabPanelGrab').classList.toggle('hidden', tab !== 'grab');
         document.getElementById('tabPanelSchedule').classList.toggle('hidden', tab !== 'schedule');
-        if (tab === 'schedule') { loadScheduleOptions(); loadScheduleGrabbedCount(); }
+        if (tab === 'schedule') { loadScheduleOptions().then(function () { loadScheduleGrabbedCount(); }); }
       });
     });
     var scheduleOptionsLoaded = false;
@@ -1553,11 +1716,23 @@
       var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
     };
+    document.getElementById('btnScheduleManufacturersAll').onclick = function () {
+      var checkboxes = document.querySelectorAll('#scheduleTaskManufacturersList input[type="checkbox"]');
+      if (!checkboxes.length) return;
+      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
+      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
+    };
     document.getElementById('categoryRadioGroup').addEventListener('change', function (e) {
       if (e.target.name === 'categoryType' && e.target.checked) loadBrandsForCategory(e.target.value);
     });
     document.getElementById('btnBrandsAll').onclick = function () {
       var checkboxes = document.querySelectorAll('#brandsList input[type="checkbox"]');
+      if (!checkboxes.length) return;
+      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
+      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
+    };
+    document.getElementById('btnManufacturersAll').onclick = function () {
+      var checkboxes = document.querySelectorAll('#manufacturersList input[type="checkbox"]');
       if (!checkboxes.length) return;
       var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
@@ -1572,6 +1747,10 @@
       function openQuoteModal() {
         document.getElementById('quoteRecordId').value = recordId;
         document.getElementById('quoteOrderId').value = orderId;
+        document.getElementById('quoteProductName').textContent = btn.dataset.productName || '-';
+        document.getElementById('quoteBrand').textContent = btn.dataset.brand || '-';
+        document.getElementById('quoteModel').textContent = btn.dataset.model || '-';
+        document.getElementById('quoteStorage').textContent = btn.dataset.storage || '-';
         document.getElementById('quoteApprizeDisplay').textContent = btn.dataset.apprizeDisplay || '-';
         document.getElementById('quoteApprizeValue').value = btn.dataset.apprize || '';
         document.getElementById('quoteActualPrice').value = btn.dataset.actualPrice || '';
