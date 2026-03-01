@@ -33,6 +33,22 @@ pyinstaller haihuishou.spec
 
 将 `dist` 里生成的**可执行文件**（或整个 `dist/haihuishou_app` 文件夹，若为目录形式）复制到其他电脑，无需安装 Python 即可直接运行使用。
 
+### macOS 在其他电脑上打不开时
+
+未签名的可执行文件在别的 Mac 上可能被系统拦截，提示「无法验证开发者」或「已损坏」。请让对方按下面任一方式操作：
+
+1. **右键打开**：对可执行文件**右键 →「打开」**，在弹窗中再点「打开」，即可运行并加入白名单。
+2. **系统设置放行**：若提示已阻止，到 **系统设置 → 隐私与安全性**，在「仍要打开」处点击允许。
+
+发给别人之前，建议在本机先去掉隔离属性，减少对方被拦截的概率：
+
+```bash
+cd dist
+xattr -cr manualOrderGrabTool   # 或当前可执行文件名
+```
+
+然后再把该文件（或整个 dist 目录）发给对方。
+
 **在 Windows 上打包：** PyInstaller 只能在本机系统打包，要得到 `haihuishou_app.exe` 需在 **Windows 电脑**上执行上述命令（在项目根目录先 `pip install pyinstaller`，再 `pyinstaller haihuishou.spec`）。若没有 Windows 环境，可把代码推到 GitHub，在仓库 **Actions** 里运行 **Build Windows** 工作流（支持手动触发），完成后在 Artifacts 中下载 `haihuishou-windows` 即可得到 `haihuishou_app.exe`。
 
 ## 使用方式

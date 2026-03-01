@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 # 在项目根目录（codingAi）执行：pyinstaller haihuishou.spec
-# 打包完成后，将 dist/haihuishou_app 整个文件夹复制到其他电脑即可运行
+# 打包完成后，可执行文件在 dist/manualOrderGrabTool（macOS/Linux）或 dist/manualOrderGrabTool.exe（Windows）
 
 import os
 
@@ -39,7 +39,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='haihuishou_app',
+    name='manualOrderGrabTool',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

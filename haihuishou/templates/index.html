@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>嗨回收抢单工具试用版</title>
+  <title>嗨回收抢单工具</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -135,65 +135,6 @@
       font-weight: 700;
       color: var(--accent);
     }
-    .header-title-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .trial-countdown {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #f59e0b;
-      background: rgba(245, 158, 11, 0.15);
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1px solid #f59e0b;
-      animation: trial-pulse 1.5s ease-in-out infinite;
-    }
-    .trial-countdown.warning {
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.15);
-      border-color: #ef4444;
-    }
-    .login-trial-countdown {
-      margin: 10px 0 0 0;
-      display: inline-block;
-    }
-    @keyframes trial-pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.85; }
-    }
-    .trial-end-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-    .trial-end-overlay.hidden { display: none !important; }
-    .trial-end-box {
-      background: var(--surface);
-      border: 2px solid #ef4444;
-      border-radius: 12px;
-      padding: 32px 48px;
-      text-align: center;
-    }
-    .trial-end-box h2 { margin: 0 0 12px 0; color: #ef4444; font-size: 1.5rem; }
-    .trial-end-box p { margin: 0; color: var(--text-muted); }
-    .trial-expired-page {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-    }
-    .trial-expired-page.hidden { display: none !important; }
-    .trial-expired-page .trial-end-box { max-width: 360px; }
 
     .main-tabs {
       background: var(--surface);
@@ -225,6 +166,13 @@
     .tab-nav-item.active {
       color: var(--accent);
       border-bottom-color: var(--accent);
+    }
+
+    .tab-nav-item.disabled {
+      color: var(--text-muted);
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     .tab-panel {
@@ -316,6 +264,38 @@
       color: var(--text-muted);
     }
 
+    .form-row-max-quote {
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-row-max-quote .input-max-quote {
+      width: 100px;
+    }
+
+    .max-quote-hint {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .max-quote-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .max-quote-check.hidden {
+      display: none !important;
+    }
+
     .form-row input:not([type="checkbox"]):not([type="radio"]),
     .form-row select {
       background: var(--bg);
@@ -325,6 +305,16 @@
       border-radius: 6px;
       font-family: inherit;
       min-width: 120px;
+    }
+
+    /* 覆盖浏览器自动填充的浅色背景，与最低价等输入框保持一致 */
+    .form-row input:-webkit-autofill,
+    .form-row input:-webkit-autofill:hover,
+    .form-row input:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--text);
+      -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+      box-shadow: 0 0 0 1000px var(--bg) inset;
+      transition: background-color 5000s ease-in-out 0s;
     }
 
     .brands-chosen {
@@ -693,8 +683,31 @@
       color: var(--text-muted);
     }
 
-    .product-name {
+    .product-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .product-name-cell .product-name-text {
       font-weight: 600;
+    }
+
+    .btn-copy-name {
+      flex-shrink: 0;
+    }
+
+    .quote-product-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quote-product-name-row .quote-product-name {
+      flex: 1;
+      min-width: 0;
     }
 
     .toast-wrap {
@@ -849,17 +862,10 @@
   </style>
 </head>
 
-<body data-trial-expired="{{ 'true' if trial_expired else 'false' }}">
-  <div id="trialExpiredPage" class="trial-expired-page {% if trial_expired %}visible{% else %}hidden{% endif %}">
-    <div class="trial-end-box">
-      <h2>试用已结束</h2>
-      <p>三分钟试用已使用完毕。再次打开链接也无法使用，请购买正式版。</p>
-    </div>
-  </div>
-  <div id="loginScreen" class="{% if trial_expired %}hidden{% endif %}">
+<body>
+  <div id="loginScreen">
     <div class="login-card">
-      <h1>嗨回收抢单工具试用版</h1>
-      <p id="loginTrialCountdown" class="trial-countdown login-trial-countdown" title="试用剩余时间">试用剩余 <span id="loginTrialCountdownTime">00:30</span></p>
+      <h1>嗨回收抢单工具</h1>
       <p class="sub">请先登录后使用</p>
       <div class="form-row">
         <label>手机号</label>
@@ -874,12 +880,9 @@
     </div>
   </div>
 
-  <div id="appContent" class="hidden {% if trial_expired %}hidden{% endif %}">
+  <div id="appContent" class="hidden">
     <header>
-      <div class="header-title-row">
-        <h1>嗨回收抢单工具试用版</h1>
-        <span id="trialCountdown" class="trial-countdown" title="试用剩余时间">试用剩余 <span id="trialCountdownTime">00:30</span></span>
-      </div>
+      <h1>嗨回收抢单工具</h1>
       <div class="login-row">
         <span class="status logged-in" id="loginStatus">已登录</span>
         <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
@@ -936,6 +939,15 @@
               <input type="text" id="inputMaxPrice" value="" style="width:90px">
               <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
               <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
+            </div>
+            <div class="form-row form-row-max-quote">
+              <label style="margin-bottom:0;">最大报价</label>
+              <input type="text" id="inputMaxQuoteAmount" placeholder="不填则不限制" class="input-max-quote"
+                inputmode="numeric" autocomplete="off">
+              <span style="color:var(--text-muted);">元</span>
+              <button type="button" class="btn btn-primary btn-small btn-set-max-quote" id="btnSetMaxQuote">设置</button>
+              <span id="maxQuoteAmountHint" class="max-quote-hint"></span>
+              <span id="maxQuoteCheck" class="max-quote-check hidden" title="已设置">✓</span>
             </div>
             <div id="orderListMsg" class="msg info hidden"></div>
             <div class="table-wrap">
@@ -1019,7 +1031,9 @@
             </div>
             <div class="form-row">
               <label>报价金额</label>
-              <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:200px;">
+              <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:200px;"
+                inputmode="numeric" autocomplete="off">
+              <span class="schedule-quote-hint" style="color:var(--text-muted); font-size:12px;">范围 0～500 元，不可超出</span>
             </div>
             <div class="form-row">
               <label>频率</label>
@@ -1043,6 +1057,10 @@
             <h2>任务列表</h2>
             <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
                 id="scheduleGrabbedCountNum">0</span></p>
+            <div class="form-row" style="margin-bottom:12px; gap:8px;">
+              <button type="button" class="btn btn-primary btn-small" id="btnScheduleStartAll">一键全部启动</button>
+              <button type="button" class="btn btn-ghost btn-small" id="btnScheduleStopAll">一键全部暂停</button>
+            </div>
             <div id="scheduleTaskListContainer">
               <div id="scheduleTaskList" class="schedule-task-list"></div>
               <p id="scheduleTaskListEmpty" class="schedule-task-empty">暂无任务，请在左侧添加。</p>
@@ -1053,13 +1071,6 @@
     </div>
   </div>
 
-  <div id="trialEndOverlay" class="trial-end-overlay hidden">
-    <div class="trial-end-box">
-      <h2>试用已结束</h2>
-      <p>三分钟试用时间已到，服务即将关闭。再次打开页面将无法使用，需重新启动程序。</p>
-    </div>
-  </div>
-
   <div id="quoteModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>提交报价</h3>
@@ -1067,7 +1078,10 @@
       <input type="hidden" id="quoteOrderId" value="">
       <div class="form-row">
         <label>产品名称</label>
-        <span id="quoteProductName" class="quote-product-name">-</span>
+        <div class="quote-product-name-row">
+          <span id="quoteProductName" class="quote-product-name">-</span>
+          <button type="button" class="btn btn-ghost btn-small btn-copy-quote-name" title="复制产品名称">复制</button>
+        </div>
       </div>
       <div id="quoteDetailBlock" class="quote-detail-block">
         <div class="form-row"><label>品牌</label><span id="quoteBrand">-</span></div>
@@ -1081,7 +1095,7 @@
       </div>
       <div class="form-row">
         <label>报价金额</label>
-        <input type="text" id="quoteActualPrice" placeholder="手动填写，如 100">
+        <input type="text" id="quoteActualPrice" placeholder="请输入数字，如 100" inputmode="numeric" autocomplete="off">
       </div>
       <div class="form-row">
         <label>备注</label>
@@ -1097,48 +1111,6 @@
   </div>
 
   <script>
-    window.TRIAL_EXPIRED = document.body.getAttribute('data-trial-expired') === 'true';
-    (function () {
-      if (window.TRIAL_EXPIRED) return;
-      var TRIAL_SECONDS = 30;
-      var remaining = TRIAL_SECONDS;
-      var elHeader = document.getElementById('trialCountdownTime');
-      var wrapHeader = document.getElementById('trialCountdown');
-      var elLogin = document.getElementById('loginTrialCountdownTime');
-      var wrapLogin = document.getElementById('loginTrialCountdown');
-      function formatTrial(sec) {
-        var m = Math.floor(sec / 60);
-        var s = sec % 60;
-        return (String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
-      }
-      function setTimeText(t) {
-        if (elHeader) elHeader.textContent = t;
-        if (elLogin) elLogin.textContent = t;
-      }
-      function onTrialEnd() {
-        if (wrapHeader) wrapHeader.classList.add('hidden');
-        if (wrapLogin) wrapLogin.classList.add('hidden');
-        var overlay = document.getElementById('trialEndOverlay');
-        if (overlay) overlay.classList.remove('hidden');
-        fetch('/api/shutdown', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(function () {});
-        try { window.close(); } catch (_) {}
-        setTimeout(function () { try { window.close(); } catch (_) {} }, 800);
-      }
-      if (elHeader || elLogin) {
-        var tid = setInterval(function () {
-          remaining--;
-          setTimeText(formatTrial(remaining));
-          if (remaining <= 5) {
-            if (wrapHeader) wrapHeader.classList.add('warning');
-            if (wrapLogin) wrapLogin.classList.add('warning');
-          }
-          if (remaining <= 0) {
-            clearInterval(tid);
-            onTrialEnd();
-          }
-        }, 1000);
-      }
-    })();
     let authToken = '';
     let authUserId = '';
     const api = async (path, options = {}) => {
@@ -1157,6 +1129,16 @@
       el.classList.remove('hidden');
     }
     function hideMsg(el) { if (el) el.classList.add('hidden'); }
+    function copyToClipboard(text) {
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(function () {
+          var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        });
+      } else {
+        var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      }
+    }
     let toastTimer = null;
     function showToast(text, type) {
       const wrap = document.getElementById('toastWrap') || (() => {
@@ -1280,7 +1262,7 @@
       return (String(m).padStart(2, '0') + ' : ' + String(s).padStart(2, '0') + ' 后结束');
     }
     function startCountdownTimer() {
-      if (countdownTimerId != null) clearInterval(countdownTimerId);
+      if (countdownTimerId != null) clearIƒnterval(countdownTimerId);
       countdownTimerId = setInterval(function () {
         document.querySelectorAll('.order-countdown[data-countdown]').forEach(function (el) {
           var sec = parseInt(el.getAttribute('data-countdown'), 10);
@@ -1364,8 +1346,9 @@
           var brandVal = (o.brandName || o.brand || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var modelVal = (o.modelName || o.model || o.goodsName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var storageVal = (o.storageCapacity || o.storage || o.memory || '').replace(/"/g, '&quot;');
-          var productNameEsc = (productName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          return '<tr><td class="product-name">' + productName + '</td><td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          var productNameEsc = (productName || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          var productNameHtml = (productName || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          return '<tr><td class="product-name-cell"><span class="product-name-text">' + productNameHtml + '</span> <button type="button" class="btn-copy-name btn btn-ghost btn-small" title="复制产品名称" data-name="' + productNameEsc + '">复制</button></td><td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
@@ -1426,6 +1409,27 @@
       doQueryOrders();
     });
     document.getElementById('btnQueryOrders').onclick = doQueryOrders;
+    document.getElementById('inputMaxQuoteAmount').addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d]/g, '');
+    });
+    document.getElementById('btnSetMaxQuote').onclick = function () {
+      var v = document.getElementById('inputMaxQuoteAmount').value.trim();
+      var hint = document.getElementById('maxQuoteAmountHint');
+      var checkEl = document.getElementById('maxQuoteCheck');
+      if (v === '') {
+        maxQuoteAmount = null;
+        hint.textContent = '已清除，不限制';
+        if (checkEl) checkEl.classList.add('hidden');
+        showToast('已清除最大报价限制', 'success');
+        return;
+      }
+      var num = parseFloat(v);
+      if (isNaN(num) || num <= 0) { showToast('请输入大于0的数字', 'error'); return; }
+      maxQuoteAmount = num;
+      hint.textContent = '已设置：报价不得超过 ' + num + ' 元';
+      if (checkEl) checkEl.classList.remove('hidden');
+      showToast('已设置最大报价 ' + num + ' 元', 'success');
+    };
     document.getElementById('btnResetQuery').onclick = async function () {
       document.querySelector('input[name="orderState"][value="10"]').checked = true;
       document.getElementById('inputMinPrice').value = '';
@@ -1440,6 +1444,7 @@
     document.getElementById('orderStateRadioGroup').addEventListener('change', function (e) { if (e.target.name === 'orderState') doQueryOrders(); });
     document.querySelectorAll('.tab-nav-item').forEach(function (el) {
       el.addEventListener('click', function () {
+        if (el.classList.contains('disabled')) return;
         var tab = el.dataset.tab;
         document.querySelectorAll('.tab-nav-item').forEach(function (n) { n.classList.remove('active'); });
         el.classList.add('active');
@@ -1561,18 +1566,30 @@
         frequency: freqEl ? freqEl.value : '1'
       };
     }
+    document.getElementById('scheduleTaskQuoteAmount').addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d.]/g, '');
+    });
     document.getElementById('btnScheduleSave').onclick = function () {
       var msg = document.getElementById('scheduleMsg');
       var t = getScheduleFormTask();
       if (!t) { showMsg(msg, '请填写任务名称和报价金额', 'error'); return; }
+      var q = parseFloat(t.quoteAmount);
+      if (isNaN(q) || q < 0 || q > 500) {
+        showMsg(msg, '报价金额须在 0～500 元范围内', 'error');
+        return;
+      }
       var id = Date.now();
       scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, frequency: t.frequency });
       saveScheduledTasks();
+      showMsg(msg, '', 'info');
+      hideMsg(msg);
       showToast('添加成功', 'success');
     };
     async function startScheduleTaskAuto(taskId) {
       var task = scheduledTasks.find(function (t) { return t.id === taskId; });
       if (!task) { showToast('任务不存在', 'error'); return; }
+      var q = parseFloat(task.quoteAmount);
+      if (isNaN(q) || q < 0 || q > 500) { showToast('该任务报价金额须在 0～500 元范围内', 'error'); return; }
       if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
       if (scheduleTaskStarting[taskId]) return;
       var sec = Math.max(1, parseInt(task.frequency, 10) || 1);
@@ -1594,15 +1611,27 @@
         renderScheduleTaskList();
       }
     }
-    function stopScheduleTaskAuto(taskId) {
+    function stopScheduleTaskAuto(taskId, silent) {
       if (scheduleTaskTimers[taskId]) {
         clearInterval(scheduleTaskTimers[taskId]);
         delete scheduleTaskTimers[taskId];
         updateScheduleGrabbedCountTimer();
         renderScheduleTaskList();
-        showToast('已停止自动执行', 'success');
+        if (!silent) showToast('已停止自动执行', 'success');
       }
     }
+    document.getElementById('btnScheduleStartAll').onclick = function () {
+      var toStart = scheduledTasks.filter(function (t) { return !scheduleTaskTimers[t.id] && !scheduleTaskStarting[t.id]; });
+      if (toStart.length === 0) { showToast('没有可启动的任务或已在执行中', 'error'); return; }
+      toStart.forEach(function (t) { startScheduleTaskAuto(t.id); });
+      showToast('已发起 ' + toStart.length + ' 个任务启动', 'success');
+    };
+    document.getElementById('btnScheduleStopAll').onclick = function () {
+      var running = scheduledTasks.filter(function (t) { return scheduleTaskTimers[t.id]; });
+      if (running.length === 0) { showToast('当前没有正在执行的任务', 'error'); return; }
+      running.forEach(function (t) { stopScheduleTaskAuto(t.id, true); });
+      showToast('已暂停全部 ' + running.length + ' 个任务', 'success');
+    };
     async function executeScheduleTask(taskId, isAuto) {
       var task = scheduledTasks.find(function (t) { return t.id === taskId; });
       if (!task) { if (!isAuto) showToast('任务不存在', 'error'); return; }
@@ -1738,6 +1767,12 @@
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
     };
     document.getElementById('orderListBody').addEventListener('click', async function (e) {
+      var copyBtn = e.target.closest('.btn-copy-name');
+      if (copyBtn) {
+        var name = copyBtn.getAttribute('data-name');
+        if (name) { copyToClipboard(name); showToast('已复制产品名称', 'success'); }
+        return;
+      }
       var btn = e.target.closest('button[data-record-id]');
       if (!btn) return;
       var recordId = btn.dataset.recordId;
@@ -1753,7 +1788,8 @@
         document.getElementById('quoteStorage').textContent = btn.dataset.storage || '-';
         document.getElementById('quoteApprizeDisplay').textContent = btn.dataset.apprizeDisplay || '-';
         document.getElementById('quoteApprizeValue').value = btn.dataset.apprize || '';
-        document.getElementById('quoteActualPrice').value = btn.dataset.actualPrice || '';
+        var ap = (btn.dataset.actualPrice || '').trim();
+        document.getElementById('quoteActualPrice').value = (ap === '' || ap === '0') ? '' : ap;
         document.getElementById('quoteRemark').value = '';
         document.getElementById('quoteIsUpdate').value = (orderState === '30') ? '1' : '';
         document.getElementById('quoteMsg').classList.add('hidden');
@@ -1771,6 +1807,14 @@
       document.getElementById('quoteModal').classList.add('hidden');
       doQueryOrders();
     };
+    document.querySelector('.btn-copy-quote-name').onclick = function () {
+      var t = document.getElementById('quoteProductName').textContent;
+      if (t && t !== '-') { copyToClipboard(t); showToast('已复制产品名称', 'success'); }
+    };
+    var maxQuoteAmount = null;
+    document.getElementById('quoteActualPrice').addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d]/g, '');
+    });
     document.getElementById('btnQuoteSubmit').onclick = async function () {
       var recordId = document.getElementById('quoteRecordId').value.trim();
       var orderId = document.getElementById('quoteOrderId').value.trim();
@@ -1780,7 +1824,8 @@
       var msg = document.getElementById('quoteMsg');
       if (!recordId || !orderId || !actualPrice) { showMsg(msg, '请填写报价金额', 'error'); return; }
       var priceNum = parseFloat(actualPrice);
-      if (isNaN(priceNum) || priceNum < 1) { showMsg(msg, '报价金额必须大于等于1', 'error'); return; }
+      if (isNaN(priceNum) || priceNum <= 0) { showMsg(msg, '报价金额必须大于0', 'error'); return; }
+      if (maxQuoteAmount != null && priceNum > maxQuoteAmount) { showMsg(msg, '报价金额不能超过已设置的最大报价 ' + maxQuoteAmount + ' 元', 'error'); return; }
       var apprizeVal = document.getElementById('quoteApprizeValue').value.trim();
       var apprizeNum = apprizeVal ? parseFloat(apprizeVal) : NaN;
       if (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0 && priceNum >= apprizeNum * 1.5) {
