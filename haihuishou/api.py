@@ -85,13 +85,17 @@ class HaihuishouAPI:
         登录获取 token 和用户信息。
         login_pwd 可为明文（内部会做 MD5）或已是 32 位小写 MD5 字符串。
         """
-        pwd = login_pwd if len(login_pwd) == 32 and all(c in "0123456789abcdef" for c in login_pwd) else md5_password(login_pwd)
+        pwd = (
+            login_pwd
+            if len(login_pwd) == 32 and all(c in "0123456789abcdef" for c in login_pwd.lower())
+            else md5_password(login_pwd)
+        )
         url = f"{self.base_hsd}/api/login/checklogin"
         payload = {
             "client": client,
             "deviceName": device_name,
             "loginName": login_name,
-            "loginPwd": pwd,
+            "loginPwd": login_pwd,
             "loginType": login_type,
         }
         r = requests.post(

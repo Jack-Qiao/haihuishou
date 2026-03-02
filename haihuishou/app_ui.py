@@ -6,6 +6,7 @@
 
 import os
 import sys
+import threading
 from typing import Any, Dict
 
 from flask import Flask, jsonify, render_template, request, session
@@ -19,7 +20,6 @@ _template_dir = os.path.join(_base_dir, "templates")
 app = Flask(__name__, template_folder=_template_dir)
 app.secret_key = os.environ.get("HAIHUISHOU_SECRET_KEY", "haihuishou-grab-dev-secret")
 app.config["JSON_AS_ASCII"] = False
-
 
 def _api_with_session() -> HaihuishouAPI:
     api = HaihuishouAPI()
@@ -376,6 +376,18 @@ def api_update_quote():
         return jsonify({"success": True, "data": res})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 200
+
+
+@app.route("/api/shutdown", methods=["POST"])
+def api_shutdown():
+    """试用结束：返回响应后退出进程，关闭工具。"""
+    def _exit():
+        import time
+        time.sleep(0.5)
+        os._exit(0)
+
+    threading.Thread(target=_exit, daemon=False).start()
+    return jsonify({"success": True, "message": "工具即将关闭"})
 
 
 def main():

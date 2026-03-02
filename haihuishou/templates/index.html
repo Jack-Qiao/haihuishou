@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>嗨回收抢单工具</title>
+  <title>嗨回收抢单试用工具</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -69,7 +69,7 @@
     }
 
     .grab-left {
-      flex: 0 0 45%;
+      flex: 0 0 38%;
       min-width: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -78,7 +78,7 @@
     }
 
     .grab-right {
-      flex: 1 1 55%;
+      flex: 1 1 62%;
       min-width: 0;
       background: var(--surface);
       padding: 16px;
@@ -134,6 +134,28 @@
       font-size: 1.35rem;
       font-weight: 700;
       color: var(--accent);
+    }
+
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .trial-countdown {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #f59e0b;
+    }
+
+    #loginCountdown {
+      margin: 8px 0 0 0;
+      display: inline-block;
     }
 
     .main-tabs {
@@ -710,6 +732,18 @@
       min-width: 0;
     }
 
+    .quote-copy-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quote-copy-row span {
+      flex: 1;
+      min-width: 0;
+    }
+
     .toast-wrap {
       position: fixed;
       top: 20px;
@@ -865,7 +899,8 @@
 <body>
   <div id="loginScreen">
     <div class="login-card">
-      <h1>嗨回收抢单工具</h1>
+      <h1>嗨回收抢单试用工具</h1>
+      <p id="loginCountdown" class="trial-countdown hidden">试用剩余 <span id="loginCountdownTime">05:00</span></p>
       <p class="sub">请先登录后使用</p>
       <div class="form-row">
         <label>手机号</label>
@@ -882,7 +917,11 @@
 
   <div id="appContent" class="hidden">
     <header>
-      <h1>嗨回收抢单工具</h1>
+      <div class="header-title-row">
+        <h1>嗨回收抢单试用工具</h1>
+        <span id="headerCountdown" class="trial-countdown hidden">试用剩余 <span
+            id="headerCountdownTime">05:00</span></span>
+      </div>
       <div class="login-row">
         <span class="status logged-in" id="loginStatus">已登录</span>
         <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
@@ -1033,7 +1072,7 @@
               <label>报价金额</label>
               <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:200px;"
                 inputmode="numeric" autocomplete="off">
-              <span class="schedule-quote-hint" style="color:var(--text-muted); font-size:12px;">范围 0～500 元，不可超出</span>
+              <span class="schedule-quote-hint" style="color:var(--text-muted); font-size:12px;">范围 1～500 元，不可超出</span>
             </div>
             <div class="form-row">
               <label>频率</label>
@@ -1084,9 +1123,22 @@
         </div>
       </div>
       <div id="quoteDetailBlock" class="quote-detail-block">
-        <div class="form-row"><label>品牌</label><span id="quoteBrand">-</span></div>
-        <div class="form-row"><label>型号</label><span id="quoteModel">-</span></div>
-        <div class="form-row"><label>存储容量</label><span id="quoteStorage">-</span></div>
+        <div class="form-row quote-detail-row">
+          <label>品牌</label>
+          <div class="quote-copy-row"><span id="quoteBrand">-</span><button type="button"
+              class="btn btn-ghost btn-small btn-copy-quote-field" data-target="quoteBrand" title="复制">复制</button></div>
+        </div>
+        <div class="form-row quote-detail-row">
+          <label>型号</label>
+          <div class="quote-copy-row"><span id="quoteModel">-</span><button type="button"
+              class="btn btn-ghost btn-small btn-copy-quote-field" data-target="quoteModel" title="复制">复制</button></div>
+        </div>
+        <div class="form-row quote-detail-row">
+          <label>存储容量</label>
+          <div class="quote-copy-row"><span id="quoteStorage">-</span><button type="button"
+              class="btn btn-ghost btn-small btn-copy-quote-field" data-target="quoteStorage" title="复制">复制</button>
+          </div>
+        </div>
       </div>
       <div class="form-row">
         <label>预估金额</label>
@@ -1111,6 +1163,33 @@
   </div>
 
   <script>
+    (function () {
+      var TRIAL_SECONDS = 600;
+      var remaining = TRIAL_SECONDS;
+      var elLogin = document.getElementById('loginCountdownTime');
+      var elHeader = document.getElementById('headerCountdownTime');
+      var wrapLogin = document.getElementById('loginCountdown');
+      var wrapHeader = document.getElementById('headerCountdown');
+      function format(t) {
+        var m = Math.floor(t / 60);
+        var s = t % 60;
+        return (String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
+      }
+      function onEnd() {
+        // 调用接口关闭后端进程，不关闭浏览器窗口
+        fetch('/api/shutdown', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(function () { });
+      }
+      function setTime(t) {
+        if (elLogin) elLogin.textContent = format(t);
+        if (elHeader) elHeader.textContent = format(t);
+      }
+      setTime(remaining);
+      var tid = setInterval(function () {
+        remaining--;
+        setTime(remaining);
+        if (remaining <= 0) { clearInterval(tid); onEnd(); }
+      }, 1000);
+    })();
     let authToken = '';
     let authUserId = '';
     const api = async (path, options = {}) => {
@@ -1262,7 +1341,7 @@
       return (String(m).padStart(2, '0') + ' : ' + String(s).padStart(2, '0') + ' 后结束');
     }
     function startCountdownTimer() {
-      if (countdownTimerId != null) clearIƒnterval(countdownTimerId);
+      if (countdownTimerId != null) clearInterval(countdownTimerId);
       countdownTimerId = setInterval(function () {
         document.querySelectorAll('.order-countdown[data-countdown]').forEach(function (el) {
           var sec = parseInt(el.getAttribute('data-countdown'), 10);
@@ -1794,6 +1873,15 @@
         document.getElementById('quoteIsUpdate').value = (orderState === '30') ? '1' : '';
         document.getElementById('quoteMsg').classList.add('hidden');
         document.getElementById('quoteModal').classList.remove('hidden');
+        var has = function (v) { var s = (v || '').trim(); return s && s !== '-'; };
+        var nameBtn = document.querySelector('.btn-copy-quote-name');
+        if (nameBtn) nameBtn.classList.toggle('hidden', !has(btn.dataset.productName));
+        var brandBtn = document.querySelector('.btn-copy-quote-field[data-target="quoteBrand"]');
+        if (brandBtn) brandBtn.classList.toggle('hidden', !has(btn.dataset.brand));
+        var modelBtn = document.querySelector('.btn-copy-quote-field[data-target="quoteModel"]');
+        if (modelBtn) modelBtn.classList.toggle('hidden', !has(btn.dataset.model));
+        var storageBtn = document.querySelector('.btn-copy-quote-field[data-target="quoteStorage"]');
+        if (storageBtn) storageBtn.classList.toggle('hidden', !has(btn.dataset.storage));
       }
       if (orderState === '20' || orderState === '30') { openQuoteModal(); return; }
       try {
@@ -1811,6 +1899,27 @@
       var t = document.getElementById('quoteProductName').textContent;
       if (t && t !== '-') { copyToClipboard(t); showToast('已复制产品名称', 'success'); }
     };
+    document.getElementById('quoteModal').addEventListener('click', function (e) {
+      var btn = e.target.closest('.btn-copy-quote-field');
+      if (!btn) return;
+      var id = btn.getAttribute('data-target');
+      var el = id ? document.getElementById(id) : null;
+      if (!el) return;
+      var t = (el.textContent || '').trim();
+      if (!t || t === '-') return;
+      if (id === 'quoteModel') {
+        var brandEl = document.getElementById('quoteBrand');
+        var brandStr = (brandEl && brandEl.textContent) ? brandEl.textContent.trim() : '';
+        if (brandStr && brandStr !== '-') {
+          if (t.toLowerCase().indexOf(brandStr.toLowerCase()) === 0) {
+            t = t.slice(brandStr.length).trim();
+          }
+        }
+        if (!t) t = (el.textContent || '').trim();
+      }
+      copyToClipboard(t);
+      showToast('已复制', 'success');
+    });
     var maxQuoteAmount = null;
     document.getElementById('quoteActualPrice').addEventListener('input', function () {
       this.value = this.value.replace(/[^\d]/g, '');
