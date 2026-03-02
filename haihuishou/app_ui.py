@@ -244,8 +244,8 @@ def api_quote():
 @app.route("/api/execute-task", methods=["POST"])
 def api_execute_task():
     """
-    执行定时任务：按条件查询待报价列表，对每条先抢单再报价（报价金额为任务设置值）。
-    body: taskName, manufacturerNames[], categoryId, brandIds[], minPrice, maxPrice, quoteAmount
+    执行定时任务：查询最多200条待报价列表，按机型（必填）和存储容量过滤，对第一条匹配的订单执行抢单并报价。
+    body: taskName, manufacturerNames[], categoryId, brandIds[], minPrice, maxPrice, quoteAmount, modelName(必填), storage?
     """
     data = request.get_json() or {}
     token = request.headers.get("token") or session.get("token")
@@ -274,6 +274,10 @@ def api_execute_task():
         return jsonify({"success": False, "message": "报价金额须为有效数字，且范围 0～500"}), 400
     task_name = (data.get("taskName") or "").strip()
     remark = task_name or "定时任务"
+    task_model = (data.get("modelName") or "").strip() or None
+    task_storage = (data.get("storage") or data.get("storageCapacity") or "").strip() or None
+    if not task_model:
+        return jsonify({"success": False, "message": "请填写机型（必填）"}), 400
     category_brands = [{"key": category_id, "value": brand_ids}] if category_id else []
     cond = GrabCondition(
         category_brands=category_brands,
@@ -281,7 +285,7 @@ def api_execute_task():
         min_price=min_price,
         max_price=max_price,
         sub_order_source_names=manufacturer_names,
-        page_size=1,
+        page_size=200,
     )
     try:
         api = HaihuishouAPI()
@@ -310,14 +314,27 @@ def api_execute_task():
                 lst = lst or inner.get("list") or inner.get("orderList") or inner.get("results") or []
         if not isinstance(lst, list):
             lst = []
-        grabbed = 0
-        quoted = 0
-        errors = []
+        # 按机型和存储容量过滤，只对匹配的订单执行抢单（机型必填，已在上方校验）
+        matched = []
         for o in lst:
             record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
             order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
             if record_id is None or order_id is None:
                 continue
+            order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
+            order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
+            if order_model.lower() != task_model.lower():
+                continue
+            if task_storage and order_storage.lower() != task_storage.lower():
+                continue
+            matched.append(o)
+        grabbed = 0
+        quoted = 0
+        errors = []
+        # 每次只对第一条匹配的订单执行抢单和报价
+        for o in matched[:1]:
+            record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
+            order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
             try:
                 raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
                 resp_data = raw.get("data") or {}

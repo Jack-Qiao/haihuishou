@@ -719,6 +719,18 @@
     .btn-copy-name {
       flex-shrink: 0;
     }
+    .order-list-model-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .order-list-model-cell .btn-copy-model {
+      flex-shrink: 0;
+    }
+    .order-list-copy-cell {
+      cursor: pointer;
+      user-select: none;
+    }
 
     .quote-product-name-row {
       display: flex;
@@ -993,7 +1005,8 @@
               <table>
                 <thead>
                   <tr id="orderListHead">
-                    <th>产品名称</th>
+                    <th>机型</th>
+                    <th>存储容量</th>
                     <th>预估金额</th>
                     <th>规格</th>
                     <th>厂商</th>
@@ -1003,7 +1016,7 @@
                 </thead>
                 <tbody id="orderListBody">
                   <tr>
-                    <td colspan="6" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
+                    <td colspan="7" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
                   </tr>
                 </tbody>
               </table>
@@ -1073,6 +1086,14 @@
               <input type="text" id="scheduleTaskQuoteAmount" placeholder="执行时统一使用此金额报价" style="width:200px;"
                 inputmode="numeric" autocomplete="off">
               <span class="schedule-quote-hint" style="color:var(--text-muted); font-size:12px;">范围 1～500 元，不可超出</span>
+            </div>
+            <div class="form-row">
+              <label>手机型号 <span style="color:var(--text-muted); font-size:12px">（必填）</span></label>
+              <input type="text" id="scheduleTaskModelName" placeholder="与单子机型一致才抢单" style="width:240px;">
+            </div>
+            <div class="form-row">
+              <label>存储容量</label>
+              <input type="text" id="scheduleTaskStorage" placeholder="选填，与单子存储一致才抢单" style="width:240px;">
             </div>
             <div class="form-row">
               <label>频率</label>
@@ -1400,10 +1421,10 @@
         var total = data.totalCount !== undefined ? data.totalCount : (data.pageCount !== undefined ? data.pageCount : 0);
         var orderState = (body.orderState || '10').toString();
         var showQuoteCol = orderState === '30';
-        var colCount = showQuoteCol ? 7 : 6;
+        var colCount = showQuoteCol ? 8 : 7;
         var theadTr = document.getElementById('orderListHead');
-        if (showQuoteCol) theadTr.innerHTML = '<th>产品名称</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
-        else theadTr.innerHTML = '<th>产品名称</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
         totalEl.textContent = '共 ' + total + ' 项';
         var currentPage = body.pageIndex || 1;
         var pageSizeNum = body.pageSize || 10;
@@ -1434,9 +1455,14 @@
           var brandVal = (o.brandName || o.brand || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var modelVal = (o.modelName || o.model || o.goodsName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var storageVal = (o.storageCapacity || o.storage || o.memory || '').replace(/"/g, '&quot;');
+          var modelRaw = (o.modelName || o.model || o.goodsName || '').trim();
+          var modelDisplay = modelRaw ? modelRaw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : '-';
+          var storageDisplay = (o.storageCapacity || o.storage || o.memory || '-').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
           var productNameEsc = (productName || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          var productNameHtml = (productName || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          return '<tr><td class="product-name-cell"><span class="product-name-text">' + productNameHtml + '</span> <button type="button" class="btn-copy-name btn btn-ghost btn-small" title="复制产品名称" data-name="' + productNameEsc + '">复制</button></td><td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          var modelCopyBtn = modelRaw ? ' <button type="button" class="btn-copy-model btn btn-ghost btn-small" title="复制机型" data-model="' + modelVal + '">复制</button>' : '';
+          var modelTd = '<td class="order-list-model-cell" style="color:var(--text-muted); font-size:13px"><span class="order-list-model-text">' + modelDisplay + '</span>' + modelCopyBtn + '</td>';
+          var storageTd = '<td class="order-list-copy-cell" title="单击复制" style="color:var(--text-muted); font-size:13px">' + storageDisplay + '</td>';
+          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
@@ -1613,9 +1639,13 @@
           actions = '<button type="button" class="btn btn-primary btn-small schedule-btn-auto" data-id="' + t.id + '">自动执行</button> ' +
             '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '">删除</button>';
         }
+        var modelStr = (t.modelName && t.modelName.length) ? ('型号: ' + t.modelName) : '';
+        var storageStr = (t.storage && t.storage.length) ? ('存储: ' + t.storage) : '';
+        var extraStr = [modelStr, storageStr].filter(Boolean).join(' | ');
+        var bodyStr = '厂商: ' + manStr + ' | 品牌: ' + brandStr + ' | 金额: ' + rangeStr + ' | 报价: ' + (t.quoteAmount || '-') + (extraStr ? ' | ' + extraStr : '') + ' | 频率: ' + freqStr;
         return '<div class="schedule-task-card" data-id="' + t.id + '">' +
           '<div class="schedule-task-card-head">' + (t.name || '未命名') + (isRunning ? ' <span class="schedule-task-running-tag">执行中</span>' : '') + '</div>' +
-          '<div class="schedule-task-card-body">厂商: ' + manStr + ' | 品牌: ' + brandStr + ' | 金额: ' + rangeStr + ' | 报价: ' + (t.quoteAmount || '-') + ' | 频率: ' + freqStr + '</div>' +
+          '<div class="schedule-task-card-body">' + bodyStr + '</div>' +
           '<div class="schedule-task-card-actions">' + actions + '</div></div>';
       }).join('');
       listEl.querySelectorAll('.schedule-btn-auto').forEach(function (btn) {
@@ -1636,13 +1666,16 @@
     function getScheduleFormTask() {
       var name = document.getElementById('scheduleTaskName').value.trim();
       var quoteAmount = document.getElementById('scheduleTaskQuoteAmount').value.trim();
+      var modelName = document.getElementById('scheduleTaskModelName').value.trim() || undefined;
       if (!name) return null;
       if (!quoteAmount) return null;
+      if (!modelName) return null;
       var checkedM = [].slice.call(document.querySelectorAll('#scheduleTaskManufacturersList input[type="checkbox"]:checked'));
       var manufacturerNames = checkedM.map(function (el) { return String(el.dataset.name || el.getAttribute('data-name') || '').trim(); }).filter(Boolean);
       var checkedB = [].slice.call(document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]:checked'));
       var brandIds = checkedB.map(function (el) { return String(el.dataset.key || el.getAttribute('data-key') || '').trim(); }).filter(Boolean);
       var freqEl = document.getElementById('scheduleTaskFrequency');
+      var storage = document.getElementById('scheduleTaskStorage').value.trim() || undefined;
       return {
         name: name,
         manufacturerNames: manufacturerNames,
@@ -1651,6 +1684,8 @@
         minPrice: document.getElementById('scheduleTaskMinPrice').value.trim() || undefined,
         maxPrice: document.getElementById('scheduleTaskMaxPrice').value.trim() || undefined,
         quoteAmount: quoteAmount,
+        modelName: modelName,
+        storage: storage,
         frequency: freqEl ? freqEl.value : '1'
       };
     }
@@ -1660,14 +1695,14 @@
     document.getElementById('btnScheduleSave').onclick = function () {
       var msg = document.getElementById('scheduleMsg');
       var t = getScheduleFormTask();
-      if (!t) { showMsg(msg, '请填写任务名称和报价金额', 'error'); return; }
+      if (!t) { showMsg(msg, '请填写任务名称、报价金额和机型', 'error'); return; }
       var q = parseFloat(t.quoteAmount);
       if (isNaN(q) || q < 0 || q > 500) {
         showMsg(msg, '报价金额须在 0～500 元范围内', 'error');
         return;
       }
       var id = Date.now();
-      scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, frequency: t.frequency });
+      scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, modelName: t.modelName, storage: t.storage, frequency: t.frequency });
       saveScheduledTasks();
       showMsg(msg, '', 'info');
       hideMsg(msg);
@@ -1676,6 +1711,7 @@
     async function startScheduleTaskAuto(taskId) {
       var task = scheduledTasks.find(function (t) { return t.id === taskId; });
       if (!task) { showToast('任务不存在', 'error'); return; }
+      if (!task.modelName || !String(task.modelName).trim()) { showToast('请先设置机型（必填）', 'error'); return; }
       var q = parseFloat(task.quoteAmount);
       if (isNaN(q) || q < 0 || q > 500) { showToast('该任务报价金额须在 0～500 元范围内', 'error'); return; }
       if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
@@ -1736,6 +1772,8 @@
             minPrice: task.minPrice,
             maxPrice: task.maxPrice,
             quoteAmount: task.quoteAmount,
+            modelName: task.modelName,
+            storage: task.storage,
             userId: authUserId
           })
         });
@@ -1854,11 +1892,17 @@
       var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
     };
+    document.getElementById('orderListBody').addEventListener('click', function (e) {
+      var cell = e.target.closest('.order-list-copy-cell');
+      if (!cell) return;
+      var t = (cell.textContent || '').trim();
+      if (t && t !== '-') { copyToClipboard(t); showToast('复制容量成功', 'success'); return; }
+    });
     document.getElementById('orderListBody').addEventListener('click', async function (e) {
-      var copyBtn = e.target.closest('.btn-copy-name');
-      if (copyBtn) {
-        var name = copyBtn.getAttribute('data-name');
-        if (name) { copyToClipboard(name); showToast('已复制产品名称', 'success'); }
+      var copyModelBtn = e.target.closest('.btn-copy-model');
+      if (copyModelBtn) {
+        var model = copyModelBtn.getAttribute('data-model');
+        if (model && model !== '-') { copyToClipboard(model); showToast('已复制机型', 'success'); }
         return;
       }
       var btn = e.target.closest('button[data-record-id]');
@@ -1916,16 +1960,6 @@
       if (!el) return;
       var t = (el.textContent || '').trim();
       if (!t || t === '-') return;
-      if (id === 'quoteModel') {
-        var brandEl = document.getElementById('quoteBrand');
-        var brandStr = (brandEl && brandEl.textContent) ? brandEl.textContent.trim() : '';
-        if (brandStr && brandStr !== '-') {
-          if (t.toLowerCase().indexOf(brandStr.toLowerCase()) === 0) {
-            t = t.slice(brandStr.length).trim();
-          }
-        }
-        if (!t) t = (el.textContent || '').trim();
-      }
       copyToClipboard(t);
       showToast('已复制', 'success');
     });
