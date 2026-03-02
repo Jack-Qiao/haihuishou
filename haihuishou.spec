@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 # 在项目根目录（codingAi）执行：pyinstaller haihuishou.spec
-# 打包完成后，可执行文件在 dist/manualOrderGrabTool（macOS/Linux）或 dist/manualOrderGrabTool.exe（Windows）
+# 打包完成后，可执行文件在 dist/autoGrabOrder（macOS/Linux）或 dist/autoGrabOrder.exe（Windows）
 
 import os
 
@@ -39,7 +39,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='manualOrderGrabTool',
+    name='autoGrabOrder',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

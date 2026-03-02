@@ -383,7 +383,7 @@ def api_shutdown():
     """试用结束：返回响应后退出进程，关闭工具。"""
     def _exit():
         import time
-        time.sleep(0.5)
+        time.sleep(1.5)
         os._exit(0)
 
     threading.Thread(target=_exit, daemon=False).start()

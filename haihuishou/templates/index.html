@@ -981,7 +981,7 @@
             </div>
             <div class="form-row form-row-max-quote">
               <label style="margin-bottom:0;">最大报价</label>
-              <input type="text" id="inputMaxQuoteAmount" placeholder="不填则不限制" class="input-max-quote"
+              <input type="text" id="inputMaxQuoteAmount" value="500" placeholder="不填则不限制" class="input-max-quote"
                 inputmode="numeric" autocomplete="off">
               <span style="color:var(--text-muted);">元</span>
               <button type="button" class="btn btn-primary btn-small btn-set-max-quote" id="btnSetMaxQuote">设置</button>
@@ -1164,8 +1164,8 @@
 
   <script>
     (function () {
-      var TRIAL_SECONDS = 600;
-      var remaining = TRIAL_SECONDS;
+      var TRIAL_SECONDS = 300;
+      var endTime = Date.now() + TRIAL_SECONDS * 1000;
       var elLogin = document.getElementById('loginCountdownTime');
       var elHeader = document.getElementById('headerCountdownTime');
       var wrapLogin = document.getElementById('loginCountdown');
@@ -1175,20 +1175,29 @@
         var s = t % 60;
         return (String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
       }
+      function callShutdown() {
+        var url = (window.location.origin || 'http://127.0.0.1:5050') + '/api/shutdown';
+        var opts = { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true };
+        fetch(url, opts).catch(function () { });
+      }
       function onEnd() {
-        // 调用接口关闭后端进程，不关闭浏览器窗口
-        fetch('/api/shutdown', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(function () { });
+        callShutdown();
+        setTimeout(callShutdown, 200);
       }
       function setTime(t) {
         if (elLogin) elLogin.textContent = format(t);
         if (elHeader) elHeader.textContent = format(t);
       }
-      setTime(remaining);
-      var tid = setInterval(function () {
-        remaining--;
+      function tick() {
+        var remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
         setTime(remaining);
-        if (remaining <= 0) { clearInterval(tid); onEnd(); }
-      }, 1000);
+        if (remaining <= 0) {
+          clearInterval(tid);
+          onEnd();
+        }
+      }
+      tick();
+      var tid = setInterval(tick, 1000);
     })();
     let authToken = '';
     let authUserId = '';
@@ -1920,7 +1929,13 @@
       copyToClipboard(t);
       showToast('已复制', 'success');
     });
-    var maxQuoteAmount = null;
+    var maxQuoteAmount = 500;
+    (function () {
+      var hint = document.getElementById('maxQuoteAmountHint');
+      var checkEl = document.getElementById('maxQuoteCheck');
+      if (hint) hint.textContent = '已设置：报价不得超过 500 元';
+      if (checkEl) checkEl.classList.remove('hidden');
+    })();
     document.getElementById('quoteActualPrice').addEventListener('input', function () {
       this.value = this.value.replace(/[^\d]/g, '');
     });
