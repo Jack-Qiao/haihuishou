@@ -285,7 +285,7 @@ def api_execute_task():
         min_price=min_price,
         max_price=max_price,
         sub_order_source_names=manufacturer_names,
-        page_size=200,
+        page_size=1,
     )
     try:
         api = HaihuishouAPI()

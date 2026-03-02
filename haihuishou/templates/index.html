@@ -781,6 +781,10 @@
       background: #ef4444;
       color: #fff;
     }
+    .toast .toast-copy-content {
+      color: #fef08a;
+      font-weight: 600;
+    }
 
     .modal-overlay {
       position: fixed;
@@ -1196,14 +1200,7 @@
         var s = t % 60;
         return (String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'));
       }
-      function callShutdown() {
-        var url = (window.location.origin || 'http://127.0.0.1:5050') + '/api/shutdown';
-        var opts = { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true };
-        fetch(url, opts).catch(function () { });
-      }
       function onEnd() {
-        callShutdown();
-        setTimeout(callShutdown, 200);
       }
       function setTime(t) {
         if (elLogin) elLogin.textContent = format(t);
@@ -1249,7 +1246,7 @@
       }
     }
     let toastTimer = null;
-    function showToast(text, type) {
+    function showToast(text, type, options) {
       const wrap = document.getElementById('toastWrap') || (() => {
         const w = document.createElement('div');
         w.id = 'toastWrap';
@@ -1261,7 +1258,16 @@
       wrap.innerHTML = '';
       const el = document.createElement('div');
       el.className = 'toast ' + (type || 'success');
-      el.textContent = text;
+      if (options && options.highlight !== undefined && options.highlight !== '') {
+        var h = String(options.highlight);
+        var idx = text.indexOf(h);
+        var escaped = h.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        el.innerHTML = (idx >= 0)
+          ? (text.substring(0, idx) + '<span class="toast-copy-content">' + escaped + '</span>' + text.substring(idx + h.length))
+          : text;
+      } else {
+        el.textContent = text;
+      }
       wrap.appendChild(el);
       wrap.style.display = 'block';
       toastTimer = setTimeout(() => { wrap.innerHTML = ''; wrap.style.display = 'none'; toastTimer = null; }, type === 'error' ? 4500 : 2500);
@@ -1896,13 +1902,13 @@
       var cell = e.target.closest('.order-list-copy-cell');
       if (!cell) return;
       var t = (cell.textContent || '').trim();
-      if (t && t !== '-') { copyToClipboard(t); showToast('复制容量成功', 'success'); return; }
+      if (t && t !== '-') { copyToClipboard(t); showToast('复制 ' + t + ' 成功', 'success', { highlight: t }); return; }
     });
     document.getElementById('orderListBody').addEventListener('click', async function (e) {
       var copyModelBtn = e.target.closest('.btn-copy-model');
       if (copyModelBtn) {
         var model = copyModelBtn.getAttribute('data-model');
-        if (model && model !== '-') { copyToClipboard(model); showToast('已复制机型', 'success'); }
+        if (model && model !== '-') { copyToClipboard(model); showToast('复制 ' + model + ' 成功', 'success', { highlight: model }); }
         return;
       }
       var btn = e.target.closest('button[data-record-id]');
