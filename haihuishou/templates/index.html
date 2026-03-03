@@ -1083,8 +1083,6 @@
             <div class="form-row form-row-align-top">
               <label>品牌</label>
               <div class="schedule-field-wrap">
-                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
-                    id="btnScheduleBrandsAll">全部</button></div>
                 <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
               </div>
             </div>
@@ -1601,11 +1599,13 @@
         if (schedulePhoneCatId) {
           var br = await api('/api/brands?catId=' + schedulePhoneCatId);
           if (br.success && Array.isArray(br.data) && br.data.length) {
-            bList.innerHTML = br.data.map(function (b) {
+            var allOpt = '<label class="tag" style="cursor:pointer"><input type="radio" name="scheduleTaskBrand" data-key="" checked> 全部</label>';
+            var brandOpts = br.data.map(function (b) {
               var bid = String(b.key || b.id || b.brandId || '').trim();
               var bname = String(b.value || b.name || b.brandName || '').trim() || bid;
-              return '<label class="tag"><input type="checkbox" data-key="' + bid.replace(/"/g, '&quot;') + '"> ' + bname + '</label>';
+              return '<label class="tag" style="cursor:pointer"><input type="radio" name="scheduleTaskBrand" data-key="' + bid.replace(/"/g, '&quot;') + '" data-name="' + (bname || '').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '"> ' + bname + '</label>';
             }).join('');
+            bList.innerHTML = allOpt + brandOpts;
           } else { bList.innerHTML = '<span style="color:var(--text-muted)">暂无品牌</span>'; }
         } else { bList.innerHTML = '<span style="color:var(--text-muted)">请先选择分类</span>'; }
         scheduleOptionsLoaded = true;
@@ -1635,7 +1635,7 @@
       var freqLabels = { '1': '1秒/次', '2': '2秒/次', '3': '3秒/次', '5': '5秒/次', '10': '10秒/次', '30': '30秒/次', '60': '60秒/次' };
       listEl.innerHTML = scheduledTasks.map(function (t) {
         var manStr = (t.manufacturerNames && t.manufacturerNames.length) ? t.manufacturerNames.join('、') : '全部厂商';
-        var brandStr = (t.brandIds && t.brandIds.length) ? (t.brandIds.length + ' 个品牌') : '全部品牌';
+        var brandStr = (t.brandName && t.brandName.length) ? t.brandName : ((t.brandIds && t.brandIds.length) ? (t.brandIds.length + ' 个品牌') : '全部品牌');
         var rangeStr = (t.minPrice || t.maxPrice) ? ((t.minPrice || '') + '～' + (t.maxPrice || '')) : '不限';
         var freqStr = freqLabels[t.frequency] || t.frequency || '3秒/次';
         var isRunning = !!scheduleTaskTimers[t.id];
@@ -1681,8 +1681,10 @@
       if (!name) return null;
       if (!quoteAmount) return null;
       if (!modelName) return null;
-      var checkedB = [].slice.call(document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]:checked'));
-      var brandIds = checkedB.map(function (el) { return String(el.dataset.key || el.getAttribute('data-key') || '').trim(); }).filter(Boolean);
+      var brandRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
+      var brandKey = brandRadio ? String(brandRadio.dataset.key || brandRadio.getAttribute('data-key') || '').trim() : '';
+      var brandIds = brandKey ? [brandKey] : [];
+      var brandName = brandKey && brandRadio ? String(brandRadio.getAttribute('data-name') || '').trim() : '';
       var freqEl = document.getElementById('scheduleTaskFrequency');
       var storage = document.getElementById('scheduleTaskStorage').value.trim() || undefined;
       return {
@@ -1690,6 +1692,7 @@
         manufacturerNames: [],
         categoryId: schedulePhoneCatId,
         brandIds: brandIds,
+        brandName: brandName,
         minPrice: document.getElementById('scheduleTaskMinPrice').value.trim() || undefined,
         maxPrice: document.getElementById('scheduleTaskMaxPrice').value.trim() || undefined,
         quoteAmount: quoteAmount,
@@ -1733,7 +1736,31 @@
       }
     }
     document.getElementById('scheduleTaskName').addEventListener('input', updateScheduleSaveButtonState);
-    document.getElementById('scheduleTaskModelName').addEventListener('input', updateScheduleSaveButtonState);
+    function syncScheduleBrandFromModelName() {
+      var modelStr = (document.getElementById('scheduleTaskModelName').value || '').trim();
+      var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
+      if (!radios.length) return;
+      var allRadio = null;
+      var matchedRadio = null;
+      var matchedLen = 0;
+      for (var i = 0; i < radios.length; i++) {
+        var r = radios[i];
+        var key = (r.getAttribute('data-key') || '').trim();
+        var name = (r.getAttribute('data-name') || '').trim();
+        if (key === '') { allRadio = r; continue; }
+        if (!name || !modelStr) continue;
+        if (modelStr.toLowerCase().indexOf(name.toLowerCase()) === 0 && name.length > matchedLen) {
+          matchedRadio = r;
+          matchedLen = name.length;
+        }
+      }
+      var toCheck = matchedRadio || allRadio;
+      if (toCheck) toCheck.checked = true;
+    }
+    document.getElementById('scheduleTaskModelName').addEventListener('input', function () {
+      syncScheduleBrandFromModelName();
+      updateScheduleSaveButtonState();
+    });
     document.getElementById('btnScheduleSave').onclick = function () {
       var msg = document.getElementById('scheduleMsg');
       var t = getScheduleFormTask();
@@ -1751,7 +1778,7 @@
         return;
       }
       var id = Date.now();
-      scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, modelName: t.modelName, storage: t.storage, frequency: t.frequency });
+      scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, brandName: t.brandName, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, modelName: t.modelName, storage: t.storage, frequency: t.frequency });
       saveScheduledTasks();
       showMsg(msg, '', 'info');
       hideMsg(msg);
@@ -1928,12 +1955,6 @@
       renderScheduleTaskList();
     }
     renderScheduleTaskList();
-    document.getElementById('btnScheduleBrandsAll').onclick = function () {
-      var checkboxes = document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]');
-      if (!checkboxes.length) return;
-      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
-      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-    };
     document.getElementById('categoryRadioGroup').addEventListener('change', function (e) {
       if (e.target.name === 'categoryType' && e.target.checked) loadBrandsForCategory(e.target.value);
     });
