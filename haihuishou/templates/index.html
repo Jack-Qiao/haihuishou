@@ -741,6 +741,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      max-width: 220px;
+    }
+
+    .order-list-model-cell .order-list-model-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
     }
 
     .order-list-model-cell .btn-copy-model {
@@ -1736,6 +1744,7 @@
       }
     }
     document.getElementById('scheduleTaskName').addEventListener('input', updateScheduleSaveButtonState);
+    var scheduleBrandAlias = { '苹果': 'Apple' };
     function syncScheduleBrandFromModelName() {
       var modelStr = (document.getElementById('scheduleTaskModelName').value || '').trim();
       var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
@@ -1743,15 +1752,34 @@
       var allRadio = null;
       var matchedRadio = null;
       var matchedLen = 0;
-      for (var i = 0; i < radios.length; i++) {
-        var r = radios[i];
-        var key = (r.getAttribute('data-key') || '').trim();
-        var name = (r.getAttribute('data-name') || '').trim();
-        if (key === '') { allRadio = r; continue; }
-        if (!name || !modelStr) continue;
-        if (modelStr.toLowerCase().indexOf(name.toLowerCase()) === 0 && name.length > matchedLen) {
-          matchedRadio = r;
-          matchedLen = name.length;
+      for (var alias in scheduleBrandAlias) {
+        if (!scheduleBrandAlias.hasOwnProperty(alias)) continue;
+        if (modelStr.indexOf(alias) === 0) {
+          var targetName = scheduleBrandAlias[alias];
+          for (var j = 0; j < radios.length; j++) {
+            var r = radios[j];
+            var key = (r.getAttribute('data-key') || '').trim();
+            var name = (r.getAttribute('data-name') || '').trim();
+            if (key === '') { allRadio = r; continue; }
+            if (name && name.toLowerCase() === targetName.toLowerCase()) {
+              matchedRadio = r;
+              break;
+            }
+          }
+          if (matchedRadio) break;
+        }
+      }
+      if (!matchedRadio) {
+        for (var i = 0; i < radios.length; i++) {
+          var r = radios[i];
+          var key = (r.getAttribute('data-key') || '').trim();
+          var name = (r.getAttribute('data-name') || '').trim();
+          if (key === '') { allRadio = r; continue; }
+          if (!name || !modelStr) continue;
+          if (modelStr.toLowerCase().indexOf(name.toLowerCase()) === 0 && name.length > matchedLen) {
+            matchedRadio = r;
+            matchedLen = name.length;
+          }
         }
       }
       var toCheck = matchedRadio || allRadio;
