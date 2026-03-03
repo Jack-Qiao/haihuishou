@@ -231,6 +231,12 @@
       background: var(--accent-hover);
     }
 
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .btn-ghost {
       background: transparent;
       color: var(--text-muted);
@@ -612,6 +618,17 @@
       display: none !important;
     }
 
+    .schedule-input-error {
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.08) !important;
+    }
+
+    .schedule-condition-hint {
+      font-size: 13px;
+      color: #fca5a5;
+      margin-bottom: 10px;
+    }
+
     #orderListBody .btn-small {
       margin-right: 6px;
     }
@@ -719,14 +736,17 @@
     .btn-copy-name {
       flex-shrink: 0;
     }
+
     .order-list-model-cell {
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .order-list-model-cell .btn-copy-model {
       flex-shrink: 0;
     }
+
     .order-list-copy-cell {
       cursor: pointer;
       user-select: none;
@@ -781,6 +801,7 @@
       background: #ef4444;
       color: #fff;
     }
+
     .toast .toast-copy-content {
       color: #fef08a;
       font-weight: 600;
@@ -956,11 +977,6 @@
             <h2>电子产品信息选择</h2>
             <div>
               <div id="categoriesMsg" class="msg info hidden"></div>
-              <div id="manufacturersArea" class="hidden" style="margin-top:8px">
-                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
-                    id="btnManufacturersAll">全部</button></div>
-                <div id="manufacturersList" class="brands-chosen"></div>
-              </div>
               <div id="categoryArea" class="hidden" style="margin-top:14px">
                 <div style="color:var(--text-muted); margin-bottom:6px">选择电子类型</div>
                 <div id="categoryRadioGroup" class="brands-chosen"></div>
@@ -1055,17 +1071,10 @@
             <h2>定时任务条件</h2>
             <p style="color:var(--text-muted); margin-top:8px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。</p>
             <div id="scheduleMsg" class="msg info hidden"></div>
+            <div id="scheduleConditionHint" class="schedule-condition-hint hidden"></div>
             <div class="form-row">
               <label>任务名称</label>
               <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:240px;">
-            </div>
-            <div class="form-row form-row-align-top">
-              <label>厂商</label>
-              <div class="schedule-field-wrap">
-                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
-                    id="btnScheduleManufacturersAll">全部</button></div>
-                <div id="scheduleTaskManufacturersList" class="brands-chosen">切换到此 Tab 后自动加载</div>
-              </div>
             </div>
             <div class="form-row">
               <label>类型</label>
@@ -1102,9 +1111,9 @@
             <div class="form-row">
               <label>频率</label>
               <select id="scheduleTaskFrequency" style="width:140px;">
-                <option value="1" selected>1秒/次</option>
+                <option value="1">1秒/次</option>
                 <option value="2">2秒/次</option>
-                <option value="3">3秒/次</option>
+                <option value="3" selected>3秒/次</option>
                 <option value="5">5秒/次</option>
                 <option value="10">10秒/次</option>
                 <option value="30">30秒/次</option>
@@ -1223,6 +1232,13 @@
       const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
       if (authToken) headers['token'] = authToken;
       const res = await fetch(path, { ...options, headers });
+      if (res.status === 401) {
+        authToken = '';
+        authUserId = '';
+        if (typeof stopAllScheduleTimers === 'function') stopAllScheduleTimers();
+        setLoginScreen(true);
+        return { success: false, message: '请重新登录' };
+      }
       const text = await res.text();
       try { return text ? JSON.parse(text) : {}; } catch (_) {
         return { success: false, message: '服务器返回异常，请检查是否已登录或刷新重试' };
@@ -1297,13 +1313,6 @@
         const r = await api('/api/categories');
         if (!r.success) { showMsg(msg, r.message || '获取失败', 'error'); return; }
         const catList = r.data.catList || [];
-        const manufacturerList = r.data.manufacturerList || [];
-        const mList = document.getElementById('manufacturersList');
-        mList.innerHTML = (manufacturerList || []).map(m => {
-          const name = m.text || m.value || '';
-          return '<label class="tag"><input type="checkbox" data-name="' + name + '"> ' + name + '</label>';
-        }).join('');
-        document.getElementById('manufacturersArea').classList.remove('hidden');
         const radioGroup = document.getElementById('categoryRadioGroup');
         radioGroup.innerHTML = catList.map(c => '<label class="tag" style="cursor:pointer"><input type="radio" name="categoryType" value="' + c.catId + '"> ' + c.catName + '</label>').join('');
         document.getElementById('categoryArea').classList.remove('hidden');
@@ -1360,6 +1369,7 @@
       }
     };
     document.getElementById('btnLogout').onclick = async () => {
+      if (typeof stopAllScheduleTimers === 'function') stopAllScheduleTimers();
       authToken = '';
       authUserId = '';
       await api('/api/logout', { method: 'POST' });
@@ -1404,8 +1414,6 @@
       var checkedBrands = [].slice.call(document.querySelectorAll('#brandsList input[type="checkbox"]:checked'));
       var brandIds = checkedBrands.map(function (el) { return String(el.getAttribute('data-key') || el.dataset.key || '').trim(); }).filter(Boolean);
       var categoryBrands = catId ? [{ key: String(catId), value: brandIds }] : [];
-      var checkedManufacturers = [].slice.call(document.querySelectorAll('#manufacturersList input:checked'));
-      var subOrderSourceNames = checkedManufacturers.map(function (el) { return String(el.dataset.name || '').trim(); }).filter(Boolean);
       var minPriceStr = document.getElementById('inputMinPrice').value.trim();
       var maxPriceStr = document.getElementById('inputMaxPrice').value.trim();
       var orderStateEl = document.querySelector("input[name=\"orderState\"]:checked");
@@ -1413,7 +1421,7 @@
         userId: authUserId,
         categoryBrands: categoryBrands,
         orderState: orderStateEl ? orderStateEl.value : '10',
-        subOrderSourceNames: subOrderSourceNames,
+        subOrderSourceNames: [],
         pageIndex: parseInt(document.getElementById('inputPage').value, 10) || 1,
         pageSize: parseInt(document.getElementById('inputPageSize').value, 10) || 10
       };
@@ -1556,7 +1564,6 @@
       document.getElementById('inputMaxPrice').value = '';
       document.getElementById('inputPage').value = '1';
       document.getElementById('inputPageSize').value = '10';
-      document.querySelectorAll('#manufacturersList input:checked').forEach(function (el) { el.checked = false; });
       var firstCat = document.querySelector('input[name="categoryType"]');
       if (firstCat) { firstCat.checked = true; await loadBrandsForCategory(firstCat.value); }
       doQueryOrders();
@@ -1570,7 +1577,12 @@
         el.classList.add('active');
         document.getElementById('tabPanelGrab').classList.toggle('hidden', tab !== 'grab');
         document.getElementById('tabPanelSchedule').classList.toggle('hidden', tab !== 'schedule');
-        if (tab === 'schedule') { loadScheduleOptions().then(function () { loadScheduleGrabbedCount(); }); }
+        if (tab === 'schedule') {
+          loadScheduleOptions().then(function () {
+            loadScheduleGrabbedCount();
+            if (typeof updateScheduleSaveButtonState === 'function') updateScheduleSaveButtonState();
+          });
+        }
       });
     });
     var scheduleOptionsLoaded = false;
@@ -1583,13 +1595,6 @@
         var r = await api('/api/categories');
         if (!r.success) { showMsg(msg, r.message || '加载失败', 'error'); return; }
         var catList = (r.data && r.data.catList) || [];
-        var manufacturerList = (r.data && r.data.manufacturerList) || [];
-        var mList = document.getElementById('scheduleTaskManufacturersList');
-        mList.innerHTML = (manufacturerList || []).map(function (m) {
-          var name = (m.text || m.value || '').trim() || '未命名';
-          return '<label class="tag"><input type="checkbox" data-name="' + name.replace(/"/g, '&quot;') + '"> ' + name + '</label>';
-        }).join('');
-        if (!manufacturerList.length) mList.innerHTML = '<span style="color:var(--text-muted)">暂无厂商</span>';
         var phoneOption = catList.find(function (c) { return c.catName === '手机'; });
         schedulePhoneCatId = phoneOption ? String(phoneOption.catId) : (catList[0] ? String(catList[0].catId) : '');
         var bList = document.getElementById('scheduleTaskBrandsList');
@@ -1632,7 +1637,7 @@
         var manStr = (t.manufacturerNames && t.manufacturerNames.length) ? t.manufacturerNames.join('、') : '全部厂商';
         var brandStr = (t.brandIds && t.brandIds.length) ? (t.brandIds.length + ' 个品牌') : '全部品牌';
         var rangeStr = (t.minPrice || t.maxPrice) ? ((t.minPrice || '') + '～' + (t.maxPrice || '')) : '不限';
-        var freqStr = freqLabels[t.frequency] || t.frequency || '1秒/次';
+        var freqStr = freqLabels[t.frequency] || t.frequency || '3秒/次';
         var isRunning = !!scheduleTaskTimers[t.id];
         var isStarting = !!scheduleTaskStarting[t.id];
         var actions = '';
@@ -1676,15 +1681,13 @@
       if (!name) return null;
       if (!quoteAmount) return null;
       if (!modelName) return null;
-      var checkedM = [].slice.call(document.querySelectorAll('#scheduleTaskManufacturersList input[type="checkbox"]:checked'));
-      var manufacturerNames = checkedM.map(function (el) { return String(el.dataset.name || el.getAttribute('data-name') || '').trim(); }).filter(Boolean);
       var checkedB = [].slice.call(document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]:checked'));
       var brandIds = checkedB.map(function (el) { return String(el.dataset.key || el.getAttribute('data-key') || '').trim(); }).filter(Boolean);
       var freqEl = document.getElementById('scheduleTaskFrequency');
       var storage = document.getElementById('scheduleTaskStorage').value.trim() || undefined;
       return {
         name: name,
-        manufacturerNames: manufacturerNames,
+        manufacturerNames: [],
         categoryId: schedulePhoneCatId,
         brandIds: brandIds,
         minPrice: document.getElementById('scheduleTaskMinPrice').value.trim() || undefined,
@@ -1692,12 +1695,45 @@
         quoteAmount: quoteAmount,
         modelName: modelName,
         storage: storage,
-        frequency: freqEl ? freqEl.value : '1'
+        frequency: freqEl ? freqEl.value : '3'
       };
     }
     document.getElementById('scheduleTaskQuoteAmount').addEventListener('input', function () {
       this.value = this.value.replace(/[^\d.]/g, '');
+      updateScheduleSaveButtonState();
     });
+    function updateScheduleSaveButtonState() {
+      var name = (document.getElementById('scheduleTaskName').value || '').trim();
+      var quoteAmount = (document.getElementById('scheduleTaskQuoteAmount').value || '').trim();
+      var modelName = (document.getElementById('scheduleTaskModelName').value || '').trim();
+      var q = parseFloat(quoteAmount);
+      var nameValid = name.length > 0;
+      var quoteValid = quoteAmount.length > 0 && !isNaN(q) && q >= 0 && q <= 500;
+      var modelValid = modelName.length > 0;
+      var valid = nameValid && quoteValid && modelValid;
+      var btn = document.getElementById('btnScheduleSave');
+      btn.disabled = !valid;
+      var elName = document.getElementById('scheduleTaskName');
+      var elQuote = document.getElementById('scheduleTaskQuoteAmount');
+      var elModel = document.getElementById('scheduleTaskModelName');
+      elName.classList.toggle('schedule-input-error', !nameValid);
+      elQuote.classList.toggle('schedule-input-error', !quoteValid);
+      elModel.classList.toggle('schedule-input-error', !modelValid);
+      var hintEl = document.getElementById('scheduleConditionHint');
+      if (valid) {
+        hintEl.classList.add('hidden');
+        hintEl.textContent = '';
+      } else {
+        var parts = [];
+        if (!nameValid) parts.push('任务名称');
+        if (!quoteValid) parts.push('报价金额（0～500元）');
+        if (!modelValid) parts.push('机型');
+        hintEl.textContent = '请完善：' + parts.join('、');
+        hintEl.classList.remove('hidden');
+      }
+    }
+    document.getElementById('scheduleTaskName').addEventListener('input', updateScheduleSaveButtonState);
+    document.getElementById('scheduleTaskModelName').addEventListener('input', updateScheduleSaveButtonState);
     document.getElementById('btnScheduleSave').onclick = function () {
       var msg = document.getElementById('scheduleMsg');
       var t = getScheduleFormTask();
@@ -1705,6 +1741,13 @@
       var q = parseFloat(t.quoteAmount);
       if (isNaN(q) || q < 0 || q > 500) {
         showMsg(msg, '报价金额须在 0～500 元范围内', 'error');
+        return;
+      }
+      var nameTrim = t.name.trim();
+      var isDuplicate = scheduledTasks.some(function (task) { return (task.name || '').trim() === nameTrim; });
+      if (isDuplicate) {
+        showMsg(msg, '任务名称不能重复', 'error');
+        document.getElementById('scheduleTaskName').classList.add('schedule-input-error');
         return;
       }
       var id = Date.now();
@@ -1870,15 +1913,23 @@
       loadScheduleGrabbedCount();
       scheduleGrabbedCountTimer = setInterval(loadScheduleGrabbedCount, minSec * 1000);
     }
+    function stopAllScheduleTimers() {
+      var id;
+      for (id in scheduleTaskTimers) {
+        if (scheduleTaskTimers.hasOwnProperty(id)) {
+          clearInterval(scheduleTaskTimers[id]);
+        }
+      }
+      scheduleTaskTimers = {};
+      if (scheduleGrabbedCountTimer) {
+        clearInterval(scheduleGrabbedCountTimer);
+        scheduleGrabbedCountTimer = null;
+      }
+      renderScheduleTaskList();
+    }
     renderScheduleTaskList();
     document.getElementById('btnScheduleBrandsAll').onclick = function () {
       var checkboxes = document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]');
-      if (!checkboxes.length) return;
-      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
-      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-    };
-    document.getElementById('btnScheduleManufacturersAll').onclick = function () {
-      var checkboxes = document.querySelectorAll('#scheduleTaskManufacturersList input[type="checkbox"]');
       if (!checkboxes.length) return;
       var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
@@ -1888,12 +1939,6 @@
     });
     document.getElementById('btnBrandsAll').onclick = function () {
       var checkboxes = document.querySelectorAll('#brandsList input[type="checkbox"]');
-      if (!checkboxes.length) return;
-      var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
-      checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
-    };
-    document.getElementById('btnManufacturersAll').onclick = function () {
-      var checkboxes = document.querySelectorAll('#manufacturersList input[type="checkbox"]');
       if (!checkboxes.length) return;
       var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
@@ -1954,6 +1999,17 @@
       document.getElementById('quoteModal').classList.add('hidden');
       doQueryOrders();
     };
+    document.addEventListener('keydown', function (e) {
+      var modal = document.getElementById('quoteModal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        document.getElementById('btnQuoteCancel').click();
+      } else if (e.key === 'Enter' && document.activeElement && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        document.getElementById('btnQuoteSubmit').click();
+      }
+    });
     document.querySelector('.btn-copy-quote-name').onclick = function () {
       var t = document.getElementById('quoteProductName').textContent;
       if (t && t !== '-') { copyToClipboard(t); showToast('已复制产品名称', 'success'); }
@@ -2002,11 +2058,9 @@
           : { recordId: Number(recordId), orderId: Number(orderId), quoteResult: 1, actualPrice: actualPrice, remark: remark, userId: authUserId };
         var r = await api(url, { method: 'POST', body: JSON.stringify(body) });
         if (r.success) {
-          showMsg(msg, isUpdate ? '修改报价成功' : '报价成功', 'success');
-          setTimeout(function () {
-            document.getElementById('quoteModal').classList.add('hidden');
-            doQueryOrders();
-          }, 1500);
+          document.getElementById('quoteModal').classList.add('hidden');
+          showToast(isUpdate ? '修改报价成功' : '报价成功', 'success');
+          doQueryOrders();
         } else {
           showMsg(msg, r.message || (isUpdate ? '修改报价失败' : '报价失败'), 'error');
         }

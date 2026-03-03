@@ -244,7 +244,7 @@ def api_quote():
 @app.route("/api/execute-task", methods=["POST"])
 def api_execute_task():
     """
-    执行定时任务：查询最多200条待报价列表，按机型（必填）和存储容量过滤，对第一条匹配的订单执行抢单并报价。
+    执行定时任务：查询最多200条待报价列表，按机型（必填）和存储容量过滤，对所有匹配的订单依次执行抢单并报价。
     body: taskName, manufacturerNames[], categoryId, brandIds[], minPrice, maxPrice, quoteAmount, modelName(必填), storage?
     """
     data = request.get_json() or {}
@@ -285,7 +285,7 @@ def api_execute_task():
         min_price=min_price,
         max_price=max_price,
         sub_order_source_names=manufacturer_names,
-        page_size=1,
+        page_size=200,
     )
     try:
         api = HaihuishouAPI()
@@ -331,8 +331,8 @@ def api_execute_task():
         grabbed = 0
         quoted = 0
         errors = []
-        # 每次只对第一条匹配的订单执行抢单和报价
-        for o in matched[:1]:
+        # 对所有匹配的订单依次执行抢单和报价
+        for o in matched:
             record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
             order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
             try:
