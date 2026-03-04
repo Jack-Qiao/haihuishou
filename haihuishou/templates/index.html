@@ -40,6 +40,61 @@
       line-height: 1.5;
     }
 
+    /* 全局滚动条：与主题一致 */
+    html,
+    body,
+    .grab-left,
+    .grab-right,
+    .schedule-left,
+    #scheduleTaskListContainer,
+    .table-wrap {
+      scrollbar-color: var(--border) var(--surface);
+      scrollbar-width: thin;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    .grab-left::-webkit-scrollbar,
+    .grab-right::-webkit-scrollbar,
+    .schedule-left::-webkit-scrollbar,
+    #scheduleTaskListContainer::-webkit-scrollbar,
+    .table-wrap::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track,
+    .grab-left::-webkit-scrollbar-track,
+    .grab-right::-webkit-scrollbar-track,
+    .schedule-left::-webkit-scrollbar-track,
+    #scheduleTaskListContainer::-webkit-scrollbar-track,
+    .table-wrap::-webkit-scrollbar-track {
+      background: var(--surface);
+      border-radius: 4px;
+    }
+
+    html::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb,
+    .grab-left::-webkit-scrollbar-thumb,
+    .grab-right::-webkit-scrollbar-thumb,
+    .schedule-left::-webkit-scrollbar-thumb,
+    #scheduleTaskListContainer::-webkit-scrollbar-thumb,
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    html::-webkit-scrollbar-thumb:hover,
+    body::-webkit-scrollbar-thumb:hover,
+    .grab-left::-webkit-scrollbar-thumb:hover,
+    .grab-right::-webkit-scrollbar-thumb:hover,
+    .schedule-left::-webkit-scrollbar-thumb:hover,
+    #scheduleTaskListContainer::-webkit-scrollbar-thumb:hover,
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -50,6 +105,8 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
 
     #tabPanelGrab {
@@ -90,6 +147,7 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
+      overflow: hidden;
     }
 
     .schedule-layout {
@@ -99,6 +157,7 @@
       align-items: stretch;
       min-height: 0;
       width: 100%;
+      overflow: hidden;
     }
 
     .schedule-left {
@@ -115,7 +174,18 @@
       min-width: 0;
       background: var(--surface);
       padding: 16px;
-      overflow: auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .schedule-right>section {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
     }
 
     header {
@@ -343,6 +413,49 @@
       -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
       box-shadow: 0 0 0 1000px var(--bg) inset;
       transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .brands-collapsible-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .brands-collapsible-toggle:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .brands-collapsible-toggle .collapse-icon {
+      font-size: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .brands-collapsible.expanded .brands-collapsible-toggle .collapse-icon {
+      transform: rotate(180deg);
+    }
+
+    .brands-collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+    }
+
+    .brands-collapsible.expanded .brands-collapsible-body {
+      max-height: 70vh;
+    }
+
+    .brands-collapsible-body .brands-chosen {
+      margin-top: 0;
     }
 
     .brands-chosen {
@@ -623,11 +736,19 @@
       background: rgba(239, 68, 68, 0.08) !important;
     }
 
-    .schedule-condition-hint {
-      font-size: 13px;
-      color: #fca5a5;
-      margin-bottom: 10px;
+    .schedule-condition-title {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px;
     }
+
+    .schedule-condition-hint-inline {
+      font-size: 12px;
+      font-weight: 400;
+      color: #f87171;
+    }
+
 
     #orderListBody .btn-small {
       margin-right: 6px;
@@ -661,10 +782,32 @@
       margin-right: 8px;
     }
 
+    .schedule-list-sticky-header {
+      flex-shrink: 0;
+      background: var(--surface);
+      padding: 0 0 12px 0;
+    }
+
+    #scheduleTaskListContainer {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--surface);
+      padding-right: 8px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .schedule-task-count {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      font-weight: 400;
+    }
+
     .schedule-grabbed-count {
       color: var(--text-muted);
       font-size: 14px;
-      margin: 8px 0 12px 0;
+      margin: 8px 0 12px 12px;
     }
 
     .schedule-grabbed-count .schedule-grabbed-num-link {
@@ -1076,10 +1219,10 @@
       <div class="schedule-layout">
         <div class="schedule-left">
           <section>
-            <h2>定时任务条件</h2>
+            <h2 class="schedule-condition-title">定时任务条件 <span id="scheduleConditionHint"
+                class="schedule-condition-hint-inline hidden"></span></h2>
+            <div id="scheduleMsg" class="msg info hidden" style="display:none !important;" aria-hidden="true"></div>
             <p style="color:var(--text-muted); margin-top:8px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。</p>
-            <div id="scheduleMsg" class="msg info hidden"></div>
-            <div id="scheduleConditionHint" class="schedule-condition-hint hidden"></div>
             <div class="form-row">
               <label>任务名称</label>
               <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:240px;">
@@ -1091,7 +1234,16 @@
             <div class="form-row form-row-align-top">
               <label>品牌</label>
               <div class="schedule-field-wrap">
-                <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
+                <div id="scheduleBrandsCollapsible" class="brands-collapsible">
+                  <button type="button" class="brands-collapsible-toggle" id="scheduleBrandsToggle"
+                    aria-expanded="false">
+                    <span class="collapse-icon">▼</span>
+                    <span id="scheduleBrandsToggleText">展开品牌</span>
+                  </button>
+                  <div class="brands-collapsible-body">
+                    <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="form-row">
@@ -1126,19 +1278,24 @@
                 <option value="60">60秒/次</option>
               </select>
             </div>
-            <div class="form-row">
+            <div class="form-row" style="gap:10px;">
               <button type="button" class="btn btn-primary" id="btnScheduleSave">保存任务</button>
+              <button type="button" class="btn btn-ghost btn-small" id="btnScheduleCancelEdit"
+                style="display:none;">取消编辑</button>
             </div>
           </section>
         </div>
         <div class="schedule-right">
           <section>
-            <h2>任务列表</h2>
-            <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
-                id="scheduleGrabbedCountNum">0</span></p>
-            <div class="form-row" style="margin-bottom:12px; gap:8px;">
-              <button type="button" class="btn btn-primary btn-small" id="btnScheduleStartAll">一键全部启动</button>
-              <button type="button" class="btn btn-ghost btn-small" id="btnScheduleStopAll">一键全部暂停</button>
+            <div class="schedule-list-sticky-header">
+              <h2>任务列表 <span id="scheduleTaskCountWrap" class="schedule-task-count">（任务数量：<span
+                    id="scheduleTaskCountNum">0</span>）</span></h2>
+              <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
+                  id="scheduleGrabbedCountNum">0</span></p>
+              <div class="form-row" style="margin-bottom:12px; gap:8px;margin-left: 12px;">
+                <button type="button" class="btn btn-primary btn-small" id="btnScheduleStartAll">一键全部启动</button>
+                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleStopAll">一键全部暂停</button>
+              </div>
             </div>
             <div id="scheduleTaskListContainer">
               <div id="scheduleTaskList" class="schedule-task-list"></div>
@@ -1255,8 +1412,26 @@
       el.textContent = text;
       el.className = 'msg ' + (type || 'info');
       el.classList.remove('hidden');
+      if (el.id === 'scheduleMsg') {
+        var hint = document.getElementById('scheduleConditionHint');
+        if (hint) {
+          hint.textContent = text;
+          if (text) hint.classList.remove('hidden');
+          else {
+            hint.classList.add('hidden');
+            if (typeof updateScheduleSaveButtonState === 'function') updateScheduleSaveButtonState();
+          }
+        }
+      }
     }
-    function hideMsg(el) { if (el) el.classList.add('hidden'); }
+    function hideMsg(el) {
+      if (!el) return;
+      el.classList.add('hidden');
+      if (el.id === 'scheduleMsg') {
+        var hint = document.getElementById('scheduleConditionHint');
+        if (hint) { hint.classList.add('hidden'); hint.textContent = ''; if (typeof updateScheduleSaveButtonState === 'function') updateScheduleSaveButtonState(); }
+      }
+    }
     function copyToClipboard(text) {
       if (!text) return;
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1614,8 +1789,25 @@
               return '<label class="tag" style="cursor:pointer"><input type="radio" name="scheduleTaskBrand" data-key="' + bid.replace(/"/g, '&quot;') + '" data-name="' + (bname || '').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '"> ' + bname + '</label>';
             }).join('');
             bList.innerHTML = allOpt + brandOpts;
-          } else { bList.innerHTML = '<span style="color:var(--text-muted)">暂无品牌</span>'; }
-        } else { bList.innerHTML = '<span style="color:var(--text-muted)">请先选择分类</span>'; }
+            var toggleBtn = document.getElementById('scheduleBrandsToggle');
+            var txt = document.getElementById('scheduleBrandsToggleText');
+            var collapsedLabel = '展开品牌（共 ' + (br.data.length + 1) + ' 个）';
+            if (toggleBtn) toggleBtn.setAttribute('data-collapsed-label', collapsedLabel);
+            if (txt && !document.getElementById('scheduleBrandsCollapsible').classList.contains('expanded')) txt.textContent = collapsedLabel;
+          } else {
+            bList.innerHTML = '<span style="color:var(--text-muted)">暂无品牌</span>';
+            var toggleBtn = document.getElementById('scheduleBrandsToggle');
+            var txt = document.getElementById('scheduleBrandsToggleText');
+            if (toggleBtn) toggleBtn.setAttribute('data-collapsed-label', '展开品牌');
+            if (txt) txt.textContent = '展开品牌';
+          }
+        } else {
+          bList.innerHTML = '<span style="color:var(--text-muted)">请先选择分类</span>';
+          var toggleBtn = document.getElementById('scheduleBrandsToggle');
+          var txt = document.getElementById('scheduleBrandsToggleText');
+          if (toggleBtn) toggleBtn.setAttribute('data-collapsed-label', '展开品牌');
+          if (txt) txt.textContent = '展开品牌';
+        }
         scheduleOptionsLoaded = true;
       } catch (e) { showMsg(msg, String(e), 'error'); }
     }
@@ -1633,6 +1825,8 @@
     function renderScheduleTaskList() {
       var listEl = document.getElementById('scheduleTaskList');
       var emptyEl = document.getElementById('scheduleTaskListEmpty');
+      var countEl = document.getElementById('scheduleTaskCountNum');
+      if (countEl) countEl.textContent = scheduledTasks.length;
       if (!listEl) return;
       if (scheduledTasks.length === 0) {
         listEl.innerHTML = '';
@@ -1656,6 +1850,7 @@
             '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '" disabled>删除</button>';
         } else {
           actions = '<button type="button" class="btn btn-primary btn-small schedule-btn-auto" data-id="' + t.id + '">自动执行</button> ' +
+            '<button type="button" class="btn btn-ghost btn-small schedule-btn-edit" data-id="' + t.id + '">编辑</button> ' +
             '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '">删除</button>';
         }
         var modelStr = (t.modelName && t.modelName.length) ? ('型号: ' + t.modelName) : '';
@@ -1673,6 +1868,14 @@
       listEl.querySelectorAll('.schedule-btn-stop').forEach(function (btn) {
         btn.onclick = function () { stopScheduleTaskAuto(Number(btn.dataset.id)); };
       });
+      listEl.querySelectorAll('.schedule-btn-edit').forEach(function (btn) {
+        btn.onclick = function () {
+          var id = Number(btn.dataset.id);
+          var task = scheduledTasks.find(function (t) { return t.id === id; });
+          if (!task || scheduleTaskTimers[id]) return;
+          fillScheduleFormWithTask(task);
+        };
+      });
       listEl.querySelectorAll('.schedule-btn-delete').forEach(function (btn) {
         btn.onclick = function () {
           var id = Number(btn.dataset.id);
@@ -1682,6 +1885,47 @@
         };
       });
     }
+    var currentEditingTaskId = null;
+    function fillScheduleFormWithTask(task) {
+      document.getElementById('scheduleTaskName').value = task.name || '';
+      document.getElementById('scheduleTaskMinPrice').value = task.minPrice || '';
+      document.getElementById('scheduleTaskMaxPrice').value = task.maxPrice || '';
+      document.getElementById('scheduleTaskQuoteAmount').value = task.quoteAmount || '';
+      document.getElementById('scheduleTaskModelName').value = task.modelName || '';
+      document.getElementById('scheduleTaskStorage').value = task.storage || '';
+      var freqSelect = document.getElementById('scheduleTaskFrequency');
+      if (freqSelect) freqSelect.value = task.frequency || '3';
+      var brandKey = (task.brandIds && task.brandIds[0]) ? String(task.brandIds[0]) : '';
+      var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
+      for (var i = 0; i < radios.length; i++) {
+        radios[i].checked = (radios[i].getAttribute('data-key') || '').trim() === brandKey;
+      }
+      currentEditingTaskId = task.id;
+      document.getElementById('btnScheduleSave').textContent = '保存修改';
+      document.getElementById('btnScheduleCancelEdit').style.display = 'inline-block';
+      updateScheduleSaveButtonState();
+    }
+    function clearScheduleEditMode() {
+      currentEditingTaskId = null;
+      document.getElementById('btnScheduleSave').textContent = '保存任务';
+      document.getElementById('btnScheduleCancelEdit').style.display = 'none';
+    }
+    document.getElementById('btnScheduleCancelEdit').onclick = function () {
+      document.getElementById('scheduleTaskName').value = '';
+      document.getElementById('scheduleTaskMinPrice').value = '';
+      document.getElementById('scheduleTaskMaxPrice').value = '';
+      document.getElementById('scheduleTaskQuoteAmount').value = '';
+      document.getElementById('scheduleTaskModelName').value = '';
+      document.getElementById('scheduleTaskStorage').value = '';
+      var freqSelect = document.getElementById('scheduleTaskFrequency');
+      if (freqSelect) freqSelect.value = '3';
+      var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
+      for (var i = 0; i < radios.length; i++) {
+        if ((radios[i].getAttribute('data-key') || '').trim() === '') { radios[i].checked = true; break; }
+      }
+      clearScheduleEditMode();
+      updateScheduleSaveButtonState();
+    };
     function getScheduleFormTask() {
       var name = document.getElementById('scheduleTaskName').value.trim();
       var quoteAmount = document.getElementById('scheduleTaskQuoteAmount').value.trim();
@@ -1737,9 +1981,9 @@
       } else {
         var parts = [];
         if (!nameValid) parts.push('任务名称');
-        if (!quoteValid) parts.push('报价金额（0～500元）');
+        if (!quoteValid) parts.push('报价金额（1～500元）');
         if (!modelValid) parts.push('机型');
-        hintEl.textContent = '请完善：' + parts.join('、');
+        hintEl.textContent = '（请完善：' + parts.join('、') + '）';
         hintEl.classList.remove('hidden');
       }
     }
@@ -1789,6 +2033,18 @@
       syncScheduleBrandFromModelName();
       updateScheduleSaveButtonState();
     });
+    (function () {
+      var wrap = document.getElementById('scheduleBrandsCollapsible');
+      var btn = document.getElementById('scheduleBrandsToggle');
+      var txt = document.getElementById('scheduleBrandsToggleText');
+      if (wrap && btn && txt) {
+        btn.addEventListener('click', function () {
+          var expanded = wrap.classList.toggle('expanded');
+          btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          txt.textContent = expanded ? '收起品牌' : (btn.getAttribute('data-collapsed-label') || '展开品牌');
+        });
+      }
+    })();
     document.getElementById('btnScheduleSave').onclick = function () {
       var msg = document.getElementById('scheduleMsg');
       var t = getScheduleFormTask();
@@ -1799,18 +2055,42 @@
         return;
       }
       var nameTrim = t.name.trim();
-      var isDuplicate = scheduledTasks.some(function (task) { return (task.name || '').trim() === nameTrim; });
+      var isDuplicate = scheduledTasks.some(function (task) { return task.id !== currentEditingTaskId && (task.name || '').trim() === nameTrim; });
       if (isDuplicate) {
         showMsg(msg, '任务名称不能重复', 'error');
         document.getElementById('scheduleTaskName').classList.add('schedule-input-error');
         return;
       }
-      var id = Date.now();
-      scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, brandName: t.brandName, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, modelName: t.modelName, storage: t.storage, frequency: t.frequency });
-      saveScheduledTasks();
-      showMsg(msg, '', 'info');
-      hideMsg(msg);
-      showToast('添加成功', 'success');
+      if (currentEditingTaskId !== null) {
+        var existing = scheduledTasks.find(function (task) { return task.id === currentEditingTaskId; });
+        if (!existing) {
+          clearScheduleEditMode();
+          return;
+        }
+        existing.name = t.name;
+        existing.manufacturerNames = t.manufacturerNames;
+        existing.categoryId = t.categoryId;
+        existing.brandIds = t.brandIds;
+        existing.brandName = t.brandName;
+        existing.minPrice = t.minPrice;
+        existing.maxPrice = t.maxPrice;
+        existing.quoteAmount = t.quoteAmount;
+        existing.modelName = t.modelName;
+        existing.storage = t.storage;
+        existing.frequency = t.frequency;
+        saveScheduledTasks();
+        clearScheduleEditMode();
+        showMsg(msg, '', 'info');
+        hideMsg(msg);
+        showToast('修改成功', 'success');
+      } else {
+        var id = Date.now();
+        scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, brandName: t.brandName, minPrice: t.minPrice, maxPrice: t.maxPrice, quoteAmount: t.quoteAmount, modelName: t.modelName, storage: t.storage, frequency: t.frequency });
+        saveScheduledTasks();
+        showMsg(msg, '', 'info');
+        hideMsg(msg);
+        showToast('添加成功', 'success');
+      }
     };
     async function startScheduleTaskAuto(taskId) {
       var task = scheduledTasks.find(function (t) { return t.id === taskId; });
