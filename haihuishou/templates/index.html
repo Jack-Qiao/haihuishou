@@ -126,7 +126,7 @@
     }
 
     .grab-left {
-      flex: 0 0 38%;
+      flex: 0 0 31%;
       min-width: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -135,7 +135,7 @@
     }
 
     .grab-right {
-      flex: 1 1 62%;
+      flex: 1 1 69%;
       min-width: 0;
       background: var(--surface);
       padding: 16px;
@@ -1616,9 +1616,10 @@
         var total = data.totalCount !== undefined ? data.totalCount : (data.pageCount !== undefined ? data.pageCount : 0);
         var orderState = (body.orderState || '10').toString();
         var showQuoteCol = orderState === '30';
-        var colCount = showQuoteCol ? 8 : 7;
+        var showManufacturerCol = orderState !== '30';
+        var colCount = 7;
         var theadTr = document.getElementById('orderListHead');
-        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>倒计时</th><th>操作</th>';
         else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
         totalEl.textContent = '共 ' + total + ' 项';
         var currentPage = body.pageIndex || 1;
@@ -1647,6 +1648,7 @@
           var actualPriceVal = (o.actualPrice != null && o.actualPrice !== '') ? String(o.actualPrice) : '';
           var apprizeData = (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0) ? String(apprizeNum) : '';
           var quoteTd = showQuoteCol ? '<td>' + quoteStr + '</td>' : '';
+          var manufacturerTd = showManufacturerCol ? '<td>' + manufacturer + '</td>' : '';
           var brandVal = (o.brandName || o.brand || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var modelVal = (o.modelName || o.model || o.goodsName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var storageVal = (o.storageCapacity || o.storage || o.memory || '').replace(/"/g, '&quot;');
@@ -1657,7 +1659,7 @@
           var modelCopyBtn = modelRaw ? ' <button type="button" class="btn-copy-model btn btn-ghost btn-small" title="复制机型" data-model="' + modelVal + '">复制</button>' : '';
           var modelTd = '<td class="order-list-model-cell" style="color:var(--text-muted); font-size:13px"><span class="order-list-model-text">' + modelDisplay + '</span>' + modelCopyBtn + '</td>';
           var storageTd = '<td class="order-list-copy-cell" title="单击复制" style="color:var(--text-muted); font-size:13px">' + storageDisplay + '</td>';
-          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td>' + manufacturerTd + '<td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
