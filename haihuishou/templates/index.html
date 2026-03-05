@@ -461,7 +461,7 @@
     .brands-chosen {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 4px;
       margin-top: 8px;
     }
 
@@ -540,6 +540,22 @@
       color: var(--text-muted);
       font-size: 14px;
       min-width: 72px;
+    }
+
+    .grab-filter-section {
+      margin-top: 18px;
+    }
+    .grab-filter-section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .grab-filter-section-title {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
     }
 
     .order-state-option {
@@ -1128,13 +1144,24 @@
             <h2>电子产品信息选择</h2>
             <div>
               <div id="categoriesMsg" class="msg info hidden"></div>
-              <div id="categoryArea" class="hidden" style="margin-top:14px">
-                <div style="color:var(--text-muted); margin-bottom:6px">选择电子类型</div>
+              <div id="manufacturersArea" class="grab-filter-section hidden">
+                <div class="grab-filter-section-head">
+                  <span class="grab-filter-section-title">厂商</span>
+                  <button type="button" class="btn btn-ghost btn-small" id="btnManufacturersAll">全部</button>
+                </div>
+                <div id="manufacturersList" class="brands-chosen"></div>
+              </div>
+              <div id="categoryArea" class="grab-filter-section hidden">
+                <div class="grab-filter-section-head">
+                  <span class="grab-filter-section-title">选择电子类型</span>
+                </div>
                 <div id="categoryRadioGroup" class="brands-chosen"></div>
               </div>
-              <div id="brandsArea" class="hidden" style="margin-top:14px">
-                <div style="margin-bottom:8px"><button type="button" class="btn btn-ghost btn-small"
-                    id="btnBrandsAll">全部</button></div>
+              <div id="brandsArea" class="grab-filter-section hidden">
+                <div class="grab-filter-section-head">
+                  <span class="grab-filter-section-title">品牌</span>
+                  <button type="button" class="btn btn-ghost btn-small" id="btnBrandsAll">全部</button>
+                </div>
                 <div id="brandsList" class="brands-chosen"></div>
               </div>
             </div>
@@ -1497,6 +1524,16 @@
         const radioGroup = document.getElementById('categoryRadioGroup');
         radioGroup.innerHTML = catList.map(c => '<label class="tag" style="cursor:pointer"><input type="radio" name="categoryType" value="' + c.catId + '"> ' + c.catName + '</label>').join('');
         document.getElementById('categoryArea').classList.remove('hidden');
+        const manufacturerList = r.data.manufacturerList || [];
+        const manListEl = document.getElementById('manufacturersList');
+        if (manListEl && Array.isArray(manufacturerList)) {
+          manListEl.innerHTML = manufacturerList.map(function (m) {
+            var name = (m.manufacturerName || m.name || m.value || m.key || '').trim() || '-';
+            var esc = name.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+            return '<label class="tag"><input type="checkbox" data-name="' + esc + '"> ' + esc + '</label>';
+          }).join('');
+          document.getElementById('manufacturersArea').classList.remove('hidden');
+        }
         const phoneOption = catList.find(c => c.catName === '手机');
         const defaultCatId = phoneOption ? phoneOption.catId : (catList[0] && catList[0].catId);
         if (defaultCatId) {
@@ -1597,12 +1634,14 @@
       var categoryBrands = catId ? [{ key: String(catId), value: brandIds }] : [];
       var minPriceStr = document.getElementById('inputMinPrice').value.trim();
       var maxPriceStr = document.getElementById('inputMaxPrice').value.trim();
+      var checkedManufacturers = [].slice.call(document.querySelectorAll('#manufacturersList input[type="checkbox"]:checked'));
+      var subOrderSourceNames = checkedManufacturers.map(function (el) { return String(el.getAttribute('data-name') || '').trim(); }).filter(Boolean);
       var orderStateEl = document.querySelector("input[name=\"orderState\"]:checked");
       var body = {
         userId: authUserId,
         categoryBrands: categoryBrands,
         orderState: orderStateEl ? orderStateEl.value : '10',
-        subOrderSourceNames: [],
+        subOrderSourceNames: subOrderSourceNames,
         pageIndex: parseInt(document.getElementById('inputPage').value, 10) || 1,
         pageSize: parseInt(document.getElementById('inputPageSize').value, 10) || 10
       };
@@ -1616,10 +1655,9 @@
         var total = data.totalCount !== undefined ? data.totalCount : (data.pageCount !== undefined ? data.pageCount : 0);
         var orderState = (body.orderState || '10').toString();
         var showQuoteCol = orderState === '30';
-        var showManufacturerCol = orderState !== '30';
-        var colCount = 7;
+        var colCount = showQuoteCol ? 8 : 7;
         var theadTr = document.getElementById('orderListHead');
-        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>倒计时</th><th>操作</th>';
+        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
         else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
         totalEl.textContent = '共 ' + total + ' 项';
         var currentPage = body.pageIndex || 1;
@@ -1648,7 +1686,6 @@
           var actualPriceVal = (o.actualPrice != null && o.actualPrice !== '') ? String(o.actualPrice) : '';
           var apprizeData = (typeof apprizeNum === 'number' && !Number.isNaN(apprizeNum) && apprizeNum > 0) ? String(apprizeNum) : '';
           var quoteTd = showQuoteCol ? '<td>' + quoteStr + '</td>' : '';
-          var manufacturerTd = showManufacturerCol ? '<td>' + manufacturer + '</td>' : '';
           var brandVal = (o.brandName || o.brand || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var modelVal = (o.modelName || o.model || o.goodsName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           var storageVal = (o.storageCapacity || o.storage || o.memory || '').replace(/"/g, '&quot;');
@@ -1659,7 +1696,7 @@
           var modelCopyBtn = modelRaw ? ' <button type="button" class="btn-copy-model btn btn-ghost btn-small" title="复制机型" data-model="' + modelVal + '">复制</button>' : '';
           var modelTd = '<td class="order-list-model-cell" style="color:var(--text-muted); font-size:13px"><span class="order-list-model-text">' + modelDisplay + '</span>' + modelCopyBtn + '</td>';
           var storageTd = '<td class="order-list-copy-cell" title="单击复制" style="color:var(--text-muted); font-size:13px">' + storageDisplay + '</td>';
-          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td>' + manufacturerTd + '<td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
@@ -1743,6 +1780,7 @@
     };
     document.getElementById('btnResetQuery').onclick = async function () {
       document.querySelector('input[name="orderState"][value="10"]').checked = true;
+      document.querySelectorAll('#manufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
       document.getElementById('inputMinPrice').value = '';
       document.getElementById('inputMaxPrice').value = '';
       document.getElementById('inputPage').value = '1';
@@ -2274,6 +2312,15 @@
       var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
       checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
     };
+    var btnManAll = document.getElementById('btnManufacturersAll');
+    if (btnManAll) {
+      btnManAll.onclick = function () {
+        var checkboxes = document.querySelectorAll('#manufacturersList input[type="checkbox"]');
+        if (!checkboxes.length) return;
+        var allChecked = [].slice.call(checkboxes).every(function (cb) { return cb.checked; });
+        checkboxes.forEach(function (cb) { cb.checked = !allChecked; });
+      };
+    }
     document.getElementById('orderListBody').addEventListener('click', function (e) {
       var cell = e.target.closest('.order-list-copy-cell');
       if (!cell) return;
