@@ -545,12 +545,14 @@
     .grab-filter-section {
       margin-top: 18px;
     }
+
     .grab-filter-section-head {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 10px;
     }
+
     .grab-filter-section-title {
       color: var(--text);
       font-size: 13px;
@@ -756,6 +758,7 @@
       width: 100%;
       max-width: 520px;
     }
+
     .schedule-conditions-table {
       width: 100%;
       border-collapse: collapse;
@@ -764,6 +767,7 @@
       background: var(--surface);
       overflow: hidden;
     }
+
     .schedule-conditions-table thead th {
       text-align: left;
       padding: 10px 12px;
@@ -773,50 +777,61 @@
       background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
+
     .schedule-conditions-table thead th.schedule-cond-th-action {
       width: 72px;
       text-align: right;
     }
+
     .schedule-conditions-table tbody td {
       padding: 8px 12px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
+
     .schedule-conditions-table tbody tr:last-child td {
       border-bottom: none;
     }
+
     .schedule-conditions-table .schedule-cond-quote {
       width: 100%;
-      min-width: 56px;
-      max-width: 72px;
+      min-width: 80px;
+      max-width: 100px;
       box-sizing: border-box;
     }
+
     .schedule-conditions-table .schedule-cond-model {
       width: 100%;
-      min-width: 180px;
+      min-width: 100px;
       box-sizing: border-box;
     }
+
     .schedule-conditions-table .schedule-cond-storage {
       width: 100%;
       min-width: 80px;
       max-width: 100px;
       box-sizing: border-box;
     }
+
     .schedule-conditions-table .schedule-cond-remove {
       color: var(--text-muted);
       padding: 4px 8px;
       font-size: 13px;
     }
+
     .schedule-conditions-table .schedule-cond-remove:hover {
       color: var(--danger);
     }
+
     .schedule-conditions-table td.schedule-cond-td-action {
       text-align: right;
     }
+
     .schedule-conditions-table tbody tr.schedule-condition-row-error td {
       background: rgba(239, 68, 68, 0.08);
       border-color: rgba(239, 68, 68, 0.4);
     }
+
     .schedule-conditions-table tbody tr.schedule-condition-row-error .schedule-cond-quote,
     .schedule-conditions-table tbody tr.schedule-condition-row-error .schedule-cond-model,
     .schedule-conditions-table tbody tr.schedule-condition-row-error .schedule-cond-storage {
@@ -865,15 +880,79 @@
       font-size: 13px;
       margin-bottom: 10px;
     }
+
     .schedule-task-card-body-line {
       margin-bottom: 4px;
     }
+
     .schedule-task-card-body-line:last-child {
       margin-bottom: 0;
     }
+
     .schedule-task-card-body-line.schedule-task-card-sub {
       font-size: 11px;
       opacity: 0.95;
+    }
+
+    .schedule-task-conditions-block {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .schedule-task-condition-line {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .schedule-task-condition-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .schedule-task-condition-label {
+      flex-shrink: 0;
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: var(--border);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .schedule-task-condition-detail {
+      flex: 1;
+      min-width: 0;
+      color: var(--text-muted);
+    }
+
+    .schedule-task-conditions-toggle {
+      flex-shrink: 0;
+      margin-left: auto;
+      padding: 2px 0;
+      font-size: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .schedule-task-conditions-toggle:hover {
+      text-decoration: underline;
+    }
+
+    .schedule-task-conditions-more {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease;
+    }
+
+    .schedule-task-conditions-more.expanded {
+      max-height: 500px;
     }
 
     .schedule-task-card-actions .btn-small {
@@ -1381,7 +1460,8 @@
                   </thead>
                   <tbody id="scheduleConditionsBody"></tbody>
                 </table>
-                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition" style="margin-top:8px;">+ 添加条件</button>
+                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition"
+                  style="margin-top:8px;">+ 添加条件</button>
               </div>
             </div>
             <div class="form-row">
@@ -1413,7 +1493,8 @@
               <div class="form-row" style="margin-bottom:12px; gap:8px;margin-left: 12px;">
                 <button type="button" class="btn btn-primary btn-small" id="btnScheduleStartAll">一键全部启动</button>
                 <button type="button" class="btn btn-ghost btn-small" id="btnScheduleStopAll">一键全部暂停</button>
-                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleDeleteAll" style="color:var(--danger);">删除全部任务</button>
+                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleDeleteAll"
+                  style="color:var(--danger);">删除全部任务</button>
               </div>
             </div>
             <div id="scheduleTaskListContainer">
@@ -2012,15 +2093,31 @@
             });
           }
         }
-        var subParts = conds.map(function (c, idx) {
-          var s = '条件' + (idx + 1) + ': 报价' + (c.quoteAmount || '-') + '元 机型' + (c.modelName || '-');
-          if (c.storage) s += ' 存储' + c.storage;
+        function fmtCondDetail(c) {
+          var s = '报价：' + (c.quoteAmount || '-') + '元 · 机型：' + (c.modelName || '-');
+          if (c.storage) s += ' · 存储：' + c.storage;
           return s;
-        });
-        var subConditionsStr = subParts.length ? subParts.join('；') : '';
+        }
         var basicStr = '厂商: ' + manStr + ' | 品牌: ' + brandStr + ' | 金额: ' + rangeStr + ' | 频率: ' + freqStr;
         var bodyHtml = '<div class="schedule-task-card-body-line">' + basicStr + '</div>';
-        if (subConditionsStr) bodyHtml += '<div class="schedule-task-card-body-line schedule-task-card-sub">' + subConditionsStr + '</div>';
+        if (conds.length > 0) {
+          bodyHtml += '<div class="schedule-task-conditions-block">';
+          bodyHtml += '<div class="schedule-task-condition-line">';
+          bodyHtml += '<span class="schedule-task-condition-label">条件1</span><span class="schedule-task-condition-detail">' + fmtCondDetail(conds[0]).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+          if (conds.length > 1) {
+            bodyHtml += '<button type="button" class="schedule-task-conditions-toggle" data-count="' + (conds.length - 1) + '">展开更多（' + (conds.length - 1) + '）</button>';
+          }
+          bodyHtml += '</div>';
+          if (conds.length > 1) {
+            bodyHtml += '<div class="schedule-task-conditions-more">';
+            for (var ci = 1; ci < conds.length; ci++) {
+              var detail = fmtCondDetail(conds[ci]).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              bodyHtml += '<div class="schedule-task-condition-line"><span class="schedule-task-condition-label">条件' + (ci + 1) + '</span><span class="schedule-task-condition-detail">' + detail + '</span></div>';
+            }
+            bodyHtml += '</div>';
+          }
+          bodyHtml += '</div>';
+        }
         return '<div class="schedule-task-card" data-id="' + t.id + '">' +
           '<div class="schedule-task-card-head">' + (t.name || '未命名') + (isRunning ? ' <span class="schedule-task-running-tag">执行中</span>' : '') + '</div>' +
           '<div class="schedule-task-card-body">' + bodyHtml + '</div>' +
@@ -2046,6 +2143,15 @@
           if (scheduleTaskTimers[id]) { showToast('请先停止任务后再删除', 'error'); return; }
           scheduledTasks = scheduledTasks.filter(function (t) { return t.id !== id; });
           saveScheduledTasks();
+        };
+      });
+      listEl.querySelectorAll('.schedule-task-conditions-toggle').forEach(function (btn) {
+        btn.onclick = function () {
+          var card = btn.closest('.schedule-task-card');
+          var more = card && card.querySelector('.schedule-task-conditions-more');
+          if (!more) return;
+          var expanded = more.classList.toggle('expanded');
+          btn.textContent = expanded ? '收起' : '展开更多（' + (btn.getAttribute('data-count') || '') + '）';
         };
       });
     }
