@@ -2198,6 +2198,19 @@
       document.getElementById('btnScheduleSave').textContent = '保存任务';
       document.getElementById('btnScheduleCancelEdit').style.display = 'none';
     }
+    function clearScheduleTaskForm() {
+      document.getElementById('scheduleTaskName').value = '';
+      document.getElementById('scheduleTaskMinPrice').value = '';
+      document.getElementById('scheduleTaskMaxPrice').value = '';
+      setScheduleConditionsInForm([{ quoteAmount: '', modelName: '', storage: '' }]);
+      var freqSelect = document.getElementById('scheduleTaskFrequency');
+      if (freqSelect) freqSelect.value = '3';
+      var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
+      for (var i = 0; i < radios.length; i++) {
+        if ((radios[i].getAttribute('data-key') || '').trim() === '') { radios[i].checked = true; break; }
+      }
+      document.querySelectorAll('#scheduleManufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+    }
     function getScheduleConditionsFromForm() {
       var tbody = document.getElementById('scheduleConditionsBody');
       if (!tbody) return [];
@@ -2211,6 +2224,7 @@
         var quote = (quoteEl && quoteEl.value || '').trim();
         var model = (modelEl && modelEl.value || '').trim();
         var storage = (storageEl && storageEl.value || '').trim() || undefined;
+        if (storage === '选填') storage = undefined;
         conditions.push({ quoteAmount: quote, modelName: model, storage: storage });
       }
       return conditions;
@@ -2286,7 +2300,8 @@
     }
     function validateScheduleConditions() {
       var conditions = getScheduleConditionsFromForm();
-      var invalidRowIndices = [];
+      var requiredInvalidIndices = [];
+      var duplicateRowIndices = [];
       var nonEmptyRows = [];
       for (var i = 0; i < conditions.length; i++) {
         var c = conditions[i];
@@ -2296,23 +2311,26 @@
         var q = parseFloat(c.quoteAmount);
         var quoteOk = c.quoteAmount && !isNaN(q) && q >= 1 && q <= 500;
         var modelOk = c.modelName && c.modelName.trim().length > 0;
-        if (!quoteOk || !modelOk) invalidRowIndices.push(i);
+        if (!quoteOk || !modelOk) requiredInvalidIndices.push(i);
       }
       if (nonEmptyRows.length === 0) {
         return { valid: false, message: '至少一条完整条件（报价1～500元+机型）', invalidRowIndices: [] };
       }
-      var modelToFirstIndex = {};
+      var modelStorageToFirstIndex = {};
       for (var j = 0; j < nonEmptyRows.length; j++) {
         var modelKey = (nonEmptyRows[j].condition.modelName || '').trim().toLowerCase();
+        var storageKey = (nonEmptyRows[j].condition.storage || '').trim().toLowerCase();
+        if (storageKey === '选填') storageKey = '';
         if (!modelKey) continue;
-        if (modelToFirstIndex.hasOwnProperty(modelKey)) {
-          invalidRowIndices.push(nonEmptyRows[j].index);
-          invalidRowIndices.push(modelToFirstIndex[modelKey]);
+        var compositeKey = modelKey + '\x01' + storageKey;
+        if (modelStorageToFirstIndex.hasOwnProperty(compositeKey)) {
+          duplicateRowIndices.push(nonEmptyRows[j].index);
+          duplicateRowIndices.push(modelStorageToFirstIndex[compositeKey]);
         } else {
-          modelToFirstIndex[modelKey] = nonEmptyRows[j].index;
+          modelStorageToFirstIndex[compositeKey] = nonEmptyRows[j].index;
         }
       }
-      invalidRowIndices = invalidRowIndices.filter(function (v, i, a) { return a.indexOf(v) === i; });
+      duplicateRowIndices = duplicateRowIndices.filter(function (v, i, a) { return a.indexOf(v) === i; });
       var brandsLower = [];
       for (var k = 0; k < nonEmptyRows.length; k++) {
         var b = getBrandNameFromFormByModel(nonEmptyRows[k].condition.modelName);
@@ -2320,30 +2338,42 @@
         if (bl && brandsLower.indexOf(bl) === -1) brandsLower.push(bl);
       }
       if (brandsLower.length > 1) {
-        for (var n = 0; n < nonEmptyRows.length; n++) invalidRowIndices.push(nonEmptyRows[n].index);
-        invalidRowIndices = invalidRowIndices.filter(function (v, i, a) { return a.indexOf(v) === i; });
-        return { valid: false, message: '所有子条件应为同一品牌，不同品牌不能放在一起', invalidRowIndices: invalidRowIndices };
+        var brandInvalid = [];
+        for (var n = 0; n < nonEmptyRows.length; n++) brandInvalid.push(nonEmptyRows[n].index);
+        return { valid: false, message: '所有子条件应为同一品牌，不同品牌不能放在一起', invalidRowIndices: brandInvalid };
       }
       var selectedRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
       var selectedBrandKeyAttr = selectedRadio ? (selectedRadio.getAttribute('data-key') || '').trim() : '';
       var selectedBrandName = selectedRadio ? String(selectedRadio.getAttribute('data-name') || '').trim() : '';
       if (selectedBrandKeyAttr !== '') {
+        var brandMismatchIndices = [];
         var requiredBrandLower = (selectedBrandName || '').toLowerCase();
         for (var p = 0; p < nonEmptyRows.length; p++) {
           var rowBrandName = getBrandNameFromFormByModel(nonEmptyRows[p].condition.modelName);
           var rowBrandLower = (rowBrandName || '').toLowerCase();
           if (rowBrandLower && rowBrandLower !== requiredBrandLower) {
-            invalidRowIndices.push(nonEmptyRows[p].index);
+            brandMismatchIndices.push(nonEmptyRows[p].index);
           }
         }
-        invalidRowIndices = invalidRowIndices.filter(function (v, i, a) { return a.indexOf(v) === i; });
-        if (invalidRowIndices.length > 0) {
-          return { valid: false, message: '子条件机型品牌须与上方所选品牌一致', invalidRowIndices: invalidRowIndices };
+        if (brandMismatchIndices.length > 0) {
+          return { valid: false, message: '子条件机型品牌须与上方所选品牌一致', invalidRowIndices: brandMismatchIndices };
         }
+      }
+      var invalidRowIndices = requiredInvalidIndices.slice();
+      for (var d = 0; d < duplicateRowIndices.length; d++) {
+        if (invalidRowIndices.indexOf(duplicateRowIndices[d]) === -1) invalidRowIndices.push(duplicateRowIndices[d]);
+      }
+      var message = '';
+      if (requiredInvalidIndices.length > 0 && duplicateRowIndices.length > 0) {
+        message = '请完善子条件（报价1～500元、机型必填）；并删除重复的机型+存储组合';
+      } else if (requiredInvalidIndices.length > 0) {
+        message = '请完善子条件（报价1～500元、机型必填）';
+      } else if (duplicateRowIndices.length > 0) {
+        message = '请删除重复的机型+存储组合';
       }
       return {
         valid: invalidRowIndices.length === 0,
-        message: invalidRowIndices.length ? '请完善子条件（报价、机型必填）或删除重复机型' : '',
+        message: message,
         invalidRowIndices: invalidRowIndices
       };
     }
@@ -2359,10 +2389,14 @@
         '<td><input type="text" class="schedule-cond-storage" placeholder="选填" value="' + storage + '"></td>' +
         '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
       tr.querySelector('.schedule-cond-quote').addEventListener('input', function () { this.value = this.value.replace(/[^\d.]/g, ''); updateScheduleSaveButtonState(); });
+      tr.querySelector('.schedule-cond-quote').addEventListener('change', updateScheduleSaveButtonState);
       tr.querySelector('.schedule-cond-model').addEventListener('input', function () {
         syncScheduleBrandFromFirstCondition();
         updateScheduleSaveButtonState();
       });
+      tr.querySelector('.schedule-cond-model').addEventListener('change', function () { syncScheduleBrandFromFirstCondition(); updateScheduleSaveButtonState(); });
+      tr.querySelector('.schedule-cond-storage').addEventListener('input', updateScheduleSaveButtonState);
+      tr.querySelector('.schedule-cond-storage').addEventListener('change', updateScheduleSaveButtonState);
       tr.querySelector('.schedule-cond-remove').onclick = function () {
         tr.remove();
         updateScheduleSaveButtonState();
@@ -2384,17 +2418,7 @@
       updateScheduleSaveButtonState();
     };
     document.getElementById('btnScheduleCancelEdit').onclick = function () {
-      document.getElementById('scheduleTaskName').value = '';
-      document.getElementById('scheduleTaskMinPrice').value = '';
-      document.getElementById('scheduleTaskMaxPrice').value = '';
-      setScheduleConditionsInForm([{ quoteAmount: '', modelName: '', storage: '' }]);
-      var freqSelect = document.getElementById('scheduleTaskFrequency');
-      if (freqSelect) freqSelect.value = '3';
-      var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
-      for (var i = 0; i < radios.length; i++) {
-        if ((radios[i].getAttribute('data-key') || '').trim() === '') { radios[i].checked = true; break; }
-      }
-      document.querySelectorAll('#scheduleManufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+      clearScheduleTaskForm();
       clearScheduleEditMode();
       updateScheduleSaveButtonState();
     };
@@ -2507,6 +2531,8 @@
         existing.frequency = t.frequency;
         saveScheduledTasks();
         clearScheduleEditMode();
+        clearScheduleTaskForm();
+        updateScheduleSaveButtonState();
         showMsg(msg, '', 'info');
         hideMsg(msg);
         showToast('修改成功', 'success');
@@ -2514,6 +2540,8 @@
         var id = Date.now();
         scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, brandName: t.brandName, minPrice: t.minPrice, maxPrice: t.maxPrice, conditions: t.conditions, frequency: t.frequency });
         saveScheduledTasks();
+        clearScheduleTaskForm();
+        updateScheduleSaveButtonState();
         showMsg(msg, '', 'info');
         hideMsg(msg);
         showToast('添加成功', 'success');
