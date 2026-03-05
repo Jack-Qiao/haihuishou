@@ -244,8 +244,8 @@ def api_quote():
 @app.route("/api/execute-task", methods=["POST"])
 def api_execute_task():
     """
-    执行定时任务：查询最多200条待报价列表，按机型（必填）和存储容量过滤，对所有匹配的订单依次执行抢单并报价。
-    body: taskName, manufacturerNames[], categoryId, brandIds[], minPrice, maxPrice, quoteAmount, modelName(必填), storage?
+    执行定时任务：查询待报价列表，按条件对象列表过滤，每条条件为 { quoteAmount, modelName, storage? }，订单匹配任一条件则用该条件的报价抢单。
+    body: taskName, manufacturerNames[], categoryId, brandIds[], minPrice, maxPrice, conditions[]
     """
     data = request.get_json() or {}
     token = request.headers.get("token") or session.get("token")
@@ -263,21 +263,36 @@ def api_execute_task():
         brand_ids = [str(x).strip() for x in brand_ids.split(",") if str(x).strip()]
     min_price = (data.get("minPrice") or "").strip() or None
     max_price = (data.get("maxPrice") or "").strip() or None
-    quote_amount = (data.get("quoteAmount") or "").strip()
-    if not quote_amount:
-        return jsonify({"success": False, "message": "请设置报价金额"}), 400
-    try:
-        quote_num = float(quote_amount)
-        if quote_num < 0 or quote_num > 500:
-            return jsonify({"success": False, "message": "自动抢单报价金额须在 0～500 元范围内"}), 400
-    except ValueError:
-        return jsonify({"success": False, "message": "报价金额须为有效数字，且范围 0～500"}), 400
+    conditions = data.get("conditions") or []
+    if not conditions and (data.get("quoteAmount") or data.get("modelName")):
+        conditions = [{
+            "quoteAmount": str(data.get("quoteAmount", "")).strip(),
+            "modelName": str(data.get("modelName", "")).strip(),
+            "storage": (str(data.get("storage", "")).strip() or None),
+        }]
+    if not conditions:
+        return jsonify({"success": False, "message": "请添加至少一条抢单条件"}), 400
     task_name = (data.get("taskName") or "").strip()
     remark = task_name or "定时任务"
-    task_model = (data.get("modelName") or "").strip() or None
-    task_storage = (data.get("storage") or data.get("storageCapacity") or "").strip() or None
-    if not task_model:
-        return jsonify({"success": False, "message": "请填写机型（必填）"}), 400
+    normalized = []
+    for c in conditions:
+        if not isinstance(c, dict):
+            continue
+        q = (c.get("quoteAmount") or "").strip()
+        m = (c.get("modelName") or "").strip()
+        s = (c.get("storage") or "").strip() or None
+        if not q or not m:
+            continue
+        try:
+            qn = float(q)
+            if qn < 1 or qn > 500:
+                return jsonify({"success": False, "message": "每条条件的报价金额须在 1～500 元范围内"}), 400
+        except ValueError:
+            return jsonify({"success": False, "message": "报价金额须为有效数字，且范围 1～500"}), 400
+        normalized.append({"quoteAmount": q, "modelName": m, "storage": s})
+    if not normalized:
+        return jsonify({"success": False, "message": "请添加至少一条完整条件（报价+机型）"}), 400
+    conditions = normalized
     category_brands = [{"key": category_id, "value": brand_ids}] if category_id else []
     cond = GrabCondition(
         category_brands=category_brands,
@@ -314,7 +329,19 @@ def api_execute_task():
                 lst = lst or inner.get("list") or inner.get("orderList") or inner.get("results") or []
         if not isinstance(lst, list):
             lst = []
-        # 按机型和存储容量过滤，只对匹配的订单执行抢单（机型必填，已在上方校验）
+        # 每条条件为 { quoteAmount, modelName, storage? }；订单匹配第一个满足的条件则用该条件的报价抢单
+        def find_matching_condition(order_model, order_storage):
+            order_model = (order_model or "").strip().lower()
+            order_storage = (order_storage or "").strip().lower()
+            for cond in conditions:
+                if (cond["modelName"] or "").strip().lower() != order_model:
+                    continue
+                if cond["storage"]:
+                    if (cond["storage"] or "").strip().lower() != order_storage:
+                        continue
+                return cond
+            return None
+
         matched = []
         for o in lst:
             record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
@@ -323,18 +350,16 @@ def api_execute_task():
                 continue
             order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
             order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
-            if order_model.lower() != task_model.lower():
-                continue
-            if task_storage and order_storage.lower() != task_storage.lower():
-                continue
-            matched.append(o)
+            cond = find_matching_condition(order_model, order_storage)
+            if cond:
+                matched.append((o, cond))
         grabbed = 0
         quoted = 0
         errors = []
-        # 对所有匹配的订单依次执行抢单和报价
-        for o in matched:
+        for o, cond in matched:
             record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
             order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+            quote_for_submit = cond["quoteAmount"]
             try:
                 raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
                 resp_data = raw.get("data") or {}
@@ -349,7 +374,7 @@ def api_execute_task():
                 api.submit_quotation(
                     record_id=int(record_id),
                     order_id=int(order_id),
-                    actual_price=quote_amount,
+                    actual_price=quote_for_submit,
                     remark=remark,
                     user_id=user_id,
                 )
