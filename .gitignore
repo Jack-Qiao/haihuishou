@@ -14,7 +14,7 @@ __pycache__/
 # 打包产物（保留可执行程序供发布）
 dist/
 build/
-!dist/haihuishou_app
+!dist/haihuishou
 *.spec.bak
 
 # 本地/敏感
