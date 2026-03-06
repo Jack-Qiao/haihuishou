@@ -231,14 +231,18 @@
     .main-tabs {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 24px 0 16px;
     }
 
     .tab-nav {
       display: flex;
       gap: 0;
-      max-width: 1200px;
-      margin: 0 16px;
-      padding: 0 0;
+      padding: 0;
     }
 
     .tab-nav-item {
@@ -353,7 +357,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      align-items: center;
+      align-items: center !important;
       margin-bottom: 12px;
     }
 
@@ -536,10 +540,62 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .order-state-row .order-state-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
     .order-state-row .order-state-label {
       color: var(--text-muted);
       font-size: 14px;
       min-width: 72px;
+    }
+
+    .order-state-row .order-state-actions {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .order-state-row .order-state-right {
+      flex: 1;
+    }
+
+    .order-filter-collapsible {
+      margin-bottom: 12px;
+    }
+    .order-filter-collapsible-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      font-size: 13px;
+      color: var(--accent);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    .order-filter-collapsible-toggle:hover {
+      color: var(--text);
+    }
+    .order-filter-collapsible-toggle .collapse-icon {
+      font-size: 10px;
+      transition: transform 0.2s ease;
+    }
+    .order-filter-collapsible.expanded .order-filter-collapsible-toggle .collapse-icon {
+      transform: rotate(180deg);
+    }
+    .order-filter-collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .order-filter-collapsible.expanded .order-filter-collapsible-body {
+      max-height: 400px;
     }
 
     .grab-filter-section {
@@ -770,9 +826,11 @@
     .schedule-conditions-table tbody {
       counter-reset: schedule-cond-row;
     }
+
     .schedule-conditions-table tbody tr {
       counter-increment: schedule-cond-row;
     }
+
     .schedule-conditions-table .schedule-cond-num {
       width: 40px;
       min-width: 40px;
@@ -780,15 +838,18 @@
       color: var(--text-muted);
       font-variant-numeric: tabular-nums;
     }
+
     .schedule-conditions-table .schedule-cond-num::before {
       content: counter(schedule-cond-row);
     }
+
     .schedule-conditions-table thead th.schedule-cond-th-num {
       width: 40px;
       min-width: 40px;
       text-align: center;
       white-space: nowrap;
     }
+
     .schedule-conditions-table thead th {
       text-align: left;
       padding: 10px 12px;
@@ -987,6 +1048,7 @@
       background: var(--surface);
       padding: 0 0 12px 0;
     }
+
     .schedule-list-title-row {
       display: flex;
       align-items: center;
@@ -994,8 +1056,14 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    .schedule-list-title-row h2 { margin: 0; }
-    .schedule-list-title-actions { flex-shrink: 0; }
+
+    .schedule-list-title-row h2 {
+      margin: 0;
+    }
+
+    .schedule-list-title-actions {
+      flex-shrink: 0;
+    }
 
     #scheduleTaskListContainer {
       flex: 1;
@@ -1072,6 +1140,9 @@
 
     .order-countdown.ended {
       color: var(--text-muted);
+    }
+    .order-countdown.waiting-result {
+      color: #f97316;
     }
 
     .product-name-cell {
@@ -1296,7 +1367,6 @@
 <body>
   <div id="loginScreen">
     <div class="login-card">
-      <h1>嗨回收抢单试用工具</h1>
       <p id="loginCountdown" class="trial-countdown hidden">试用剩余 <span id="loginCountdownTime">05:00</span></p>
       <p class="sub">请先登录后使用</p>
       <div class="form-row">
@@ -1315,13 +1385,8 @@
   <div id="appContent" class="hidden">
     <header>
       <div class="header-title-row">
-        <h1>嗨回收抢单试用工具</h1>
         <span id="headerCountdown" class="trial-countdown hidden">试用剩余 <span
             id="headerCountdownTime">05:00</span></span>
-      </div>
-      <div class="login-row">
-        <span class="status logged-in" id="loginStatus">已登录</span>
-        <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
       </div>
     </header>
     <div class="main-tabs">
@@ -1329,6 +1394,10 @@
         <span class="tab-nav-item active" data-tab="grab">手动抢单</span>
         <span class="tab-nav-item" data-tab="schedule">自动抢单</span>
       </nav>
+      <div class="login-row">
+        <span class="status logged-in" id="loginStatus">已登录</span>
+        <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
+      </div>
     </div>
     <div id="tabPanelGrab" class="tab-panel">
       <div class="grab-layout">
@@ -1364,32 +1433,49 @@
           <section>
             <h2>抢单列表</h2>
             <div class="order-state-row">
-              <span class="order-state-label">订单状态</span>
-              <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
-                <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
-                  <span>待报价</span></label>
-                <label class="order-state-option"><input type="radio" name="orderState" value="20">
-                  <span>报价中</span></label>
-                <label class="order-state-option"><input type="radio" name="orderState" value="30">
-                  <span>已报价</span></label>
-              </span>
+              <div class="order-state-left">
+                <span class="order-state-label">订单状态</span>
+                <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
+                    <span>待报价</span></label>
+                  <label class="order-state-option"><input type="radio" name="orderState" value="20">
+                    <span>报价中</span></label>
+                  <label class="order-state-option"><input type="radio" name="orderState" value="30">
+                    <span>已报价</span></label>
+                </span>
+              </div>
+              <div class="order-state-actions">
+                <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
+                <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
+              </div>
+              <div class="order-state-right"></div>
             </div>
-            <div class="form-row">
-              <label>最低价</label>
-              <input type="text" id="inputMinPrice" value="" style="width:90px">
-              <label>最高价</label>
-              <input type="text" id="inputMaxPrice" value="" style="width:90px">
-              <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
-              <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
-            </div>
-            <div class="form-row form-row-max-quote">
-              <label style="margin-bottom:0;">最大报价</label>
-              <input type="text" id="inputMaxQuoteAmount" value="500" placeholder="不填则不限制" class="input-max-quote"
-                inputmode="numeric" autocomplete="off">
-              <span style="color:var(--text-muted);">元</span>
-              <button type="button" class="btn btn-primary btn-small btn-set-max-quote" id="btnSetMaxQuote">设置</button>
-              <span id="maxQuoteAmountHint" class="max-quote-hint"></span>
-              <span id="maxQuoteCheck" class="max-quote-check hidden" title="已设置">✓</span>
+            <div id="orderFilterCollapsible" class="order-filter-collapsible">
+              <button type="button" class="order-filter-collapsible-toggle" id="orderFilterToggle" aria-expanded="false">
+                <span class="collapse-icon">▼</span>
+                <span id="orderFilterToggleText">展开筛选条件</span>
+              </button>
+              <div class="order-filter-collapsible-body">
+                <div class="form-row">
+                  <label>最低价</label>
+                  <input type="text" id="inputMinPrice" value="" style="width:90px">
+                  <label>最高价</label>
+                  <input type="text" id="inputMaxPrice" value="" style="width:90px">
+                </div>
+                <div class="form-row form-row-max-quote">
+                  <label style="margin-bottom:0;">最大报价</label>
+                  <input type="text" id="inputMaxQuoteAmount" value="500" placeholder="不填则不限制" class="input-max-quote"
+                    inputmode="numeric" autocomplete="off">
+                  <span style="color:var(--text-muted);">元</span>
+                  <button type="button" class="btn btn-primary btn-small btn-set-max-quote" id="btnSetMaxQuote">设置</button>
+                  <span id="maxQuoteAmountHint" class="max-quote-hint"></span>
+                  <span id="maxQuoteCheck" class="max-quote-check hidden" title="已设置">✓</span>
+                </div>
+                <div class="form-row form-row-align-top">
+                  <label>手机成色</label>
+                  <div id="colorGradeList" class="color-grade-wrap brands-chosen">加载中…</div>
+                </div>
+              </div>
             </div>
             <div id="orderListMsg" class="msg info hidden"></div>
             <div class="table-wrap">
@@ -1401,13 +1487,14 @@
                     <th>预估金额</th>
                     <th>规格</th>
                     <th>厂商</th>
+                    <th>成色</th>
                     <th>倒计时</th>
                     <th>操作</th>
                   </tr>
                 </thead>
                 <tbody id="orderListBody">
                   <tr>
-                    <td colspan="7" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
+                    <td colspan="8" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
                   </tr>
                 </tbody>
               </table>
@@ -1755,7 +1842,29 @@
         } else {
           showMsg(msg, '已加载厂商与分类', 'success');
         }
+        await loadColorGradeList();
       } catch (e) { showMsg(msg, String(e), 'error'); }
+    }
+    var colorGradeListLoaded = false;
+    async function loadColorGradeList() {
+      var wrap = document.getElementById('colorGradeList');
+      if (!wrap) return;
+      if (colorGradeListLoaded) return;
+      wrap.textContent = '加载中…';
+      try {
+        var r = await api('/api/color-grade-level');
+        if (!r.success) { wrap.textContent = r.message || '加载失败'; return; }
+        var list = r.data && Array.isArray(r.data) ? r.data : [];
+        list.sort(function (a, b) { return (a.weight || 0) - (b.weight || 0); });
+        wrap.innerHTML = list.map(function (item) {
+          var id = item.gradeId != null ? item.gradeId : item.id;
+          var name = (item.gradeName || item.name || '').trim() || ('ID' + id);
+          var esc = name.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return '<label class="tag"><input type="checkbox" data-grade-id="' + id + '"> ' + esc + '</label>';
+        }).join('');
+        if (list.length === 0) wrap.innerHTML = '<span style="color:var(--text-muted)">暂无成色选项</span>';
+        colorGradeListLoaded = true;
+      } catch (e) { wrap.textContent = '加载失败'; }
     }
     async function updateUserDisplay() {
       const el = document.getElementById('loginStatus');
@@ -1819,18 +1928,39 @@
     function startCountdownTimer() {
       if (countdownTimerId != null) clearInterval(countdownTimerId);
       countdownTimerId = setInterval(function () {
+        var now = Date.now();
         document.querySelectorAll('.order-countdown[data-countdown]').forEach(function (el) {
+          var orderStateAttr = el.getAttribute('data-order-state');
+          var isQuoted = orderStateAttr === '30';
+          function setEnded() {
+            el.textContent = isQuoted ? '等待竞拍结果' : '已结束';
+            el.classList.add('ended');
+            if (isQuoted) el.classList.add('waiting-result');
+            el.removeAttribute('data-countdown');
+            el.removeAttribute('data-deadline');
+          }
+          var deadlineMs = el.getAttribute('data-deadline');
+          if (deadlineMs != null && deadlineMs !== '') {
+            var dm = parseInt(deadlineMs, 10);
+            if (!isNaN(dm) && now >= dm) {
+              setEnded();
+              return;
+            }
+          }
           var sec = parseInt(el.getAttribute('data-countdown'), 10);
           if (isNaN(sec) || sec <= 0) {
-            el.textContent = '已结束';
-            el.classList.add('ended');
-            el.removeAttribute('data-countdown');
+            setEnded();
             return;
           }
           sec -= 1;
           el.setAttribute('data-countdown', String(sec));
-          el.textContent = sec > 0 ? formatCountdown(sec) : '已结束';
-          if (sec <= 0) { el.classList.add('ended'); el.removeAttribute('data-countdown'); }
+          el.textContent = sec > 0 ? formatCountdown(sec) : (isQuoted ? '等待竞拍结果' : '已结束');
+          if (sec <= 0) {
+            el.classList.add('ended');
+            if (isQuoted) el.classList.add('waiting-result');
+            el.removeAttribute('data-countdown');
+            el.removeAttribute('data-deadline');
+          }
         });
       }, 1000);
     }
@@ -1848,6 +1978,8 @@
       var maxPriceStr = document.getElementById('inputMaxPrice').value.trim();
       var checkedManufacturers = [].slice.call(document.querySelectorAll('#manufacturersList input[type="checkbox"]:checked'));
       var subOrderSourceNames = checkedManufacturers.map(function (el) { return String(el.getAttribute('data-name') || '').trim(); }).filter(Boolean);
+      var colorGradeChecks = [].slice.call(document.querySelectorAll('#colorGradeList input[type="checkbox"]:checked'));
+      var colorGradeIds = colorGradeChecks.map(function (el) { var id = el.getAttribute('data-grade-id'); return id != null ? parseInt(id, 10) : null; }).filter(function (n) { return n != null && !isNaN(n); });
       var orderStateEl = document.querySelector("input[name=\"orderState\"]:checked");
       var body = {
         userId: authUserId,
@@ -1859,6 +1991,7 @@
       };
       if (minPriceStr) body.minPrice = minPriceStr;
       if (maxPriceStr) body.maxPrice = maxPriceStr;
+      if (colorGradeIds.length > 0) body.colorGradeIds = colorGradeIds;
       try {
         var r = await api('/api/order-list', { method: 'POST', body: JSON.stringify(body) });
         if (!r.success) { showMsg(msg, r.message || '查询失败', 'error'); return; }
@@ -1867,10 +2000,10 @@
         var total = data.totalCount !== undefined ? data.totalCount : (data.pageCount !== undefined ? data.pageCount : 0);
         var orderState = (body.orderState || '10').toString();
         var showQuoteCol = orderState === '30';
-        var colCount = showQuoteCol ? 8 : 7;
+        var colCount = showQuoteCol ? 9 : 8;
         var theadTr = document.getElementById('orderListHead');
-        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
-        else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>成色</th><th>倒计时</th><th>操作</th>';
+        else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>成色</th><th>倒计时</th><th>操作</th>';
         totalEl.textContent = '共 ' + total + ' 项';
         var currentPage = body.pageIndex || 1;
         var pageSizeNum = body.pageSize || 10;
@@ -1891,8 +2024,42 @@
           var specParts = [o.catName || '手机', o.brandName || '', o.memory || ''].filter(Boolean);
           var specStr = specParts.length ? specParts.join(' | ') : '-';
           var manufacturer = o.subOrderSourceName || o.brandName || '-';
-          var countdownSec = o.countdown != null ? parseInt(o.countdown, 10) : null;
-          var countdownHtml = countdownSec != null ? '<span class="order-countdown" data-countdown="' + countdownSec + '">' + formatCountdown(countdownSec) + '</span>' : '<span class="order-countdown ended">-</span>';
+          var colorGradeName = (o.colorGradeName != null && String(o.colorGradeName).trim()) ? String(o.colorGradeName).trim() : '-';
+          var colorGradeDisplay = colorGradeName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          var countdownHtml;
+          (function () {
+            var orderStateForCountdown = String(o.orderState !== undefined ? o.orderState : '');
+            var isQuotedState = orderStateForCountdown === '30';
+            function endedHtml() {
+              if (isQuotedState) return '<span class="order-countdown ended waiting-result" data-order-state="30">等待竞拍结果</span>';
+              return '<span class="order-countdown ended">已结束</span>';
+            }
+            var now = Date.now();
+            var deadlineStr = o.deadlineTime != null ? String(o.deadlineTime).trim() : '';
+            var deadlineMs = NaN;
+            if (deadlineStr) {
+              var s = deadlineStr.replace(' ', 'T');
+              deadlineMs = new Date(s).getTime();
+            }
+            if (!isNaN(deadlineMs) && now >= deadlineMs) {
+              countdownHtml = endedHtml();
+              return;
+            }
+            var countdownSec = o.countdown != null ? parseInt(o.countdown, 10) : null;
+            if (countdownSec != null && !isNaN(countdownSec) && countdownSec <= 0) {
+              countdownHtml = endedHtml();
+              return;
+            }
+            var displaySec = countdownSec;
+            if (!isNaN(deadlineMs) && deadlineMs > now) {
+              displaySec = Math.max(0, Math.floor((deadlineMs - now) / 1000));
+            }
+            if (displaySec == null || isNaN(displaySec) || displaySec <= 0) {
+              countdownHtml = endedHtml();
+              return;
+            }
+            countdownHtml = '<span class="order-countdown" data-countdown="' + displaySec + '" data-order-state="' + orderStateForCountdown.replace(/"/g, '&quot;') + '"' + (!isNaN(deadlineMs) ? ' data-deadline="' + deadlineMs + '"' : '') + '>' + formatCountdown(displaySec) + '</span>';
+          })();
           var orderStateVal = String(o.orderState !== undefined ? o.orderState : '');
           var actionLabel = orderStateVal === '10' ? '抢单' : (orderStateVal === '30' ? '修改报价' : '报价');
           var actualPriceVal = (o.actualPrice != null && o.actualPrice !== '') ? String(o.actualPrice) : '';
@@ -1908,7 +2075,7 @@
           var modelCopyBtn = modelRaw ? ' <button type="button" class="btn-copy-model btn btn-ghost btn-small" title="复制机型" data-model="' + modelVal + '">复制</button>' : '';
           var modelTd = '<td class="order-list-model-cell" style="color:var(--text-muted); font-size:13px"><span class="order-list-model-text">' + modelDisplay + '</span>' + modelCopyBtn + '</td>';
           var storageTd = '<td class="order-list-copy-cell" title="单击复制" style="color:var(--text-muted); font-size:13px">' + storageDisplay + '</td>';
-          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td style="color:#fff; font-size:13px">' + colorGradeDisplay + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
@@ -1993,6 +2160,7 @@
     document.getElementById('btnResetQuery').onclick = async function () {
       document.querySelector('input[name="orderState"][value="10"]').checked = true;
       document.querySelectorAll('#manufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+      document.querySelectorAll('#colorGradeList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
       document.getElementById('inputMinPrice').value = '';
       document.getElementById('inputMaxPrice').value = '';
       document.getElementById('inputPage').value = '1';
@@ -2002,6 +2170,18 @@
       doQueryOrders();
     };
     document.getElementById('orderStateRadioGroup').addEventListener('change', function (e) { if (e.target.name === 'orderState') doQueryOrders(); });
+    (function () {
+      var wrap = document.getElementById('orderFilterCollapsible');
+      var btn = document.getElementById('orderFilterToggle');
+      var txt = document.getElementById('orderFilterToggleText');
+      if (wrap && btn && txt) {
+        btn.addEventListener('click', function () {
+          var expanded = wrap.classList.toggle('expanded');
+          btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          txt.textContent = expanded ? '收起筛选条件' : '展开筛选条件';
+        });
+      }
+    })();
     document.querySelectorAll('.tab-nav-item').forEach(function (el) {
       el.addEventListener('click', function () {
         if (el.classList.contains('disabled')) return;
@@ -2010,6 +2190,7 @@
         el.classList.add('active');
         document.getElementById('tabPanelGrab').classList.toggle('hidden', tab !== 'grab');
         document.getElementById('tabPanelSchedule').classList.toggle('hidden', tab !== 'schedule');
+        if (tab === 'grab') loadColorGradeList();
         if (tab === 'schedule') {
           loadScheduleOptions().then(function () {
             var tbody = document.getElementById('scheduleConditionsBody');
@@ -2728,8 +2909,9 @@
     };
     document.getElementById('btnScheduleDeleteAll').onclick = function () {
       if (scheduledTasks.length === 0) { showToast('暂无任务', 'error'); return; }
+      var runningCount = Object.keys(scheduleTaskTimers).length;
+      if (runningCount > 0) { showToast('请先全部暂停后再删除', 'error'); return; }
       if (!confirm('确定要删除全部 ' + scheduledTasks.length + ' 个任务吗？')) return;
-      for (var id in scheduleTaskTimers) { if (scheduleTaskTimers.hasOwnProperty(id)) { clearInterval(scheduleTaskTimers[id]); } }
       scheduleTaskTimers = {};
       scheduleTaskStarting = {};
       scheduledTasks = [];

@@ -98,6 +98,21 @@ def api_categories():
         return jsonify({"success": False, "message": str(e)}), 200
 
 
+@app.route("/api/color-grade-level", methods=["GET"])
+def api_color_grade_level():
+    """获取手机成色列表（小花、大花、外爆、内爆等），用于前端筛选复选框。"""
+    token = session.get("token")
+    if not token:
+        return jsonify({"success": False, "message": "请先登录"}), 401
+    try:
+        api = HaihuishouAPI()
+        api.set_token(token, session.get("user_id") or session.get("userId"))
+        lst = api.get_color_grade_level()
+        return jsonify({"success": True, "data": lst})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 200
+
+
 @app.route("/api/brands", methods=["GET"])
 def api_brands():
     cat_id = request.args.get("catId", type=int)
@@ -210,6 +225,14 @@ def api_order_list():
     sub_order_source_names = body.get("subOrderSourceNames") or []  # 厂商名称列表
     if isinstance(sub_order_source_names, str):
         sub_order_source_names = [x.strip() for x in sub_order_source_names.split(",") if x.strip()]
+    _raw_grades = body.get("colorGradeIds") or []
+    color_grade_ids = []
+    if isinstance(_raw_grades, list):
+        for x in _raw_grades:
+            try:
+                color_grade_ids.append(int(x))
+            except (TypeError, ValueError):
+                pass
     page = int(body.get("pageIndex", 1))
     page_size = int(body.get("pageSize", 20))
     cond = GrabCondition(
@@ -218,6 +241,7 @@ def api_order_list():
         min_price=min_price,
         max_price=max_price,
         sub_order_source_names=sub_order_source_names,
+        color_grade_ids=color_grade_ids,
         page_size=page_size,
     )
     try:

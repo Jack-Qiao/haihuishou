@@ -22,6 +22,8 @@ class GrabCondition:
     max_price: Optional[str] = None
     # 厂商名称列表（如 华为、OPPO、小米、荣耀），用于 subOrderSourceNames
     sub_order_source_names: List[str] = field(default_factory=list)
+    # 手机成色 ID 列表（如 1002 小花、1003 大花），用于 colorGradeIds
+    color_grade_ids: List[int] = field(default_factory=list)
     # 每页条数
     page_size: int = 20
 
@@ -71,6 +73,7 @@ class GrabOrderTool:
             min_price=condition.min_price,
             max_price=condition.max_price,
             sub_order_source_names=condition.sub_order_source_names or None,
+            color_grade_ids=condition.color_grade_ids or None,
             user_id=uid,
         )
 

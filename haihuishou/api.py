@@ -176,6 +176,34 @@ class HaihuishouAPI:
             raise RuntimeError(data.get("message", "获取品牌列表失败"))
         return data.get("data", {}).get("brandList", [])
 
+    def get_color_grade_level(self) -> List[Dict[str, Any]]:
+        """
+        获取手机成色列表（GetColorGradeLevel）。
+        返回 [{"gradeName": "小花", "gradeId": 1002, "weight": 2}, ...]
+        """
+        url = f"{self.base_hsd}/api/ColorGrade/GetColorGradeLevel"
+        r = requests.post(
+            url,
+            json={},
+            headers=self._headers(with_token=True),
+            timeout=self.timeout,
+            verify=self.verify,
+        )
+        r.raise_for_status()
+        data = r.json()
+        if data.get("code") is not None and data.get("code") != 1:
+            raise RuntimeError(data.get("message", "获取成色列表失败"))
+        raw = data.get("data", data)
+        if isinstance(raw, list):
+            lst = raw
+        elif isinstance(raw, dict):
+            lst = raw.get("list", raw.get("results", []))
+        else:
+            lst = []
+        if not isinstance(lst, list):
+            lst = []
+        return lst
+
     # ------------------------- 4. 抢单列表（需要 token） -------------------------
 
     def get_hsd_order_list(
@@ -187,6 +215,7 @@ class HaihuishouAPI:
         min_price: Optional[str] = None,
         max_price: Optional[str] = None,
         sub_order_source_names: Optional[List[str]] = None,
+        color_grade_ids: Optional[List[int]] = None,
         user_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
@@ -214,6 +243,8 @@ class HaihuishouAPI:
             payload["minPrice"] = min_price
         if max_price is not None:
             payload["maxPrice"] = max_price
+        if color_grade_ids is not None and len(color_grade_ids) > 0:
+            payload["colorGrade"] = color_grade_ids
         headers = self._headers(with_token=True)
         r = requests.post(
             url,
