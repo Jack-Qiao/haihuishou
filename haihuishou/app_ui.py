@@ -111,6 +111,87 @@ def api_brands():
         return jsonify({"success": False, "message": str(e)}), 200
 
 
+@app.route("/api/import-price-list", methods=["POST"])
+def api_import_price_list():
+    """上传价格列表 xlsx，解析 品牌、机型、内存、报底价 四列，按品牌分组返回可批量创建任务的数据。"""
+    if "file" not in request.files:
+        return jsonify({"success": False, "message": "请选择要上传的文件"}), 400
+    f = request.files["file"]
+    if not f.filename or not (f.filename.endswith(".xlsx") or f.filename.endswith(".xls")):
+        return jsonify({"success": False, "message": "请上传 .xlsx 或 .xls 格式的 Excel 文件"}), 400
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        return jsonify({"success": False, "message": "服务端未安装 openpyxl，无法解析 Excel"}), 500
+    try:
+        wb = load_workbook(f, read_only=True, data_only=True)
+        ws = wb.active
+        if ws is None:
+            return jsonify({"success": False, "message": "Excel 无有效工作表"}), 400
+        rows = list(ws.iter_rows(values_only=True))
+        if not rows:
+            return jsonify({"success": False, "message": "Excel 无数据"}), 400
+        header = [str(c).strip() if c is not None else "" for c in rows[0]]
+        col_brand = col_model = col_storage = col_price = None
+        for i, h in enumerate(header):
+            h_lower = h.lower()
+            if "品牌" in h or h_lower == "brand":
+                col_brand = i
+            elif "机型" in h or h_lower in ("model", "型号"):
+                col_model = i
+            elif "内存" in h or "存储" in h or h_lower in ("storage", "memory"):
+                col_storage = i
+            elif "报底价" in h or "报价" in h or "底价" in h or h_lower in ("price", "quote"):
+                col_price = i
+        if col_brand is None or col_model is None or col_price is None:
+            return jsonify({
+                "success": False,
+                "message": "Excel 需包含表头：品牌、机型、报底价（内存可选）"
+            }), 400
+        by_brand = {}
+        for row in rows[1:]:
+            if not row:
+                continue
+            brand = (row[col_brand] if col_brand < len(row) else None)
+            brand = str(brand).strip() if brand is not None else ""
+            model = (row[col_model] if col_model < len(row) else None)
+            model = str(model).strip() if model is not None else ""
+            storage = ""
+            if col_storage is not None and col_storage < len(row) and row[col_storage] is not None:
+                storage = str(row[col_storage]).strip()
+            price = (row[col_price] if col_price < len(row) else None)
+            if price is not None:
+                try:
+                    price = str(int(float(price))) if float(price) == int(float(price)) else str(float(price))
+                except (TypeError, ValueError):
+                    price = str(price).strip()
+            else:
+                price = ""
+            if not brand or not model or not price:
+                continue
+            try:
+                q = float(price)
+                if q < 1 or q > 500:
+                    continue
+            except ValueError:
+                continue
+            if brand not in by_brand:
+                by_brand[brand] = []
+            by_brand[brand].append({
+                "modelName": model,
+                "storage": storage if storage else None,
+                "quoteAmount": price,
+            })
+        wb.close()
+        result = [
+            {"brandName": brand, "conditions": conds}
+            for brand, conds in by_brand.items() if conds
+        ]
+        return jsonify({"success": True, "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "message": "解析失败: %s" % str(e)}), 200
+
+
 @app.route("/api/order-list", methods=["POST"])
 def api_order_list():
     body = request.get_json() or {}

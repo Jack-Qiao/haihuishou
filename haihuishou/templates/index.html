@@ -161,7 +161,7 @@
     }
 
     .schedule-left {
-      flex: 0 0 45%;
+      flex: 0 0 50%;
       min-width: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -170,7 +170,7 @@
     }
 
     .schedule-right {
-      flex: 1 1 55%;
+      flex: 1 1 50%;
       min-width: 0;
       background: var(--surface);
       padding: 16px;
@@ -756,7 +756,6 @@
 
     .schedule-conditions-wrap {
       width: 100%;
-      max-width: 520px;
     }
 
     .schedule-conditions-table {
@@ -768,6 +767,28 @@
       overflow: hidden;
     }
 
+    .schedule-conditions-table tbody {
+      counter-reset: schedule-cond-row;
+    }
+    .schedule-conditions-table tbody tr {
+      counter-increment: schedule-cond-row;
+    }
+    .schedule-conditions-table .schedule-cond-num {
+      width: 40px;
+      min-width: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .schedule-conditions-table .schedule-cond-num::before {
+      content: counter(schedule-cond-row);
+    }
+    .schedule-conditions-table thead th.schedule-cond-th-num {
+      width: 40px;
+      min-width: 40px;
+      text-align: center;
+      white-space: nowrap;
+    }
     .schedule-conditions-table thead th {
       text-align: left;
       padding: 10px 12px;
@@ -948,11 +969,13 @@
     .schedule-task-conditions-more {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.2s ease;
+      transition: max-height 0.25s ease;
     }
 
     .schedule-task-conditions-more.expanded {
-      max-height: 500px;
+      max-height: min(80vh, 1200px);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .schedule-task-card-actions .btn-small {
@@ -964,6 +987,15 @@
       background: var(--surface);
       padding: 0 0 12px 0;
     }
+    .schedule-list-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .schedule-list-title-row h2 { margin: 0; }
+    .schedule-list-title-actions { flex-shrink: 0; }
 
     #scheduleTaskListContainer {
       flex: 1;
@@ -1452,6 +1484,7 @@
                 <table class="schedule-conditions-table">
                   <thead>
                     <tr>
+                      <th class="schedule-cond-th-num">序号</th>
                       <th>报价金额</th>
                       <th>机型</th>
                       <th>存储</th>
@@ -1486,8 +1519,14 @@
         <div class="schedule-right">
           <section>
             <div class="schedule-list-sticky-header">
-              <h2>任务列表 <span id="scheduleTaskCountWrap" class="schedule-task-count">（任务数量：<span
-                    id="scheduleTaskCountNum">0</span>）</span></h2>
+              <div class="schedule-list-title-row">
+                <h2>任务列表 <span id="scheduleTaskCountWrap" class="schedule-task-count">（任务数量：<span
+                      id="scheduleTaskCountNum">0</span>）</span></h2>
+                <div class="schedule-list-title-actions">
+                  <input type="file" id="scheduleImportFile" accept=".xlsx,.xls" style="display:none;">
+                  <button type="button" class="btn btn-primary btn-small" id="btnScheduleImport">导入价格列表</button>
+                </div>
+              </div>
               <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
                   id="scheduleGrabbedCountNum">0</span></p>
               <div class="form-row" style="margin-bottom:12px; gap:8px;margin-left: 12px;">
@@ -2262,11 +2301,18 @@
         }
         break;
       }
+      var bestName = null;
+      var bestIndex = -1;
       for (var j = 0; j < brandList.length; j++) {
         var name = brandList[j].name;
-        if (name && m.indexOf(name.toLowerCase()) >= 0) return name;
+        if (!name) continue;
+        var idx = m.indexOf(name.toLowerCase());
+        if (idx >= 0 && (bestIndex < 0 || idx < bestIndex)) {
+          bestIndex = idx;
+          bestName = name;
+        }
       }
-      return null;
+      return bestName;
     }
     function syncScheduleBrandFromFirstCondition() {
       var conditions = getScheduleConditionsFromForm();
@@ -2384,7 +2430,8 @@
       var storage = String(condition.storage || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       var tr = document.createElement('tr');
       tr.className = 'schedule-condition-row';
-      tr.innerHTML = '<td><input type="text" class="schedule-cond-quote" placeholder="1-500元" inputmode="numeric" autocomplete="off" value="' + quote + '"></td>' +
+      tr.innerHTML = '<td class="schedule-cond-num"></td>' +
+        '<td><input type="text" class="schedule-cond-quote" placeholder="1-500元" inputmode="numeric" autocomplete="off" value="' + quote + '"></td>' +
         '<td><input type="text" class="schedule-cond-model" placeholder="必填" value="' + model + '"></td>' +
         '<td><input type="text" class="schedule-cond-storage" placeholder="选填" value="' + storage + '"></td>' +
         '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
@@ -2422,6 +2469,88 @@
       clearScheduleEditMode();
       updateScheduleSaveButtonState();
     };
+    document.getElementById('btnScheduleImport').onclick = function () { document.getElementById('scheduleImportFile').click(); };
+    (function () {
+      var fileEl = document.getElementById('scheduleImportFile');
+      if (!fileEl) return;
+      fileEl.addEventListener('change', function () {
+        var file = fileEl.files && fileEl.files[0];
+        fileEl.value = '';
+        if (!file) return;
+        if (!authToken) { showToast('请先登录', 'error'); return; }
+        var fd = new FormData();
+        fd.append('file', file);
+        var msg = document.getElementById('scheduleMsg');
+        showMsg(msg, '正在解析…', 'info');
+        fetch('/api/import-price-list', {
+          method: 'POST',
+          headers: { 'token': authToken },
+          body: fd
+        }).then(function (r) { return r.text().then(function (t) { try { return JSON.parse(t); } catch (_) { return { success: false, message: '解析响应失败' }; } }); }).then(function (res) {
+          hideMsg(msg);
+          if (!res.success) { showToast(res.message || '导入失败', 'error'); return; }
+          var list = res.data && Array.isArray(res.data) ? res.data : [];
+          if (!list.length) { showToast('文件中无有效数据（需含品牌、机型、报底价）', 'error'); return; }
+          loadScheduleOptions().then(function () {
+            var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
+            var brandNameToKey = {};
+            radios.forEach(function (r) {
+              var key = (r.getAttribute('data-key') || '').trim();
+              var name = (r.getAttribute('data-name') || '').trim();
+              if (name) brandNameToKey[name.toLowerCase()] = { key: key, name: name };
+            });
+            var added = 0;
+            var skipped = 0;
+            var baseId = Date.now();
+            list.forEach(function (item, idx) {
+              var brandName = (item.brandName || '').trim();
+              var conditions = item.conditions || [];
+              if (!brandName || !conditions.length) { skipped++; return; }
+              var brandLower = brandName.toLowerCase();
+              var matched = brandNameToKey[brandLower] || null;
+              for (var k in brandNameToKey) {
+                if (!matched && (k.indexOf(brandLower) !== -1 || brandLower.indexOf(k) !== -1)) {
+                  matched = brandNameToKey[k]; break;
+                }
+              }
+              var brandKey = matched ? matched.key : '';
+              var displayBrandName = matched ? matched.name : brandName;
+              var taskName = brandName + '抢单';
+              if (scheduledTasks.some(function (t) { return (t.name || '').trim() === taskName; })) {
+                skipped++;
+                return;
+              }
+              var id = baseId + idx;
+              scheduledTasks.push({
+                id: id,
+                name: taskName,
+                manufacturerNames: [],
+                categoryId: schedulePhoneCatId,
+                brandIds: brandKey ? [brandKey] : [],
+                brandName: displayBrandName,
+                minPrice: undefined,
+                maxPrice: undefined,
+                conditions: conditions.map(function (c) {
+                  return {
+                    quoteAmount: String(c.quoteAmount || '').trim(),
+                    modelName: String(c.modelName || '').trim(),
+                    storage: (c.storage && String(c.storage).trim()) || undefined
+                  };
+                }),
+                frequency: '3'
+              });
+              added++;
+            });
+            saveScheduledTasks();
+            renderScheduleTaskList();
+            showToast('已导入 ' + added + ' 个任务' + (skipped ? '，跳过 ' + skipped + ' 条' : ''), 'success');
+          });
+        }).catch(function (e) {
+          hideMsg(msg);
+          showToast('导入失败: ' + (e && e.message ? e.message : '网络错误'), 'error');
+        });
+      });
+    })();
     function getScheduleFormTask() {
       var name = document.getElementById('scheduleTaskName').value.trim();
       if (!name) return null;

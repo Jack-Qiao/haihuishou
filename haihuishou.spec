@@ -18,6 +18,7 @@ a = Analysis(
     hiddenimports=[
         'flask',
         'requests',
+        'openpyxl',
         'haihuishou',
         'haihuishou.app_ui',
         'haihuishou.api',
