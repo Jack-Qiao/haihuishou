@@ -126,42 +126,90 @@ def api_brands():
         return jsonify({"success": False, "message": str(e)}), 200
 
 
+def _parse_cell_number(val):
+    """将单元格转为数字字符串，无效则返回空字符串。"""
+    if val is None:
+        return ""
+    try:
+        x = float(val)
+        if x == int(x):
+            return str(int(x))
+        return str(x)
+    except (TypeError, ValueError):
+        return str(val).strip() if val is not None else ""
+
+
 @app.route("/api/import-price-list", methods=["POST"])
 def api_import_price_list():
-    """上传价格列表 xlsx，解析 品牌、机型、内存、报底价 四列，按品牌分组返回可批量创建任务的数据。"""
+    """上传价格列表 xlsx，解析 品牌、机型、内存、靓机、小花、大花、外爆、内爆、保底价 列，按品牌分组返回可批量创建任务的数据。"""
     if "file" not in request.files:
         return jsonify({"success": False, "message": "请选择要上传的文件"}), 400
     f = request.files["file"]
-    if not f.filename or not (f.filename.endswith(".xlsx") or f.filename.endswith(".xls")):
+    fn = (f.filename or "").strip().lower()
+    if not f.filename or not (fn.endswith(".xlsx") or fn.endswith(".xls")):
         return jsonify({"success": False, "message": "请上传 .xlsx 或 .xls 格式的 Excel 文件"}), 400
     try:
         from openpyxl import load_workbook
     except ImportError:
         return jsonify({"success": False, "message": "服务端未安装 openpyxl，无法解析 Excel"}), 500
     try:
-        wb = load_workbook(f, read_only=True, data_only=True)
-        ws = wb.active
-        if ws is None:
-            return jsonify({"success": False, "message": "Excel 无有效工作表"}), 400
-        rows = list(ws.iter_rows(values_only=True))
+        # 保存到临时文件再解析，避免上传流不可 seek 导致 read_only 模式失败
+        import tempfile
+        import os
+        suffix = ".xlsx" if fn.endswith(".xlsx") else ".xls"
+        tmp_path = None
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            f.save(tmp.name)
+            tmp_path = tmp.name
+        try:
+            wb = load_workbook(tmp_path, read_only=True, data_only=True)
+            ws = wb.active
+            if ws is None:
+                return jsonify({"success": False, "message": "Excel 无有效工作表"}), 400
+            rows = list(ws.iter_rows(values_only=True))
+            wb.close()
+        finally:
+            if tmp_path:
+                try:
+                    os.unlink(tmp_path)
+                except Exception:
+                    pass
         if not rows:
             return jsonify({"success": False, "message": "Excel 无数据"}), 400
         header = [str(c).strip() if c is not None else "" for c in rows[0]]
-        col_brand = col_model = col_storage = col_price = None
+        col_brand = col_model = col_storage = None
+        col_prices = {}  # 靓机、小花、大花、外爆、内爆、保底价
+        price_keys = ("靓机", "小花", "大花", "外爆", "内爆", "保底价")
+        # 内爆列可能表头为 内爆 或 内爆屏 等
+        price_key_aliases = {"内爆": ("内爆", "内爆屏")}
         for i, h in enumerate(header):
-            h_lower = h.lower()
-            if "品牌" in h or h_lower == "brand":
+            h_strip = (h or "").strip()
+            if "品牌" in (h or "") or (h_strip and h_strip.lower() == "brand"):
                 col_brand = i
-            elif "机型" in h or h_lower in ("model", "型号"):
+            elif "机型" in (h or "") or (h_strip and h_strip.lower() in ("model", "型号")):
                 col_model = i
-            elif "内存" in h or "存储" in h or h_lower in ("storage", "memory"):
+            elif "内存" in (h or "") or "存储" in (h or "") or (h_strip and h_strip.lower() in ("storage", "memory")):
                 col_storage = i
-            elif "报底价" in h or "报价" in h or "底价" in h or h_lower in ("price", "quote"):
-                col_price = i
-        if col_brand is None or col_model is None or col_price is None:
+            else:
+                for k in price_keys:
+                    if col_prices.get(k) is not None:
+                        continue
+                    if k in (h or "") or h_strip == k:
+                        col_prices[k] = i
+                        break
+                    aliases = price_key_aliases.get(k)
+                    if aliases and h_strip in aliases:
+                        col_prices[k] = i
+                        break
+        if col_brand is None or col_model is None:
             return jsonify({
                 "success": False,
-                "message": "Excel 需包含表头：品牌、机型、报底价（内存可选）"
+                "message": "Excel 需包含表头：品牌、机型（内存、靓机、小花、大花、外爆、内爆、保底价 可选）"
+            }), 400
+        if "保底价" not in col_prices:
+            return jsonify({
+                "success": False,
+                "message": "Excel 需包含「保底价」列"
             }), 400
         by_brand = {}
         for row in rows[1:]:
@@ -174,30 +222,41 @@ def api_import_price_list():
             storage = ""
             if col_storage is not None and col_storage < len(row) and row[col_storage] is not None:
                 storage = str(row[col_storage]).strip()
-            price = (row[col_price] if col_price < len(row) else None)
-            if price is not None:
-                try:
-                    price = str(int(float(price))) if float(price) == int(float(price)) else str(float(price))
-                except (TypeError, ValueError):
-                    price = str(price).strip()
-            else:
-                price = ""
-            if not brand or not model or not price:
+            if not brand or not model:
+                continue
+            cond = {"modelName": model, "storage": storage if storage else None}
+            for k in price_keys:
+                col_idx = col_prices.get(k)
+                if col_idx is not None and col_idx < len(row):
+                    val = _parse_cell_number(row[col_idx])
+                    cond[k] = val
+                else:
+                    cond[k] = ""
+            baodijia = (cond.get("保底价") or "").strip()
+            if not baodijia:
                 continue
             try:
-                q = float(price)
+                q = float(baodijia)
                 if q < 1 or q > 500:
                     continue
             except ValueError:
                 continue
+            valid = True
+            for k in ("靓机", "小花", "大花", "外爆", "内爆"):
+                v = (cond.get(k) or "").strip()
+                if v:
+                    try:
+                        if float(v) < 1 or float(v) > 500:
+                            valid = False
+                            break
+                    except ValueError:
+                        valid = False
+                        break
+            if not valid:
+                continue
             if brand not in by_brand:
                 by_brand[brand] = []
-            by_brand[brand].append({
-                "modelName": model,
-                "storage": storage if storage else None,
-                "quoteAmount": price,
-            })
-        wb.close()
+            by_brand[brand].append(cond)
         result = [
             {"brandName": brand, "conditions": conds}
             for brand, conds in by_brand.items() if conds
@@ -359,6 +418,11 @@ def api_execute_task():
         return jsonify({"success": False, "message": "请先登录（缺少 token）"}), 401
     if not user_id:
         return jsonify({"success": False, "message": "请先登录（缺少 userId）"}), 401
+    task_name = (data.get("taskName") or "").strip()
+
+    def task_err(msg):
+        return jsonify({"success": False, "message": ("任务「%s」：%s" % (task_name, msg)) if task_name else msg}), 400
+
     manufacturer_names = data.get("manufacturerNames") or []
     if isinstance(manufacturer_names, str):
         manufacturer_names = [x.strip() for x in manufacturer_names.split(",") if x.strip()]
@@ -375,29 +439,69 @@ def api_execute_task():
             "modelName": str(data.get("modelName", "")).strip(),
             "storage": (str(data.get("storage", "")).strip() or None),
         }]
-    if not conditions:
-        return jsonify({"success": False, "message": "请添加至少一条抢单条件"}), 400
-    task_name = (data.get("taskName") or "").strip()
+    use_conditions_list = False
+    if conditions and isinstance(conditions[0], dict) and "保底价" in conditions[0]:
+        use_conditions_list = True
+        normalized = []
+        seen_key = {}
+        for idx, c in enumerate(conditions):
+            if not isinstance(c, dict):
+                continue
+            m = (c.get("modelName") or "").strip()
+            s = (c.get("storage") or "").strip() or ""
+            baodijia = (c.get("保底价") or "").strip()
+            if not m or not baodijia:
+                continue
+            try:
+                bn = float(baodijia)
+                if bn < 1 or bn > 500:
+                    return task_err("保底价须在 1～500 元范围内")
+            except ValueError:
+                return task_err("保底价须为有效数字，且范围 1～500")
+            key = (m or "").lower() + "\x01" + (s or "").lower()
+            if key in seen_key:
+                first_no = seen_key[key]
+                cur_no = idx + 1
+                return task_err("序号 %d 与 序号 %d 机型+存储不可重复" % (first_no, cur_no))
+            seen_key[key] = idx + 1
+            row = {"modelName": m, "storage": s or None}
+            for k in ("靓机", "小花", "大花", "外爆", "内爆", "保底价"):
+                v = (c.get(k) or "").strip()
+                if v:
+                    try:
+                        vn = float(v)
+                        if vn < 1 or vn > 500:
+                            return task_err("成色报价须在 1～500 元范围内")
+                    except ValueError:
+                        return task_err("报价须为有效数字")
+                row[k] = v
+            normalized.append(row)
+        if not normalized:
+            return task_err("请至少添加一条完整条件（机型+保底价）")
+        conditions = normalized
+    elif conditions:
+        normalized = []
+        for c in conditions:
+            if not isinstance(c, dict):
+                continue
+            q = (c.get("quoteAmount") or "").strip()
+            m = (c.get("modelName") or "").strip()
+            s = (c.get("storage") or "").strip() or None
+            if not q or not m:
+                continue
+            try:
+                qn = float(q)
+                if qn < 1 or qn > 500:
+                    return task_err("每条条件的报价金额须在 1～500 元范围内")
+            except ValueError:
+                return task_err("报价金额须为有效数字，且范围 1～500")
+            normalized.append({"quoteAmount": q, "modelName": m, "storage": s})
+        if not normalized:
+            return task_err("请添加至少一条完整条件（报价+机型）")
+        conditions = normalized
+    else:
+        return task_err("请添加至少一条抢单条件")
     remark = task_name or "定时任务"
-    normalized = []
-    for c in conditions:
-        if not isinstance(c, dict):
-            continue
-        q = (c.get("quoteAmount") or "").strip()
-        m = (c.get("modelName") or "").strip()
-        s = (c.get("storage") or "").strip() or None
-        if not q or not m:
-            continue
-        try:
-            qn = float(q)
-            if qn < 1 or qn > 500:
-                return jsonify({"success": False, "message": "每条条件的报价金额须在 1～500 元范围内"}), 400
-        except ValueError:
-            return jsonify({"success": False, "message": "报价金额须为有效数字，且范围 1～500"}), 400
-        normalized.append({"quoteAmount": q, "modelName": m, "storage": s})
-    if not normalized:
-        return jsonify({"success": False, "message": "请添加至少一条完整条件（报价+机型）"}), 400
-    conditions = normalized
     category_brands = [{"key": category_id, "value": brand_ids}] if category_id else []
     cond = GrabCondition(
         category_brands=category_brands,
@@ -434,37 +538,63 @@ def api_execute_task():
                 lst = lst or inner.get("list") or inner.get("orderList") or inner.get("results") or []
         if not isinstance(lst, list):
             lst = []
-        # 每条条件为 { quoteAmount, modelName, storage? }；订单匹配第一个满足的条件则用该条件的报价抢单
-        def find_matching_condition(order_model, order_storage):
-            order_model = (order_model or "").strip().lower()
-            order_storage = (order_storage or "").strip().lower()
-            for cond in conditions:
-                if (cond["modelName"] or "").strip().lower() != order_model:
-                    continue
-                if cond["storage"]:
-                    if (cond["storage"] or "").strip().lower() != order_storage:
+        if use_conditions_list:
+            def find_condition_and_quote(order):
+                order_model = (order.get("modelName") or order.get("model") or order.get("goodsName") or "").strip().lower()
+                order_storage = (order.get("storageCapacity") or order.get("storage") or order.get("memory") or "").strip().lower()
+                for cond in conditions:
+                    c_m = (cond.get("modelName") or "").strip().lower()
+                    c_s = (cond.get("storage") or "").strip().lower()
+                    if c_m != order_model:
                         continue
-                return cond
-            return None
+                    if c_s != order_storage:
+                        continue
+                    color_name = (order.get("colorGradeName") or order.get("colorGrade") or "").strip()
+                    if color_name and color_name in cond and (cond.get(color_name) or "").strip():
+                        return (cond.get(color_name) or "").strip()
+                    return (cond.get("保底价") or "").strip()
+                return None
 
-        matched = []
-        for o in lst:
-            record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
-            order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
-            if record_id is None or order_id is None:
-                continue
-            order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
-            order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
-            cond = find_matching_condition(order_model, order_storage)
-            if cond:
-                matched.append((o, cond))
+            matched = []
+            for o in lst:
+                record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
+                order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+                if record_id is None or order_id is None:
+                    continue
+                quote_for_submit = find_condition_and_quote(o)
+                if quote_for_submit:
+                    matched.append((o, quote_for_submit))
+        else:
+            def find_matching_condition(order_model, order_storage):
+                order_model = (order_model or "").strip().lower()
+                order_storage = (order_storage or "").strip().lower()
+                for cond in conditions:
+                    if (cond["modelName"] or "").strip().lower() != order_model:
+                        continue
+                    if cond["storage"]:
+                        if (cond["storage"] or "").strip().lower() != order_storage:
+                            continue
+                    return cond
+                return None
+
+            matched = []
+            for o in lst:
+                record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
+                order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+                if record_id is None or order_id is None:
+                    continue
+                order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
+                order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
+                cond = find_matching_condition(order_model, order_storage)
+                if cond:
+                    matched.append((o, cond["quoteAmount"]))
         grabbed = 0
         quoted = 0
         errors = []
-        for o, cond in matched:
+        for item in matched:
+            o, quote_for_submit = item[0], item[1]
             record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
             order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
-            quote_for_submit = cond["quoteAmount"]
             try:
                 raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
                 resp_data = raw.get("data") or {}
