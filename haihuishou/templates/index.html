@@ -1902,6 +1902,12 @@
     </div>
   </div>
 
+  <div id="importLoadingModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal" style="max-width:280px; text-align:center;">
+      <p id="importLoadingText" style="margin:0; font-size:1rem;">正在导入中…</p>
+    </div>
+  </div>
+
   <script>
     (function () {
       var TRIAL_SECONDS = 600;
@@ -2810,14 +2816,19 @@
         var fd = new FormData();
         fd.append('file', file);
         var msg = document.getElementById('scheduleMsg');
+        var importModal = document.getElementById('importLoadingModal');
+        var importLoadingText = document.getElementById('importLoadingText');
         var btnText = btnImport.textContent || '导入价格列表';
         btnImport.disabled = true;
         btnImport.textContent = '导入中…';
+        if (importModal) { importModal.classList.remove('hidden'); importModal.setAttribute('aria-hidden', 'false'); }
+        if (importLoadingText) importLoadingText.textContent = '正在导入中…';
         showMsg(msg, '正在解析…', 'info');
         function stopLoading() {
           btnImport.disabled = false;
           btnImport.textContent = btnText;
           hideMsg(msg);
+          if (importModal) { importModal.classList.add('hidden'); importModal.setAttribute('aria-hidden', 'true'); }
         }
         fetch('/api/import-price-list', {
           method: 'POST',
