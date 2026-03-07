@@ -7,12 +7,203 @@
 import os
 import sys
 import threading
+import unicodedata
 from typing import Any, Dict
 
 from flask import Flask, jsonify, render_template, request, session
 
 from .api import HaihuishouAPI
 from .grab_tool import GrabCondition, GrabOrderTool
+
+# 成色 gradeId 与中文名对应（与接口 GetColorGradeLevel 一致）
+COLOR_GRADE_ID_TO_NAME = {
+    1001: "靓机",
+    1002: "小花",
+    1003: "大花",
+    1004: "外爆",
+    1005: "内爆",
+}
+# 成色中文名到 gradeId，用于入参兼容中文 key 时转成 ID key
+COLOR_GRADE_NAME_TO_ID = {v: k for k, v in COLOR_GRADE_ID_TO_NAME.items()}
+# 成色 ID 列表，报价时用 order.colorGrade 与条件中的 ID key 对比
+COLOR_GRADE_IDS = (1001, 1002, 1003, 1004, 1005)
+
+
+def _normalize_storage(s):
+    """统一存储格式便于匹配：去空格、小写，如 4G+128G / 4G + 128G -> 4g+128g"""
+    if s is None:
+        return ""
+    return str(s).strip().lower().replace(" ", "")
+
+
+def _normalize_color_name(s):
+    """成色名规范化，避免全角/空格等导致匹配不到"""
+    if s is None:
+        return ""
+    return unicodedata.normalize("NFKC", str(s).strip())
+
+
+def _execute_task_fetch_order_list(cond, token, user_id):
+    """
+    抢单任务 - 查询待报价列表。
+    查询时不带 conditions（机型/存储/成色价），只带分类、品牌、价格区间、厂商等 cond；
+    conditions 在拿到列表后由 _execute_task_match_orders 做对比筛选。
+    :param cond: GrabCondition（分类、品牌、价格、厂商等），不含抢单条件列表
+    :param token: 登录 token
+    :param user_id: 用户 ID
+    :return: (lst, api)，lst 为订单列表，api 供后续抢单/报价使用
+    """
+    api = HaihuishouAPI()
+    api.set_token(token, user_id)
+    tool = GrabOrderTool(api=api)
+    result = tool.step4_order_list(cond, page_index=1, user_id=user_id)
+    lst = None
+    if isinstance(result, dict):
+        res_obj = result.get("result")
+        if isinstance(res_obj, dict):
+            lst = res_obj.get("orderList")
+        if lst is None:
+            lst = (
+                result.get("list")
+                or result.get("orderList")
+                or result.get("results")
+                or result.get("records")
+                or result.get("rows")
+                or result.get("items")
+            )
+        if lst is None and isinstance(result.get("data"), list):
+            lst = result["data"]
+        if lst is None and isinstance(result.get("data"), dict):
+            inner = result["data"]
+            lst = (inner.get("result") or {}).get("orderList") if isinstance(inner.get("result"), dict) else None
+            lst = lst or inner.get("list") or inner.get("orderList") or inner.get("results") or []
+    if not isinstance(lst, list):
+        lst = []
+    return lst, api
+
+
+def _execute_task_match_orders(lst, conditions, use_conditions_list):
+    """
+    抢单任务 - 遍历订单列表，匹配条件并算出每条订单的报价金额。
+    :param lst: 订单列表（来自查询列表接口）
+    :param conditions: 归一化后的抢单条件
+    :param use_conditions_list: 是否为新格式（含保底价/成色价）
+    :return: [(order, quote_amount), ...]，仅包含能匹配到条件且有报价的订单
+    """
+    def _quote_from_cond(order, cond):
+        """按订单成色 ID（colorGrade）从条件中取报价，避免中文 colorGradeName 匹配问题；无则用底价。"""
+        grade_id = order.get("colorGrade")
+        if grade_id is not None:
+            try:
+                gid = int(grade_id)
+                key = str(gid)
+                if key in cond:
+                    val = cond.get(key)
+                    if val is not None and str(val).strip():
+                        return str(val).strip()
+            except (TypeError, ValueError):
+                pass
+        fallback_key = "floorPrice"
+        val = cond.get(fallback_key)
+        if val is not None and str(val).strip():
+            return str(val).strip()
+        return ""
+
+    def _find_condition_and_quote(order):
+        """新格式：按机型+存储匹配一条条件（优先完全一致，否则仅机型），再按成色取报价；无匹配返回 None。"""
+        order_model = (order.get("modelName") or order.get("model") or order.get("goodsName") or "").strip().lower()
+        order_storage = _normalize_storage(
+            order.get("storageCapacity") or order.get("storage") or order.get("memory")
+        )
+        exact_match = None
+        model_only_match = None
+        for c in conditions:
+            c_m = (c.get("modelName") or "").strip().lower()
+            c_s = _normalize_storage(c.get("storage"))
+            if c_m != order_model:
+                continue
+            if c_s:
+                if c_s != order_storage:
+                    continue
+                exact_match = c
+                break
+            else:
+                if model_only_match is None:
+                    model_only_match = c
+        chosen = exact_match or model_only_match
+        if not chosen:
+            return None
+        return _quote_from_cond(order, chosen)
+
+    def _find_matching_condition(order_model, order_storage):
+        """旧格式：按机型+存储匹配一条条件（条件无存储时只比机型）；无匹配返回 None。"""
+        order_model = (order_model or "").strip().lower()
+        order_storage = (order_storage or "").strip().lower()
+        for c in conditions:
+            if (c.get("modelName") or "").strip().lower() != order_model:
+                continue
+            if c.get("storage"):
+                if (c.get("storage") or "").strip().lower() != order_storage:
+                    continue
+            return c
+        return None
+
+    matched = []
+    for o in lst:
+        record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
+        order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+        if record_id is None or order_id is None:
+            continue
+        if use_conditions_list:
+            quote_for_submit = _find_condition_and_quote(o)
+        else:
+            order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
+            order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
+            c = _find_matching_condition(order_model, order_storage)
+            quote_for_submit = c.get("quoteAmount") if c else None
+        if quote_for_submit:
+            matched.append((o, quote_for_submit))
+    return matched
+
+
+def _execute_task_grab_and_quote(matched, api, user_id, remark):
+    """
+    抢单任务 - 对匹配到的订单执行抢单并提交报价。
+    :param matched: [(order, quote_amount), ...]
+    :param api: HaihuishouAPI 实例（已 set_token）
+    :param user_id: 用户 ID
+    :param remark: 报价备注
+    :return: (grabbed, quoted, errors)
+    """
+    grabbed = 0
+    quoted = 0
+    errors = []
+    for o, quote_for_submit in matched:
+        record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
+        order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+        try:
+            raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
+            resp_data = raw.get("data") or {}
+            sub_code = resp_data.get("subCode")
+            if sub_code == 200:
+                errors.append("recordId=%s 抢单失败: %s" % (record_id, (resp_data.get("subMessage") or "已被抢")))
+                continue
+            if sub_code != 100:
+                errors.append("recordId=%s 抢单异常 subCode=%s" % (record_id, sub_code))
+                continue
+            grabbed += 1
+            api.submit_quotation(
+                record_id=int(record_id),
+                order_id=int(order_id),
+                actual_price=quote_for_submit,
+                remark=remark,
+                user_id=user_id,
+            )
+            quoted += 1
+        except Exception as e:
+            errors.append("recordId=%s: %s" % (record_id, str(e)))
+    return grabbed, quoted, errors
+
 
 # 打包成 exe 时模板在 sys._MEIPASS 下
 _base_dir = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
@@ -224,26 +415,32 @@ def api_import_price_list():
                 storage = str(row[col_storage]).strip()
             if not brand or not model:
                 continue
+            # Excel 表头为中文，输出为成色 ID key（1001～1005）+ floorPrice
             cond = {"modelName": model, "storage": storage if storage else None}
-            for k in price_keys:
-                col_idx = col_prices.get(k)
+            name_to_id = {"靓机": 1001, "小花": 1002, "大花": 1003, "外爆": 1004, "内爆": 1005}
+            for name in price_keys:
+                col_idx = col_prices.get(name)
+                val = ""
                 if col_idx is not None and col_idx < len(row):
                     val = _parse_cell_number(row[col_idx])
-                    cond[k] = val
+                if name == "保底价":
+                    cond["floorPrice"] = val
                 else:
-                    cond[k] = ""
-            baodijia = (cond.get("保底价") or "").strip()
-            if not baodijia:
+                    gid = name_to_id.get(name)
+                    if gid is not None:
+                        cond[str(gid)] = val
+            floor_val = (cond.get("floorPrice") or "").strip()
+            if not floor_val:
                 continue
             try:
-                q = float(baodijia)
+                q = float(floor_val)
                 if q < 1 or q > 500:
                     continue
             except ValueError:
                 continue
             valid = True
-            for k in ("靓机", "小花", "大花", "外爆", "内爆"):
-                v = (cond.get(k) or "").strip()
+            for gid in (1001, 1002, 1003, 1004, 1005):
+                v = (cond.get(str(gid)) or "").strip()
                 if v:
                     try:
                         if float(v) < 1 or float(v) > 500:
@@ -440,7 +637,7 @@ def api_execute_task():
             "storage": (str(data.get("storage", "")).strip() or None),
         }]
     use_conditions_list = False
-    if conditions and isinstance(conditions[0], dict) and "保底价" in conditions[0]:
+    if conditions and isinstance(conditions[0], dict) and ("floorPrice" in conditions[0] or "1001" in conditions[0]):
         use_conditions_list = True
         normalized = []
         seen_key = {}
@@ -449,35 +646,36 @@ def api_execute_task():
                 continue
             m = (c.get("modelName") or "").strip()
             s = (c.get("storage") or "").strip() or ""
-            baodijia = (c.get("保底价") or "").strip()
-            if not m or not baodijia:
+            floor_val = str(c.get("floorPrice") or "").strip()
+            if not m or not floor_val:
                 continue
             try:
-                bn = float(baodijia)
-                if bn < 1 or bn > 500:
-                    return task_err("保底价须在 1～500 元范围内")
+                fn = float(floor_val)
+                if fn < 1 or fn > 500:
+                    return task_err("floorPrice 须在 1～500 元范围内")
             except ValueError:
-                return task_err("保底价须为有效数字，且范围 1～500")
+                return task_err("floorPrice 须为有效数字，且范围 1～500")
             key = (m or "").lower() + "\x01" + (s or "").lower()
             if key in seen_key:
                 first_no = seen_key[key]
                 cur_no = idx + 1
                 return task_err("序号 %d 与 序号 %d 机型+存储不可重复" % (first_no, cur_no))
             seen_key[key] = idx + 1
-            row = {"modelName": m, "storage": s or None}
-            for k in ("靓机", "小花", "大花", "外爆", "内爆", "保底价"):
-                v = (c.get(k) or "").strip()
+            row = {"modelName": m, "storage": s or None, "floorPrice": floor_val}
+            for gid in COLOR_GRADE_IDS:
+                key_id = str(gid)
+                v = str(c.get(key_id) or "").strip()
                 if v:
                     try:
                         vn = float(v)
                         if vn < 1 or vn > 500:
-                            return task_err("成色报价须在 1～500 元范围内")
+                            return task_err("成色报价 %s 须在 1～500 元范围内" % key_id)
                     except ValueError:
-                        return task_err("报价须为有效数字")
-                row[k] = v
+                        return task_err("成色报价 %s 须为有效数字" % key_id)
+                row[key_id] = v
             normalized.append(row)
         if not normalized:
-            return task_err("请至少添加一条完整条件（机型+保底价）")
+            return task_err("请至少添加一条完整条件（机型+floorPrice）")
         conditions = normalized
     elif conditions:
         normalized = []
@@ -503,6 +701,7 @@ def api_execute_task():
         return task_err("请添加至少一条抢单条件")
     remark = task_name or "定时任务"
     category_brands = [{"key": category_id, "value": brand_ids}] if category_id else []
+    # 查询列表只用分类/品牌/价格/厂商，不带 conditions；conditions 仅用于后续对查询结果做匹配筛选
     cond = GrabCondition(
         category_brands=category_brands,
         order_state="10",
@@ -512,110 +711,9 @@ def api_execute_task():
         page_size=200,
     )
     try:
-        api = HaihuishouAPI()
-        api.set_token(token, user_id)
-        tool = GrabOrderTool(api=api)
-        result = tool.step4_order_list(cond, page_index=1, user_id=user_id)
-        lst = None
-        if isinstance(result, dict):
-            res_obj = result.get("result")
-            if isinstance(res_obj, dict):
-                lst = res_obj.get("orderList")
-            if lst is None:
-                lst = (
-                    result.get("list")
-                    or result.get("orderList")
-                    or result.get("results")
-                    or result.get("records")
-                    or result.get("rows")
-                    or result.get("items")
-                )
-            if lst is None and isinstance(result.get("data"), list):
-                lst = result["data"]
-            if lst is None and isinstance(result.get("data"), dict):
-                inner = result["data"]
-                lst = (inner.get("result") or {}).get("orderList") if isinstance(inner.get("result"), dict) else None
-                lst = lst or inner.get("list") or inner.get("orderList") or inner.get("results") or []
-        if not isinstance(lst, list):
-            lst = []
-        if use_conditions_list:
-            def find_condition_and_quote(order):
-                order_model = (order.get("modelName") or order.get("model") or order.get("goodsName") or "").strip().lower()
-                order_storage = (order.get("storageCapacity") or order.get("storage") or order.get("memory") or "").strip().lower()
-                for cond in conditions:
-                    c_m = (cond.get("modelName") or "").strip().lower()
-                    c_s = (cond.get("storage") or "").strip().lower()
-                    if c_m != order_model:
-                        continue
-                    if c_s != order_storage:
-                        continue
-                    color_name = (order.get("colorGradeName") or order.get("colorGrade") or "").strip()
-                    if color_name and color_name in cond and (cond.get(color_name) or "").strip():
-                        return (cond.get(color_name) or "").strip()
-                    return (cond.get("保底价") or "").strip()
-                return None
-
-            matched = []
-            for o in lst:
-                record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
-                order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
-                if record_id is None or order_id is None:
-                    continue
-                quote_for_submit = find_condition_and_quote(o)
-                if quote_for_submit:
-                    matched.append((o, quote_for_submit))
-        else:
-            def find_matching_condition(order_model, order_storage):
-                order_model = (order_model or "").strip().lower()
-                order_storage = (order_storage or "").strip().lower()
-                for cond in conditions:
-                    if (cond["modelName"] or "").strip().lower() != order_model:
-                        continue
-                    if cond["storage"]:
-                        if (cond["storage"] or "").strip().lower() != order_storage:
-                            continue
-                    return cond
-                return None
-
-            matched = []
-            for o in lst:
-                record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
-                order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
-                if record_id is None or order_id is None:
-                    continue
-                order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
-                order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
-                cond = find_matching_condition(order_model, order_storage)
-                if cond:
-                    matched.append((o, cond["quoteAmount"]))
-        grabbed = 0
-        quoted = 0
-        errors = []
-        for item in matched:
-            o, quote_for_submit = item[0], item[1]
-            record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
-            order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
-            try:
-                raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
-                resp_data = raw.get("data") or {}
-                sub_code = resp_data.get("subCode")
-                if sub_code == 200:
-                    errors.append("recordId=%s 抢单失败: %s" % (record_id, (resp_data.get("subMessage") or "已被抢")))
-                    continue
-                if sub_code != 100:
-                    errors.append("recordId=%s 抢单异常 subCode=%s" % (record_id, sub_code))
-                    continue
-                grabbed += 1
-                api.submit_quotation(
-                    record_id=int(record_id),
-                    order_id=int(order_id),
-                    actual_price=quote_for_submit,
-                    remark=remark,
-                    user_id=user_id,
-                )
-                quoted += 1
-            except Exception as e:
-                errors.append("recordId=%s: %s" % (record_id, str(e)))
+        lst, api = _execute_task_fetch_order_list(cond, token, user_id)
+        matched = _execute_task_match_orders(lst, conditions, use_conditions_list)
+        grabbed, quoted, errors = _execute_task_grab_and_quote(matched, api, user_id, remark)
         return jsonify({
             "success": True,
             "data": {"grabbed": grabbed, "quoted": quoted, "total": len(lst), "errors": errors[:20]},

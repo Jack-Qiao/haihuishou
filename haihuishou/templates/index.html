@@ -187,24 +187,29 @@
       min-height: 0;
       overflow: hidden;
     }
+
     .schedule-layout-list-only .schedule-right {
       flex: 1 1 100%;
     }
+
     .schedule-task-modal.modal {
       width: 90%;
       max-width: none;
       max-height: 90vh;
       overflow-y: auto;
     }
+
     .schedule-task-modal #btnScheduleCancelEdit {
       display: inline-block !important;
     }
+
     .schedule-task-modal .brands-chosen {
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
       margin-top: 8px;
     }
+
     .schedule-task-modal .tag {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -217,6 +222,7 @@
       cursor: pointer;
       color: var(--text);
     }
+
     .schedule-task-modal .tag input[type="checkbox"],
     .schedule-task-modal .tag input[type="radio"] {
       margin: 0;
@@ -233,16 +239,19 @@
       background: var(--bg);
       box-sizing: border-box;
     }
+
     .schedule-task-modal .tag input[type="checkbox"]:checked,
     .schedule-task-modal .tag input[type="radio"]:checked {
       background: #fff;
       border-color: #fff;
     }
+
     .schedule-task-modal .tag:has(input[type="checkbox"]:checked),
     .schedule-task-modal .tag:has(input[type="radio"]:checked) {
       border-color: var(--primary);
       background: rgba(34, 197, 94, 0.12);
     }
+
     .schedule-task-modal .tag input[type="radio"] {
       border-radius: 50%;
     }
@@ -627,6 +636,7 @@
     .order-filter-collapsible {
       margin-bottom: 12px;
     }
+
     .order-filter-collapsible-toggle {
       display: inline-flex;
       align-items: center;
@@ -638,21 +648,26 @@
       background: none;
       border: none;
     }
+
     .order-filter-collapsible-toggle:hover {
       color: var(--text);
     }
+
     .order-filter-collapsible-toggle .collapse-icon {
       font-size: 10px;
       transition: transform 0.2s ease;
     }
+
     .order-filter-collapsible.expanded .order-filter-collapsible-toggle .collapse-icon {
       transform: rotate(180deg);
     }
+
     .order-filter-collapsible-body {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.25s ease;
     }
+
     .order-filter-collapsible.expanded .order-filter-collapsible-body {
       max-height: 400px;
     }
@@ -966,16 +981,19 @@
       gap: 12px 20px;
       align-items: flex-end;
     }
+
     .schedule-cgp-cell {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
+
     .schedule-cgp-cell label {
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
     }
+
     .schedule-cgp-input {
       width: 52px;
       padding: 6px 6px;
@@ -984,9 +1002,11 @@
       font-size: 13px;
       box-sizing: border-box;
     }
+
     .schedule-cgp-input.schedule-input-error {
       border-color: var(--danger);
     }
+
     .schedule-cgp-input-model {
       width: 140px;
       min-width: 100px;
@@ -996,6 +1016,7 @@
       font-size: 13px;
       box-sizing: border-box;
     }
+
     .schedule-cgp-input-storage {
       width: 72px;
       min-width: 56px;
@@ -1005,14 +1026,17 @@
       font-size: 13px;
       box-sizing: border-box;
     }
+
     .schedule-conditions-table-wrap {
       overflow-x: auto;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 {
       table-layout: fixed;
       width: 100%;
       border-collapse: collapse;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 thead th,
     .schedule-conditions-table.schedule-conditions-table-8 tbody td {
       white-space: nowrap;
@@ -1021,14 +1045,17 @@
       font-size: 13px;
       vertical-align: middle;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 thead th {
       font-weight: 600;
       color: var(--text);
       background: var(--surface);
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 tbody tr.schedule-condition-row-error td {
       background: rgba(239, 68, 68, 0.08);
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 thead th.schedule-cond-th-num,
     .schedule-conditions-table.schedule-conditions-table-8 tbody td.schedule-cond-num {
       width: 40px;
@@ -1036,19 +1063,24 @@
       text-align: center;
       white-space: nowrap;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 tbody {
       counter-reset: schedule-cond-row;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 tbody tr {
       counter-increment: schedule-cond-row;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 tbody td.schedule-cond-num::before {
       content: counter(schedule-cond-row);
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 .schedule-cond-th-action {
       width: 56px;
       text-align: right;
     }
+
     .schedule-conditions-table.schedule-conditions-table-8 tbody td input {
       width: 100%;
       min-width: 0;
@@ -1058,9 +1090,18 @@
       font-size: 13px;
       box-sizing: border-box;
     }
-    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(2) input { max-width: 120px; }
-    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(3) input { max-width: 70px; }
-    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(n+4):nth-child(-n+9) input { max-width: 52px; }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(2) input {
+      max-width: 120px;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(3) input {
+      max-width: 70px;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(n+4):nth-child(-n+9) input {
+      max-width: 52px;
+    }
 
     .schedule-conditions-table .schedule-cond-remove:hover {
       color: var(--danger);
@@ -1187,6 +1228,7 @@
     .schedule-task-conditions-toggle:hover {
       text-decoration: underline;
     }
+
     .schedule-task-conditions-toggle-row .schedule-task-conditions-toggle {
       margin-left: 0;
     }
@@ -1305,6 +1347,7 @@
     .order-countdown.ended {
       color: var(--text-muted);
     }
+
     .order-countdown.waiting-result {
       color: #f97316;
     }
@@ -1615,7 +1658,8 @@
               <div class="order-state-right"></div>
             </div>
             <div id="orderFilterCollapsible" class="order-filter-collapsible">
-              <button type="button" class="order-filter-collapsible-toggle" id="orderFilterToggle" aria-expanded="false">
+              <button type="button" class="order-filter-collapsible-toggle" id="orderFilterToggle"
+                aria-expanded="false">
                 <span class="collapse-icon">▼</span>
                 <span id="orderFilterToggleText">展开筛选条件</span>
               </button>
@@ -1631,7 +1675,8 @@
                   <input type="text" id="inputMaxQuoteAmount" value="500" placeholder="不填则不限制" class="input-max-quote"
                     inputmode="numeric" autocomplete="off">
                   <span style="color:var(--text-muted);">元</span>
-                  <button type="button" class="btn btn-primary btn-small btn-set-max-quote" id="btnSetMaxQuote">设置</button>
+                  <button type="button" class="btn btn-primary btn-small btn-set-max-quote"
+                    id="btnSetMaxQuote">设置</button>
                   <span id="maxQuoteAmountHint" class="max-quote-hint"></span>
                   <span id="maxQuoteCheck" class="max-quote-check hidden" title="已设置">✓</span>
                 </div>
@@ -1723,7 +1768,8 @@
     <div class="modal schedule-task-modal">
       <h3>定时任务条件 <span id="scheduleConditionHint" class="schedule-condition-hint-inline hidden"></span></h3>
       <div id="scheduleMsg" class="msg info hidden" style="display:none !important;" aria-hidden="true"></div>
-      <p style="color:var(--text-muted); margin-top:0; margin-bottom:12px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。</p>
+      <p style="color:var(--text-muted); margin-top:0; margin-bottom:12px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。
+      </p>
       <div class="form-row">
         <label>任务名称</label>
         <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:100%; max-width:280px;">
@@ -1781,7 +1827,8 @@
               <tbody id="scheduleConditionsBody"></tbody>
             </table>
           </div>
-          <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition" style="margin-top:8px;">+ 添加条件</button>
+          <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition" style="margin-top:8px;">+
+            添加条件</button>
         </div>
       </div>
       <div class="form-row">
@@ -2468,14 +2515,15 @@
             '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '">删除</button>';
         }
         var conds = t.conditions && t.conditions.length ? t.conditions : [];
-        var condPriceKeys = ['靓机', '小花', '大花', '外爆', '内爆', '保底价'];
+        var condPriceKeys = ['1001', '1002', '1003', '1004', '1005', 'floorPrice'];
+        var condPriceLabels = { '1001': '靓机', '1002': '小花', '1003': '大花', '1004': '外爆', '1005': '内爆', 'floorPrice': '保底价' };
         function fmtCondLine(c) {
           var parts = [];
           if ((c.modelName || '').trim()) parts.push('机型: ' + (c.modelName || '').trim());
           if ((c.storage || '').trim()) parts.push('存储: ' + (c.storage || '').trim());
           condPriceKeys.forEach(function (k) {
             var v = (c[k] || '').trim();
-            if (v) parts.push(k + ': ' + v + '元');
+            if (v) parts.push((condPriceLabels[k] || k) + ': ' + v + '元');
           });
           return parts.join(' ');
         }
@@ -2621,8 +2669,9 @@
       }
       return bestName;
     }
-    var SCHEDULE_COND_PRICE_KEYS = ['靓机', '小花', '大花', '外爆', '内爆', '保底价'];
-    var SCHEDULE_COND_INPUT_CLASS = { '机型': 'schedule-cond-model', '存储': 'schedule-cond-storage', '靓机': 'schedule-cond-liangji', '小花': 'schedule-cond-xiaohua', '大花': 'schedule-cond-dahua', '外爆': 'schedule-cond-waibao', '内爆': 'schedule-cond-neibao', '保底价': 'schedule-cond-baodijia' };
+    // 成色/底价用 ID 与 floorPrice，与后端一致；表头仍显示中文（靓机/小花/…/保底价）
+    var SCHEDULE_COND_PRICE_KEYS = ['1001', '1002', '1003', '1004', '1005', 'floorPrice'];
+    var SCHEDULE_COND_INPUT_CLASS = { '1001': 'schedule-cond-1001', '1002': 'schedule-cond-1002', '1003': 'schedule-cond-1003', '1004': 'schedule-cond-1004', '1005': 'schedule-cond-1005', 'floorPrice': 'schedule-cond-floor' };
     function renderScheduleConditionRow(cond) {
       cond = cond || {};
       var tr = document.createElement('tr');
@@ -2634,8 +2683,8 @@
       SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
         var cls = SCHEDULE_COND_INPUT_CLASS[k];
         var v = String(cond[k] != null ? cond[k] : '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        var ph = k === '保底价' ? '必填 1-500' : '1-500';
-        cells += '<td><input type="text" class="' + cls + ' schedule-cond-price" placeholder="' + ph + '" inputmode="numeric" autocomplete="off" value="' + v + '"></td>';
+        var ph = k === 'floorPrice' ? '必填 1-500' : '1-500';
+        cells += '<td><input type="text" class="' + cls + ' schedule-cond-price" data-key="' + k + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off" value="' + v + '"></td>';
       });
       cells += '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
       tr.innerHTML = cells;
@@ -2662,11 +2711,11 @@
         var modelName = (modelEl && modelEl.value ? modelEl.value.trim() : '');
         var storage = (storageEl && storageEl.value ? storageEl.value.trim() : '') || undefined;
         var obj = { modelName: modelName, storage: storage };
-        SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
-          var cls = SCHEDULE_COND_INPUT_CLASS[k];
-          var el = row.querySelector('.' + cls);
-          obj[k] = (el && el.value ? el.value.trim() : '');
+        row.querySelectorAll('.schedule-cond-price').forEach(function (inp) {
+          var k = inp.getAttribute('data-key');
+          if (k) obj[k] = (inp.value ? inp.value.trim() : '');
         });
+        SCHEDULE_COND_PRICE_KEYS.forEach(function (k) { if (obj[k] === undefined) obj[k] = ''; });
         list.push(obj);
       }
       return list;
@@ -2691,10 +2740,10 @@
         var hasAny = c.modelName || (c.storage && c.storage.trim()) || SCHEDULE_COND_PRICE_KEYS.some(function (k) { return (c[k] || '').trim(); });
         if (!hasAny) continue;
         var modelOk = (c.modelName || '').trim().length > 0;
-        var baodijia = (c['保底价'] || '').trim();
-        var baodijiaNum = parseFloat(baodijia);
-        var baodijiaOk = baodijia && !isNaN(baodijiaNum) && baodijiaNum >= 1 && baodijiaNum <= 500;
-        if (!modelOk || !baodijiaOk) requiredInvalid.push(i);
+        var floorVal = (c.floorPrice || '').trim();
+        var floorNum = parseFloat(floorVal);
+        var floorOk = floorVal && !isNaN(floorNum) && floorNum >= 1 && floorNum <= 500;
+        if (!modelOk || !floorOk) requiredInvalid.push(i);
         var storageNorm = (c.storage || '').trim().toLowerCase();
         var modelNorm = (c.modelName || '').trim().toLowerCase();
         var key = modelNorm + '\x01' + storageNorm;
@@ -2706,7 +2755,7 @@
         }
       }
       if (requiredInvalid.length > 0) {
-        return { valid: false, message: '每条条件须填机型和保底价（1～500元）', invalidRowIndices: requiredInvalid };
+        return { valid: false, message: '每条条件须填机型和 floorPrice（1～500元）', invalidRowIndices: requiredInvalid };
       }
       var dupUnique = duplicateInvalid.filter(function (v, idx, a) { return a.indexOf(v) === idx; });
       if (dupUnique.length > 0) {
@@ -2716,12 +2765,12 @@
       }
       var hasValid = conditions.some(function (c) {
         var modelOk = (c.modelName || '').trim().length > 0;
-        var baodijia = (c['保底价'] || '').trim();
-        var n = parseFloat(baodijia);
-        return modelOk && baodijia && !isNaN(n) && n >= 1 && n <= 500;
+        var floorVal = (c.floorPrice || '').trim();
+        var n = parseFloat(floorVal);
+        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
       });
       if (!hasValid) {
-        return { valid: false, message: '请至少添加一条完整条件（机型+保底价 1～500）', invalidRowIndices: [] };
+        return { valid: false, message: '请至少添加一条完整条件（机型+floorPrice 1～500）', invalidRowIndices: [] };
       }
       return { valid: true, message: '', invalidRowIndices: [] };
     }
@@ -2751,7 +2800,8 @@
     document.getElementById('btnScheduleImport').onclick = function () { document.getElementById('scheduleImportFile').click(); };
     (function () {
       var fileEl = document.getElementById('scheduleImportFile');
-      if (!fileEl) return;
+      var btnImport = document.getElementById('btnScheduleImport');
+      if (!fileEl || !btnImport) return;
       fileEl.addEventListener('change', function () {
         var file = fileEl.files && fileEl.files[0];
         fileEl.value = '';
@@ -2760,16 +2810,23 @@
         var fd = new FormData();
         fd.append('file', file);
         var msg = document.getElementById('scheduleMsg');
+        var btnText = btnImport.textContent || '导入价格列表';
+        btnImport.disabled = true;
+        btnImport.textContent = '导入中…';
         showMsg(msg, '正在解析…', 'info');
+        function stopLoading() {
+          btnImport.disabled = false;
+          btnImport.textContent = btnText;
+          hideMsg(msg);
+        }
         fetch('/api/import-price-list', {
           method: 'POST',
           headers: { 'token': authToken },
           body: fd
         }).then(function (r) { return r.text().then(function (t) { try { return JSON.parse(t); } catch (_) { return { success: false, message: '解析响应失败' }; } }); }).then(function (res) {
-          hideMsg(msg);
-          if (!res.success) { showToast(res.message || '导入失败', 'error'); return; }
+          if (!res.success) { stopLoading(); showToast(res.message || '导入失败', 'error'); return; }
           var list = res.data && Array.isArray(res.data) ? res.data : [];
-          if (!list.length) { showToast('文件中无有效数据（需含品牌、机型、保底价）', 'error'); return; }
+          if (!list.length) { stopLoading(); showToast('文件中无有效数据（需含品牌、机型、保底价）', 'error'); return; }
           loadScheduleOptions().then(function () {
             var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
             var brandNameToKey = {};
@@ -2810,16 +2867,9 @@
                 minPrice: undefined,
                 maxPrice: undefined,
                 conditions: conditions.map(function (c) {
-                  return {
-                    modelName: String(c.modelName || '').trim(),
-                    storage: (c.storage && String(c.storage).trim()) || undefined,
-                    '靓机': String(c['靓机'] || '').trim(),
-                    '小花': String(c['小花'] || '').trim(),
-                    '大花': String(c['大花'] || '').trim(),
-                    '外爆': String(c['外爆'] || '').trim(),
-                    '内爆': String(c['内爆'] || '').trim(),
-                    '保底价': String(c['保底价'] || c.quoteAmount || '').trim()
-                  };
+                  var out = { modelName: String(c.modelName || '').trim(), storage: (c.storage && String(c.storage).trim()) || undefined };
+                  ['1001', '1002', '1003', '1004', '1005', 'floorPrice'].forEach(function (k) { out[k] = String(c[k] || '').trim(); });
+                  return out;
                 }),
                 frequency: '3'
               });
@@ -2827,10 +2877,11 @@
             });
             saveScheduledTasks();
             renderScheduleTaskList();
+            stopLoading();
             showToast('已导入 ' + added + ' 个任务' + (skipped ? '，跳过 ' + skipped + ' 条' : ''), 'success');
           });
         }).catch(function (e) {
-          hideMsg(msg);
+          stopLoading();
           showToast('导入失败: ' + (e && e.message ? e.message : '网络错误'), 'error');
         });
       });
@@ -2843,9 +2894,9 @@
       var conditions = getScheduleConditionsFromForm();
       var validConditions = conditions.filter(function (c) {
         var modelOk = (c.modelName || '').trim().length > 0;
-        var baodijia = (c['保底价'] || '').trim();
-        var n = parseFloat(baodijia);
-        return modelOk && baodijia && !isNaN(n) && n >= 1 && n <= 500;
+        var floorVal = (c.floorPrice || '').trim();
+        var n = parseFloat(floorVal);
+        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
       });
       if (!validConditions.length) return null;
       var brandRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
@@ -2965,14 +3016,14 @@
       var task = scheduledTasks.find(function (t) { return t.id === taskId; });
       if (!task) { showToast('任务不存在', 'error'); return; }
       var conds = task.conditions && task.conditions.length ? task.conditions : [];
-      if (!conds.length && (task.quoteAmount || task.modelName)) conds = [{ quoteAmount: task.quoteAmount, modelName: task.modelName, storage: task.storage }];
+      if (!conds.length && (task.quoteAmount || task.modelName)) conds = [{ floorPrice: task.quoteAmount, modelName: task.modelName, storage: task.storage }];
       if (!conds.length) { showToast('请先添加至少一条抢单条件', 'error'); return; }
       var invalid = conds.find(function (c) {
-        var price = (c['保底价'] || c.quoteAmount || '').trim();
+        var price = String(c.floorPrice != null ? c.floorPrice : '').trim();
         var q = parseFloat(price);
         return !(c.modelName || '').trim() || !price || isNaN(q) || q < 1 || q > 500;
       });
-      if (invalid) { showToast('每条条件须包含机型且保底价 1～500 元', 'error'); return; }
+      if (invalid) { showToast('每条条件须包含机型且底价（floorPrice）1～500 元', 'error'); return; }
       if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
       if (scheduleTaskStarting[taskId]) return;
       var sec = Math.max(1, parseInt(task.frequency, 10) || 1);
