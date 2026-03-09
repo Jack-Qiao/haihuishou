@@ -193,10 +193,60 @@
     }
 
     .schedule-task-modal.modal {
-      width: 90%;
+      width: 95%;
       max-width: none;
       max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .schedule-task-modal-fixed {
+      flex-shrink: 0;
+    }
+
+    .schedule-task-modal-scroll {
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
+      margin-top: 8px;
+    }
+
+    .schedule-task-manu-range-freq-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+    }
+
+    .schedule-task-manu-range-freq-row .schedule-task-inline-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .schedule-task-manu-range-freq-row .schedule-task-inline-item label {
+      min-width: 80px;
+      margin: 0;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .schedule-quick-locate-label {
+      color: var(--primary) !important;
+      font-weight: 600;
+    }
+    .schedule-quick-locate-input {
+      border: 1px solid var(--primary);
+      background: rgba(34, 197, 94, 0.08);
+      border-radius: 6px;
+    }
+    .schedule-quick-locate-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    }
+    #btnScheduleQuickLocate {
+      font-weight: 600;
     }
 
     .schedule-task-modal #btnScheduleCancelEdit {
@@ -1056,6 +1106,10 @@
       background: rgba(239, 68, 68, 0.08);
     }
 
+    .schedule-conditions-table tbody tr.schedule-condition-row-highlight td {
+      background: rgba(34, 197, 94, 0.12);
+    }
+
     .schedule-conditions-table.schedule-conditions-table-8 thead th.schedule-cond-th-num,
     .schedule-conditions-table.schedule-conditions-table-8 tbody td.schedule-cond-num {
       width: 40px;
@@ -1769,84 +1823,83 @@
 
   <div id="scheduleTaskModal" class="modal-overlay hidden">
     <div class="modal schedule-task-modal">
-      <h3>定时任务条件 <span id="scheduleConditionHint" class="schedule-condition-hint-inline hidden"></span></h3>
-      <div id="scheduleMsg" class="msg info hidden" style="display:none !important;" aria-hidden="true"></div>
-      <p style="color:var(--text-muted); margin-top:0; margin-bottom:12px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。
-      </p>
-      <div class="form-row">
-        <label>任务名称</label>
-        <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:100%; max-width:280px;">
-      </div>
-      <div class="form-row form-row-align-top">
-        <label>厂商</label>
-        <div class="schedule-field-wrap">
-          <div id="scheduleManufacturersList" class="brands-chosen">加载中…</div>
+      <div class="schedule-task-modal-fixed">
+        <h3>定时任务条件 <span id="scheduleConditionHint" class="schedule-condition-hint-inline hidden"></span></h3>
+        <div id="scheduleMsg" class="msg info hidden" style="display:none !important;" aria-hidden="true"></div>
+        <div class="form-row">
+          <label>任务名称</label>
+          <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:100%; max-width:280px;">
         </div>
-      </div>
-      <div class="form-row">
-        <label>类型</label>
-        <span style="color:var(--text-muted);">手机</span>
-      </div>
-      <div class="form-row form-row-align-top">
-        <label>品牌</label>
-        <div class="schedule-field-wrap">
-          <div id="scheduleBrandsCollapsible" class="brands-collapsible">
-            <button type="button" class="brands-collapsible-toggle" id="scheduleBrandsToggle" aria-expanded="false">
-              <span class="collapse-icon">▼</span>
-              <span id="scheduleBrandsToggleText">展开品牌</span>
-            </button>
-            <div class="brands-collapsible-body">
-              <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
+        <div class="form-row form-row-align-top">
+          <label>厂商</label>
+          <div class="schedule-field-wrap">
+            <div id="scheduleManufacturersList" class="brands-chosen">加载中…</div>
+          </div>
+        </div>
+        <div class="form-row schedule-task-range-freq-row">
+          <label>抢单金额范围</label>
+          <input type="text" id="scheduleTaskMinPrice" placeholder="最低价" style="width:90px;">
+          <span style="color:var(--text-muted);">～</span>
+          <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
+          <label style="margin-left:20px;">频率</label>
+          <select id="scheduleTaskFrequency" style="width:140px;">
+            <option value="1">1秒/次</option>
+            <option value="2">2秒/次</option>
+            <option value="3" selected>3秒/次</option>
+            <option value="5">5秒/次</option>
+            <option value="10">10秒/次</option>
+            <option value="30">30秒/次</option>
+            <option value="60">60秒/次</option>
+          </select>
+          <label class="schedule-quick-locate-label" style="margin-left:20px;">快速定位</label>
+          <input type="text" id="scheduleQuickLocate" class="schedule-quick-locate-input" placeholder="输入机型模糊搜索（辅助，不入参）" style="width:160px;" autocomplete="off" data-auxiliary="true">
+          <button type="button" class="btn btn-primary btn-small" id="btnScheduleQuickLocate" title="定位到匹配的条件行（辅助功能，不入参）">定位</button>
+        </div>
+        <div class="form-row form-row-align-top">
+          <label>品牌</label>
+          <div class="schedule-field-wrap">
+            <div id="scheduleBrandsCollapsible" class="brands-collapsible">
+              <button type="button" class="brands-collapsible-toggle" id="scheduleBrandsToggle" aria-expanded="false">
+                <span class="collapse-icon">▼</span>
+                <span id="scheduleBrandsToggleText">展开品牌</span>
+              </button>
+              <div class="brands-collapsible-body">
+                <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="form-row">
-        <label>抢单金额范围</label>
-        <input type="text" id="scheduleTaskMinPrice" placeholder="最低价" style="width:90px;">
-        <span style="color:var(--text-muted);">～</span>
-        <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
-      </div>
-      <div class="form-row">
-        <label>频率</label>
-        <select id="scheduleTaskFrequency" style="width:140px;">
-          <option value="1">1秒/次</option>
-          <option value="2">2秒/次</option>
-          <option value="3" selected>3秒/次</option>
-          <option value="5">5秒/次</option>
-          <option value="10">10秒/次</option>
-          <option value="30">30秒/次</option>
-          <option value="60">60秒/次</option>
-        </select>
-      </div>
-      <div class="form-row form-row-align-top">
-        <label>抢单条件</label>
-        <div class="schedule-field-wrap schedule-conditions-wrap">
-          <p style="color:var(--text-muted); margin:0 0 8px 0;">可添加多条，每条机型与保底价必填，保底价 1～500 元；机型+存储不可重复。</p>
-          <div class="schedule-conditions-table-wrap">
-            <table class="schedule-conditions-table schedule-conditions-table-8">
-              <thead>
-                <tr>
-                  <th class="schedule-cond-th-num">序号</th>
-                  <th>机型</th>
-                  <th>存储</th>
-                  <th>靓机</th>
-                  <th>小花</th>
-                  <th>大花</th>
-                  <th>外爆</th>
-                  <th>内爆</th>
-                  <th>保底价</th>
-                  <th class="schedule-cond-th-action"></th>
-                </tr>
-              </thead>
-              <tbody id="scheduleConditionsBody"></tbody>
-            </table>
-          </div>
+      <div class="schedule-task-modal-scroll">
+        <div class="form-row form-row-align-top">
+          <label>抢单条件</label>
+          <div class="schedule-field-wrap schedule-conditions-wrap">
+            <p style="color:var(--text-muted); margin:0 0 8px 0;">可添加多条，每条机型与保底价必填，保底价 1～500 元；机型+存储不可重复。</p>
+            <div class="schedule-conditions-table-wrap">
+              <table class="schedule-conditions-table schedule-conditions-table-8">
+                <thead>
+                  <tr>
+                    <th class="schedule-cond-th-num">序号</th>
+                    <th>机型</th>
+                    <th>存储</th>
+                    <th>靓机</th>
+                    <th>小花</th>
+                    <th>大花</th>
+                    <th>外爆</th>
+                    <th>内爆</th>
+                    <th>保底价</th>
+                    <th class="schedule-cond-th-action"></th>
+                  </tr>
+                </thead>
+                <tbody id="scheduleConditionsBody"></tbody>
+              </table>
+            </div>
             <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition" style="margin-top:8px;">+
             添加条件</button>
+          </div>
         </div>
       </div>
-      <div class="modal-actions" style="margin-top:16px;">
+      <div class="modal-actions" style="margin-top:16px; flex-shrink:0;">
         <button type="button" class="btn btn-primary" id="btnScheduleSave">保存任务</button>
         <button type="button" class="btn btn-ghost btn-small" id="btnScheduleCancelEdit">取消</button>
       </div>
@@ -2492,6 +2545,11 @@
     var scheduleTaskTimers = {};
     var scheduleTaskStarting = {};
     var scheduleGrabbedCountTimer = null;
+    function updateScheduleImportButtonState() {
+      var hasRunning = Object.keys(scheduleTaskTimers).length > 0 || Object.keys(scheduleTaskStarting).length > 0;
+      var btnImport = document.getElementById('btnScheduleImport');
+      if (btnImport) btnImport.disabled = hasRunning;
+    }
     var scheduleGrabbedCountValue = 0;
     function saveScheduledTasks() {
       try { localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(scheduledTasks)); } catch (_) { }
@@ -2506,6 +2564,7 @@
       if (scheduledTasks.length === 0) {
         listEl.innerHTML = '';
         if (emptyEl) emptyEl.classList.remove('hidden');
+        updateScheduleImportButtonState();
         return;
       }
       if (emptyEl) emptyEl.classList.add('hidden');
@@ -2561,6 +2620,7 @@
           '<div class="schedule-task-card-body">' + bodyHtml + '</div>' +
           '<div class="schedule-task-card-actions">' + actions + '</div></div>';
       }).join('');
+      updateScheduleImportButtonState();
       listEl.querySelectorAll('.schedule-btn-auto').forEach(function (btn) {
         btn.onclick = function () { startScheduleTaskAuto(Number(btn.dataset.id)); };
       });
@@ -2603,6 +2663,8 @@
       setScheduleConditionsInForm(conditions.length ? conditions : [{}]);
       var freqSelect = document.getElementById('scheduleTaskFrequency');
       if (freqSelect) freqSelect.value = task.frequency || '3';
+      var quickLocate = document.getElementById('scheduleQuickLocate');
+      if (quickLocate) quickLocate.value = '';
       var brandKey = (task.brandIds && task.brandIds[0]) ? String(task.brandIds[0]) : '';
       var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
       for (var i = 0; i < radios.length; i++) {
@@ -2636,6 +2698,8 @@
         if ((radios[i].getAttribute('data-key') || '').trim() === '') { radios[i].checked = true; break; }
       }
       document.querySelectorAll('#scheduleManufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+      var quickLocate = document.getElementById('scheduleQuickLocate');
+      if (quickLocate) quickLocate.value = '';
     }
     function getScheduleBrandListSortedByLength() {
       var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
@@ -2793,8 +2857,48 @@
       if (tbody) tbody.appendChild(renderScheduleConditionRow({}));
       updateScheduleSaveButtonState();
     };
+    var scheduleQuickLocateIndex = 0;
+    var scheduleQuickLocateLastKeyword = '';
+    function runScheduleQuickLocate() {
+      var input = document.getElementById('scheduleQuickLocate');
+      var tbody = document.getElementById('scheduleConditionsBody');
+      var scrollEl = document.querySelector('.schedule-task-modal-scroll');
+      if (!input || !tbody || !scrollEl) return;
+      var keyword = (input.value || '').trim().toLowerCase();
+      if (!keyword) { showToast('请输入机型关键词', 'info'); return; }
+      if (keyword !== scheduleQuickLocateLastKeyword) {
+        scheduleQuickLocateLastKeyword = keyword;
+        scheduleQuickLocateIndex = 0;
+      }
+      var rows = tbody.querySelectorAll('tr.schedule-condition-row');
+      var matches = [];
+      for (var i = 0; i < rows.length; i++) {
+        var modelInput = rows[i].querySelector('.schedule-cond-model');
+        var modelVal = (modelInput && modelInput.value ? modelInput.value.trim() : '').toLowerCase();
+        if (modelVal && modelVal.indexOf(keyword) !== -1) matches.push(rows[i]);
+      }
+      if (!matches.length) { showToast('未找到匹配的机型', 'info'); return; }
+      var idx = scheduleQuickLocateIndex % matches.length;
+      var found = matches[idx];
+      scheduleQuickLocateIndex = (scheduleQuickLocateIndex + 1) % matches.length;
+      found.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      found.classList.add('schedule-condition-row-highlight');
+      setTimeout(function () { found.classList.remove('schedule-condition-row-highlight'); }, 1500);
+      if (matches.length > 1) showToast('第 ' + (idx + 1) + '/' + matches.length + ' 条匹配，继续点击定位可顺移下一条', 'success');
+    }
+    var quickLocateInput = document.getElementById('scheduleQuickLocate');
+    var btnQuickLocate = document.getElementById('btnScheduleQuickLocate');
+    if (quickLocateInput) {
+      quickLocateInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runScheduleQuickLocate(); } });
+      quickLocateInput.addEventListener('input', function () { scheduleQuickLocateLastKeyword = ''; });
+    }
+    if (btnQuickLocate) btnQuickLocate.onclick = runScheduleQuickLocate;
     var scheduleTaskModalEl = document.getElementById('scheduleTaskModal');
-    function openScheduleTaskModal() { if (scheduleTaskModalEl) scheduleTaskModalEl.classList.remove('hidden'); }
+    function openScheduleTaskModal() {
+      if (scheduleTaskModalEl) scheduleTaskModalEl.classList.remove('hidden');
+      var scrollEl = document.querySelector('.schedule-task-modal-scroll');
+      if (scrollEl) scrollEl.scrollTop = 0;
+    }
     function closeScheduleTaskModal() { if (scheduleTaskModalEl) scheduleTaskModalEl.classList.add('hidden'); }
     document.getElementById('btnScheduleAddTask').onclick = function () {
       clearScheduleTaskForm();
@@ -2850,6 +2954,10 @@
         fileEl.value = '';
         if (!file) return;
         if (!authToken) { showToast('请先登录', 'error'); return; }
+        if (Object.keys(scheduleTaskTimers).length > 0 || Object.keys(scheduleTaskStarting).length > 0) {
+          showToast('请先全部停止任务后再导入', 'error');
+          return;
+        }
         var fd = new FormData();
         fd.append('file', file);
         var msg = document.getElementById('scheduleMsg');
@@ -2884,8 +2992,16 @@
               if (name) brandNameToKey[name.toLowerCase()] = { key: key, name: name };
             });
             var added = 0;
+            var overwritten = 0;
             var skipped = 0;
             var baseId = Date.now();
+            var newConditions = function (conditions) {
+              return conditions.map(function (c) {
+                var out = { modelName: String(c.modelName || '').trim(), storage: (c.storage && String(c.storage).trim()) || undefined };
+                ['1001', '1002', '1003', '1004', '1005', 'floorPrice'].forEach(function (k) { out[k] = String(c[k] || '').trim(); });
+                return out;
+              });
+            };
             list.forEach(function (item, idx) {
               var brandName = (item.brandName || '').trim();
               var conditions = item.conditions || [];
@@ -2900,8 +3016,17 @@
               var brandKey = matched ? matched.key : '';
               var displayBrandName = matched ? matched.name : brandName;
               var taskName = brandName + '抢单';
-              if (scheduledTasks.some(function (t) { return (t.name || '').trim() === taskName; })) {
-                skipped++;
+              var existing = scheduledTasks.find(function (t) { return (t.name || '').trim() === taskName; });
+              if (existing) {
+                existing.manufacturerNames = [];
+                existing.categoryId = schedulePhoneCatId;
+                existing.brandIds = brandKey ? [brandKey] : [];
+                existing.brandName = displayBrandName;
+                existing.minPrice = undefined;
+                existing.maxPrice = undefined;
+                existing.conditions = newConditions(conditions);
+                existing.frequency = '3';
+                overwritten++;
                 return;
               }
               var id = baseId + idx;
@@ -2914,11 +3039,7 @@
                 brandName: displayBrandName,
                 minPrice: undefined,
                 maxPrice: undefined,
-                conditions: conditions.map(function (c) {
-                  var out = { modelName: String(c.modelName || '').trim(), storage: (c.storage && String(c.storage).trim()) || undefined };
-                  ['1001', '1002', '1003', '1004', '1005', 'floorPrice'].forEach(function (k) { out[k] = String(c[k] || '').trim(); });
-                  return out;
-                }),
+                conditions: newConditions(conditions),
                 frequency: '3'
               });
               added++;
@@ -2926,7 +3047,10 @@
             saveScheduledTasks();
             renderScheduleTaskList();
             stopLoading();
-            showToast('已导入 ' + added + ' 个任务' + (skipped ? '，跳过 ' + skipped + ' 条' : ''), 'success');
+            var msg = '已导入 ' + added + ' 个任务';
+            if (overwritten) msg += '，覆盖 ' + overwritten + ' 条';
+            if (skipped) msg += '，跳过 ' + skipped + ' 条';
+            showToast(msg, 'success');
           });
         }).catch(function (e) {
           stopLoading();
@@ -2935,6 +3059,7 @@
       });
     })();
     function getScheduleFormTask() {
+      // 快速定位为辅助功能，仅用于在条件列表中滚动定位，不入参、不参与保存与执行
       var name = document.getElementById('scheduleTaskName').value.trim();
       if (!name) return null;
       var validation = validateScheduleConditions();
@@ -3122,6 +3247,7 @@
       scheduleTaskTimers = {};
       scheduleTaskStarting = {};
       scheduledTasks = [];
+      updateScheduleImportButtonState();
       saveScheduledTasks();
       clearScheduleEditMode();
       showToast('已删除全部任务', 'success');
