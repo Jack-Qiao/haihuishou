@@ -1882,6 +1882,10 @@
               class="btn btn-ghost btn-small btn-copy-quote-field" data-target="quoteStorage" title="复制">复制</button>
           </div>
         </div>
+        <div class="form-row quote-detail-row">
+          <label>成色</label>
+          <span id="quoteColorGrade">-</span>
+        </div>
       </div>
       <div class="form-row">
         <label>预估金额</label>
@@ -2301,7 +2305,8 @@
           var modelCopyBtn = modelRaw ? ' <button type="button" class="btn-copy-model btn btn-ghost btn-small" title="复制机型" data-model="' + modelVal + '">复制</button>' : '';
           var modelTd = '<td class="order-list-model-cell" style="color:var(--text-muted); font-size:13px"><span class="order-list-model-text">' + modelDisplay + '</span>' + modelCopyBtn + '</td>';
           var storageTd = '<td class="order-list-copy-cell" title="单击复制" style="color:var(--text-muted); font-size:13px">' + storageDisplay + '</td>';
-          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td style="color:#fff; font-size:13px">' + colorGradeDisplay + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          var colorGradeVal = (colorGradeName || '-').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td style="color:#fff; font-size:13px">' + colorGradeDisplay + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-color-grade="' + colorGradeVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
@@ -3287,6 +3292,7 @@
         document.getElementById('quoteBrand').textContent = btn.dataset.brand || '-';
         document.getElementById('quoteModel').textContent = btn.dataset.model || '-';
         document.getElementById('quoteStorage').textContent = btn.dataset.storage || '-';
+        document.getElementById('quoteColorGrade').textContent = btn.dataset.colorGrade || '-';
         document.getElementById('quoteApprizeDisplay').textContent = btn.dataset.apprizeDisplay || '-';
         document.getElementById('quoteApprizeValue').value = btn.dataset.apprize || '';
         var ap = (btn.dataset.actualPrice || '').trim();
