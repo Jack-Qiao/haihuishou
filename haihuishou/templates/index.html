@@ -1269,6 +1269,8 @@
 
     .schedule-list-title-actions {
       flex-shrink: 0;
+      display: flex;
+      gap: 16px;
     }
 
     #scheduleTaskListContainer {
@@ -1743,13 +1745,14 @@
                   <button type="button" class="btn btn-primary btn-small" id="btnScheduleAddTask">添加任务</button>
                   <input type="file" id="scheduleImportFile" accept=".xlsx,.xls" style="display:none;">
                   <button type="button" class="btn btn-primary btn-small" id="btnScheduleImport">导入价格列表</button>
+                  <button type="button" class="btn btn-primary btn-small" id="btnScheduleExport">导出价格列表</button>
                 </div>
               </div>
               <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
                   id="scheduleGrabbedCountNum">0</span></p>
               <div class="form-row" style="margin-bottom:12px; gap:8px;margin-left: 12px;">
                 <button type="button" class="btn btn-primary btn-small" id="btnScheduleStartAll">一键全部启动</button>
-                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleStopAll">一键全部暂停</button>
+                <button type="button" class="btn btn-primary btn-small" id="btnScheduleStopAll">一键全部暂停</button>
                 <button type="button" class="btn btn-ghost btn-small" id="btnScheduleDeleteAll"
                   style="color:var(--danger);">删除全部任务</button>
               </div>
@@ -1804,6 +1807,18 @@
         <span style="color:var(--text-muted);">～</span>
         <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
       </div>
+      <div class="form-row">
+        <label>频率</label>
+        <select id="scheduleTaskFrequency" style="width:140px;">
+          <option value="1">1秒/次</option>
+          <option value="2">2秒/次</option>
+          <option value="3" selected>3秒/次</option>
+          <option value="5">5秒/次</option>
+          <option value="10">10秒/次</option>
+          <option value="30">30秒/次</option>
+          <option value="60">60秒/次</option>
+        </select>
+      </div>
       <div class="form-row form-row-align-top">
         <label>抢单条件</label>
         <div class="schedule-field-wrap schedule-conditions-wrap">
@@ -1827,21 +1842,9 @@
               <tbody id="scheduleConditionsBody"></tbody>
             </table>
           </div>
-          <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition" style="margin-top:8px;">+
+            <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition" style="margin-top:8px;">+
             添加条件</button>
         </div>
-      </div>
-      <div class="form-row">
-        <label>频率</label>
-        <select id="scheduleTaskFrequency" style="width:140px;">
-          <option value="1">1秒/次</option>
-          <option value="2">2秒/次</option>
-          <option value="3" selected>3秒/次</option>
-          <option value="5">5秒/次</option>
-          <option value="10">10秒/次</option>
-          <option value="30">30秒/次</option>
-          <option value="60">60秒/次</option>
-        </select>
       </div>
       <div class="modal-actions" style="margin-top:16px;">
         <button type="button" class="btn btn-primary" id="btnScheduleSave">保存任务</button>
@@ -2776,7 +2779,7 @@
         return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
       });
       if (!hasValid) {
-        return { valid: false, message: '请至少添加一条完整条件（机型+floorPrice 1～500）', invalidRowIndices: [] };
+        return { valid: false, message: '请至少添加一条完整条件', invalidRowIndices: [] };
       }
       return { valid: true, message: '', invalidRowIndices: [] };
     }
@@ -2804,6 +2807,35 @@
       closeScheduleTaskModal();
     };
     document.getElementById('btnScheduleImport').onclick = function () { document.getElementById('scheduleImportFile').click(); };
+    (function () {
+      var btnExport = document.getElementById('btnScheduleExport');
+      if (btnExport) {
+        btnExport.onclick = function () {
+          if (!authToken) { showToast('请先登录', 'error'); return; }
+          if (!scheduledTasks.length) { showToast('暂无任务可导出', 'error'); return; }
+          fetch('/api/export-price-list', {
+            method: 'POST',
+            headers: { 'token': authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tasks: scheduledTasks })
+          }).then(function (r) {
+            if (!r.ok) {
+              return r.text().then(function (t) {
+                try { var j = JSON.parse(t); showToast(j.message || '导出失败', 'error'); } catch (_) { showToast('导出失败', 'error'); }
+              });
+            }
+            return r.blob();
+          }).then(function (blob) {
+            if (!blob) return;
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = '价格列表.xlsx';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('导出成功', 'success');
+          }).catch(function (e) { showToast('导出失败: ' + (e && e.message ? e.message : '网络错误'), 'error'); });
+        };
+      }
+    })();
     (function () {
       var fileEl = document.getElementById('scheduleImportFile');
       var btnImport = document.getElementById('btnScheduleImport');
@@ -2952,7 +2984,7 @@
       } else {
         var parts = [];
         if (!nameValid) parts.push('任务名称');
-        if (!validation.valid) parts.push(validation.message || '至少一条完整条件（机型+保底价）');
+        if (!validation.valid) parts.push(validation.message || '至少一条完整条件');
         hintEl.textContent = '（请完善：' + parts.join('；') + '）';
         hintEl.classList.remove('hidden');
       }
@@ -2977,7 +3009,7 @@
       var taskNameVal = (document.getElementById('scheduleTaskName').value || '').trim();
       if (!t) {
         var validation = validateScheduleConditions();
-        var errText = taskNameVal ? ('任务「' + taskNameVal + '」：' + (validation.message || '请至少一条完整条件（机型+保底价）')) : (validation.message || '请填写任务名称');
+        var errText = taskNameVal ? ('任务「' + taskNameVal + '」：' + (validation.message || '请至少一条完整条件')) : (validation.message || '请填写任务名称');
         showMsg(msg, errText, 'error');
         return;
       }

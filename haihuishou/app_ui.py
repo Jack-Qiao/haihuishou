@@ -10,7 +10,7 @@ import threading
 import unicodedata
 from typing import Any, Dict
 
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, jsonify, render_template, request, send_file, session
 
 from .api import HaihuishouAPI
 from .grab_tool import GrabCondition, GrabOrderTool
@@ -85,10 +85,11 @@ def _execute_task_fetch_order_list(cond, token, user_id):
 def _execute_task_match_orders(lst, conditions, use_conditions_list):
     """
     抢单任务 - 遍历订单列表，匹配条件并算出每条订单的报价金额。
+    当成色为空或不存在时，仍加入匹配列表但 quote_amount 为 None，表示只抢单不报价。
     :param lst: 订单列表（来自查询列表接口）
     :param conditions: 归一化后的抢单条件
     :param use_conditions_list: 是否为新格式（含保底价/成色价）
-    :return: [(order, quote_amount), ...]，仅包含能匹配到条件且有报价的订单
+    :return: [(order, quote_amount or None), ...]，quote_amount 为 None 时仅抢单不报价
     """
     def _quote_from_cond(order, cond):
         """按订单成色 ID（colorGrade）从条件中取报价，避免中文 colorGradeName 匹配问题；无则用底价。"""
@@ -109,8 +110,17 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
             return str(val).strip()
         return ""
 
+    def _order_has_no_color_grade(order):
+        """订单成色为空或不存在时返回 True，此时只抢单不报价。"""
+        g = order.get("colorGrade")
+        if g is None:
+            return True
+        if isinstance(g, str) and not g.strip():
+            return True
+        return False
+
     def _find_condition_and_quote(order):
-        """新格式：按机型+存储匹配一条条件（优先完全一致，否则仅机型），再按成色取报价；无匹配返回 None。"""
+        """新格式：按机型+存储匹配一条条件（优先完全一致，否则仅机型），再按成色取报价。无匹配返回 None；有成色则返回 (报价金额,)；成色为空/不存在则返回 (None,) 表示只抢单不报价。"""
         order_model = (order.get("modelName") or order.get("model") or order.get("goodsName") or "").strip().lower()
         order_storage = _normalize_storage(
             order.get("storageCapacity") or order.get("storage") or order.get("memory")
@@ -133,7 +143,10 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
         chosen = exact_match or model_only_match
         if not chosen:
             return None
-        return _quote_from_cond(order, chosen)
+        if _order_has_no_color_grade(order):
+            return (None,)  # 只抢单不报价
+        quote = _quote_from_cond(order, chosen)
+        return (quote,) if quote else (None,)
 
     def _find_matching_condition(order_model, order_storage):
         """旧格式：按机型+存储匹配一条条件（条件无存储时只比机型）；无匹配返回 None。"""
@@ -155,21 +168,34 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
         if record_id is None or order_id is None:
             continue
         if use_conditions_list:
-            quote_for_submit = _find_condition_and_quote(o)
+            res = _find_condition_and_quote(o)
+            if res is None:
+                continue
+            # res 为 (None,) 表示只抢单不报价，(quote_str,) 表示抢单并报价
+            if res[0] is not None and str(res[0]).strip():
+                matched.append((o, str(res[0]).strip()))
+            else:
+                matched.append((o, None))  # 成色为空，只抢单不报价
         else:
             order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
             order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
             c = _find_matching_condition(order_model, order_storage)
-            quote_for_submit = c.get("quoteAmount") if c else None
-        if quote_for_submit:
-            matched.append((o, quote_for_submit))
+            if not c:
+                continue
+            if _order_has_no_color_grade(o):
+                matched.append((o, None))  # 成色为空，只抢单不报价
+            else:
+                q = c.get("quoteAmount")
+                if q and str(q).strip():
+                    matched.append((o, str(q).strip()))
     return matched
 
 
 def _execute_task_grab_and_quote(matched, api, user_id, remark):
     """
     抢单任务 - 对匹配到的订单执行抢单并提交报价。
-    :param matched: [(order, quote_amount), ...]
+    quote_amount 为 None 或空时只抢单不报价。
+    :param matched: [(order, quote_amount or None), ...]
     :param api: HaihuishouAPI 实例（已 set_token）
     :param user_id: 用户 ID
     :param remark: 报价备注
@@ -192,14 +218,16 @@ def _execute_task_grab_and_quote(matched, api, user_id, remark):
                 errors.append("recordId=%s 抢单异常 subCode=%s" % (record_id, sub_code))
                 continue
             grabbed += 1
-            api.submit_quotation(
-                record_id=int(record_id),
-                order_id=int(order_id),
-                actual_price=quote_for_submit,
-                remark=remark,
-                user_id=user_id,
-            )
-            quoted += 1
+            # 成色为空或不存在时只抢单不报价（quote_for_submit 为 None）
+            if quote_for_submit is not None and str(quote_for_submit).strip():
+                api.submit_quotation(
+                    record_id=int(record_id),
+                    order_id=int(order_id),
+                    actual_price=quote_for_submit,
+                    remark=remark,
+                    user_id=user_id,
+                )
+                quoted += 1
         except Exception as e:
             errors.append("recordId=%s: %s" % (record_id, str(e)))
     return grabbed, quoted, errors
@@ -463,6 +491,55 @@ def api_import_price_list():
         return jsonify({"success": False, "message": "解析失败: %s" % str(e)}), 200
 
 
+@app.route("/api/export-price-list", methods=["POST"])
+def api_export_price_list():
+    """根据前端传入的任务列表，生成与导入格式一致的 Excel（品牌、机型、内存、靓机、小花、大花、外爆、内爆、保底价），供下载。"""
+    try:
+        from openpyxl import Workbook
+        import io
+    except ImportError:
+        return jsonify({"success": False, "message": "服务端未安装 openpyxl，无法生成 Excel"}), 500
+    body = request.get_json() or {}
+    tasks = body.get("tasks")
+    if not tasks or not isinstance(tasks, list):
+        return jsonify({"success": False, "message": "请提供任务列表 tasks"}), 400
+    # 表头与导入一致
+    headers = ["品牌", "机型", "内存", "靓机", "小花", "大花", "外爆", "内爆", "保底价"]
+    wb = Workbook()
+    ws = wb.active
+    if ws is None:
+        ws = wb.create_sheet("价格列表", 0)
+    ws.append(headers)
+    for task in tasks:
+        brand_name = (task.get("brandName") or "").strip() or (task.get("name") or "").replace("抢单", "").strip()
+        conditions = task.get("conditions") or []
+        for c in conditions:
+            model = (c.get("modelName") or "").strip()
+            storage = (c.get("storage") or "").strip()
+            floor = (c.get("floorPrice") or "").strip()
+            row = [
+                brand_name,
+                model,
+                storage,
+                (c.get("1001") or "").strip(),
+                (c.get("1002") or "").strip(),
+                (c.get("1003") or "").strip(),
+                (c.get("1004") or "").strip(),
+                (c.get("1005") or "").strip(),
+                floor,
+            ]
+            ws.append(row)
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return send_file(
+        buf,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="价格列表.xlsx",
+    )
+
+
 @app.route("/api/order-list", methods=["POST"])
 def api_order_list():
     body = request.get_json() or {}
@@ -701,13 +778,14 @@ def api_execute_task():
         return task_err("请添加至少一条抢单条件")
     remark = task_name or "定时任务"
     category_brands = [{"key": category_id, "value": brand_ids}] if category_id else []
-    # 查询列表只用分类/品牌/价格/厂商，不带 conditions；conditions 仅用于后续对查询结果做匹配筛选
+    # 查询列表：分类/品牌/价格/厂商 + 所有成色（colorGrade: [1001,1002,1003,1004,1005]）；conditions 仅用于后续对查询结果做匹配筛选
     cond = GrabCondition(
         category_brands=category_brands,
         order_state="10",
         min_price=min_price,
         max_price=max_price,
         sub_order_source_names=manufacturer_names,
+        color_grade_ids=list(COLOR_GRADE_IDS),
         page_size=200,
     )
     try:
