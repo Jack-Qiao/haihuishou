@@ -161,7 +161,7 @@
     }
 
     .schedule-left {
-      flex: 0 0 45%;
+      flex: 0 0 50%;
       min-width: 0;
       background: var(--surface);
       border-right: 1px solid var(--border);
@@ -170,7 +170,7 @@
     }
 
     .schedule-right {
-      flex: 1 1 55%;
+      flex: 1 1 50%;
       min-width: 0;
       background: var(--surface);
       padding: 16px;
@@ -186,6 +186,177 @@
       flex: 1;
       min-height: 0;
       overflow: hidden;
+    }
+
+    .schedule-layout-list-only .schedule-right {
+      flex: 1 1 100%;
+    }
+
+    .schedule-task-modal.modal {
+      width: 95%;
+      max-width: none;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .schedule-task-modal-fixed {
+      flex-shrink: 0;
+    }
+    .schedule-task-modal .form-row > label,
+    .schedule-task-modal .schedule-conditions-header-row label {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .schedule-task-modal-scroll-outer {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      margin-top: 8px;
+      gap: 0;
+    }
+    .schedule-task-modal-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+    .schedule-scroll-buttons-column {
+      flex-shrink: 0;
+      width: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-left: 1px solid var(--border);
+    }
+    .schedule-scroll-arrow-btn {
+      min-width: 24px;
+      padding: 4px;
+      font-size: 14px;
+      line-height: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .schedule-scroll-arrow-btn:hover {
+      color: var(--text);
+    }
+    .schedule-conditions-header-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .schedule-conditions-header-row label {
+      margin: 0;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .schedule-conditions-desc {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-right: 12px;
+    }
+
+    .schedule-task-manu-range-freq-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+    }
+
+    .schedule-task-manu-range-freq-row .schedule-task-inline-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .schedule-task-manu-range-freq-row .schedule-task-inline-item label {
+      min-width: 80px;
+      margin: 0;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .schedule-quick-locate-label {
+      color: var(--primary) !important;
+      font-weight: 600;
+    }
+    .schedule-quick-locate-input {
+      border: 1px solid var(--primary);
+      background: rgba(34, 197, 94, 0.08);
+      border-radius: 6px;
+    }
+    .schedule-quick-locate-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    }
+    #btnScheduleQuickLocate {
+      font-weight: 600;
+    }
+
+    .schedule-task-modal #btnScheduleCancelEdit {
+      display: inline-block !important;
+    }
+
+    .schedule-task-modal .brands-chosen {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .schedule-task-modal .tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .schedule-task-modal .tag input[type="checkbox"],
+    .schedule-task-modal .tag input[type="radio"] {
+      margin: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      min-width: 12px;
+      min-height: 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: var(--bg);
+      box-sizing: border-box;
+    }
+
+    .schedule-task-modal .tag input[type="checkbox"]:checked,
+    .schedule-task-modal .tag input[type="radio"]:checked {
+      background: #fff;
+      border-color: #fff;
+    }
+
+    .schedule-task-modal .tag:has(input[type="checkbox"]:checked),
+    .schedule-task-modal .tag:has(input[type="radio"]:checked) {
+      border-color: var(--primary);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .schedule-task-modal .tag input[type="radio"] {
+      border-radius: 50%;
     }
 
     header {
@@ -231,14 +402,18 @@
     .main-tabs {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 24px 0 16px;
     }
 
     .tab-nav {
       display: flex;
       gap: 0;
-      max-width: 1200px;
-      margin: 0 16px;
-      padding: 0 0;
+      padding: 0;
     }
 
     .tab-nav-item {
@@ -353,7 +528,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      align-items: center;
+      align-items: center !important;
       margin-bottom: 12px;
     }
 
@@ -536,10 +711,68 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .order-state-row .order-state-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
     .order-state-row .order-state-label {
       color: var(--text-muted);
       font-size: 14px;
       min-width: 72px;
+    }
+
+    .order-state-row .order-state-actions {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .order-state-row .order-state-right {
+      flex: 1;
+    }
+
+    .order-filter-collapsible {
+      margin-bottom: 12px;
+    }
+
+    .order-filter-collapsible-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      font-size: 13px;
+      color: var(--accent);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .order-filter-collapsible-toggle:hover {
+      color: var(--text);
+    }
+
+    .order-filter-collapsible-toggle .collapse-icon {
+      font-size: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .order-filter-collapsible.expanded .order-filter-collapsible-toggle .collapse-icon {
+      transform: rotate(180deg);
+    }
+
+    .order-filter-collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+
+    .order-filter-collapsible.expanded .order-filter-collapsible-body {
+      max-height: 400px;
     }
 
     .grab-filter-section {
@@ -756,7 +989,6 @@
 
     .schedule-conditions-wrap {
       width: 100%;
-      max-width: 520px;
     }
 
     .schedule-conditions-table {
@@ -766,6 +998,33 @@
       border-radius: 8px;
       background: var(--surface);
       overflow: hidden;
+    }
+
+    .schedule-conditions-table tbody {
+      counter-reset: schedule-cond-row;
+    }
+
+    .schedule-conditions-table tbody tr {
+      counter-increment: schedule-cond-row;
+    }
+
+    .schedule-conditions-table .schedule-cond-num {
+      width: 40px;
+      min-width: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .schedule-conditions-table .schedule-cond-num::before {
+      content: counter(schedule-cond-row);
+    }
+
+    .schedule-conditions-table thead th.schedule-cond-th-num {
+      width: 40px;
+      min-width: 40px;
+      text-align: center;
+      white-space: nowrap;
     }
 
     .schedule-conditions-table thead th {
@@ -817,6 +1076,140 @@
       color: var(--text-muted);
       padding: 4px 8px;
       font-size: 13px;
+    }
+
+    .schedule-color-grade-prices-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      align-items: flex-end;
+    }
+
+    .schedule-cgp-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .schedule-cgp-cell label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .schedule-cgp-input {
+      width: 52px;
+      padding: 6px 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .schedule-cgp-input.schedule-input-error {
+      border-color: var(--danger);
+    }
+
+    .schedule-cgp-input-model {
+      width: 140px;
+      min-width: 100px;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .schedule-cgp-input-storage {
+      width: 72px;
+      min-width: 56px;
+      padding: 6px 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .schedule-conditions-table-wrap {
+      overflow-x: auto;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 {
+      table-layout: fixed;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 thead th,
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td {
+      white-space: nowrap;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 thead th {
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody tr.schedule-condition-row-error td {
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .schedule-conditions-table tbody tr.schedule-condition-row-highlight td {
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 thead th.schedule-cond-th-num,
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td.schedule-cond-num {
+      width: 40px;
+      min-width: 40px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody {
+      counter-reset: schedule-cond-row;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody tr {
+      counter-increment: schedule-cond-row;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td.schedule-cond-num::before {
+      content: counter(schedule-cond-row);
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 .schedule-cond-th-action {
+      width: 56px;
+      text-align: right;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td input {
+      width: 100%;
+      min-width: 0;
+      padding: 4px 6px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(2) input {
+      max-width: 120px;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(3) input {
+      max-width: 70px;
+    }
+
+    .schedule-conditions-table.schedule-conditions-table-8 tbody td:nth-child(n+4):nth-child(-n+9) input {
+      max-width: 52px;
     }
 
     .schedule-conditions-table .schedule-cond-remove:hover {
@@ -945,14 +1338,20 @@
       text-decoration: underline;
     }
 
+    .schedule-task-conditions-toggle-row .schedule-task-conditions-toggle {
+      margin-left: 0;
+    }
+
     .schedule-task-conditions-more {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.2s ease;
+      transition: max-height 0.25s ease;
     }
 
     .schedule-task-conditions-more.expanded {
-      max-height: 500px;
+      max-height: min(80vh, 1200px);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .schedule-task-card-actions .btn-small {
@@ -963,6 +1362,24 @@
       flex-shrink: 0;
       background: var(--surface);
       padding: 0 0 12px 0;
+    }
+
+    .schedule-list-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .schedule-list-title-row h2 {
+      margin: 0;
+    }
+
+    .schedule-list-title-actions {
+      flex-shrink: 0;
+      display: flex;
+      gap: 16px;
     }
 
     #scheduleTaskListContainer {
@@ -1040,6 +1457,10 @@
 
     .order-countdown.ended {
       color: var(--text-muted);
+    }
+
+    .order-countdown.waiting-result {
+      color: #f97316;
     }
 
     .product-name-cell {
@@ -1164,7 +1585,7 @@
       margin-bottom: 14px;
     }
 
-    .modal .form-row input {
+    .modal .form-row input:not([type="checkbox"]):not([type="radio"]) {
       width: 100%;
     }
 
@@ -1264,7 +1685,6 @@
 <body>
   <div id="loginScreen">
     <div class="login-card">
-      <h1>嗨回收抢单试用工具</h1>
       <p id="loginCountdown" class="trial-countdown hidden">试用剩余 <span id="loginCountdownTime">05:00</span></p>
       <p class="sub">请先登录后使用</p>
       <div class="form-row">
@@ -1283,13 +1703,8 @@
   <div id="appContent" class="hidden">
     <header>
       <div class="header-title-row">
-        <h1>嗨回收抢单试用工具</h1>
         <span id="headerCountdown" class="trial-countdown hidden">试用剩余 <span
             id="headerCountdownTime">05:00</span></span>
-      </div>
-      <div class="login-row">
-        <span class="status logged-in" id="loginStatus">已登录</span>
-        <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
       </div>
     </header>
     <div class="main-tabs">
@@ -1297,6 +1712,10 @@
         <span class="tab-nav-item active" data-tab="grab">手动抢单</span>
         <span class="tab-nav-item" data-tab="schedule">自动抢单</span>
       </nav>
+      <div class="login-row">
+        <span class="status logged-in" id="loginStatus">已登录</span>
+        <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
+      </div>
     </div>
     <div id="tabPanelGrab" class="tab-panel">
       <div class="grab-layout">
@@ -1332,32 +1751,51 @@
           <section>
             <h2>抢单列表</h2>
             <div class="order-state-row">
-              <span class="order-state-label">订单状态</span>
-              <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
-                <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
-                  <span>待报价</span></label>
-                <label class="order-state-option"><input type="radio" name="orderState" value="20">
-                  <span>报价中</span></label>
-                <label class="order-state-option"><input type="radio" name="orderState" value="30">
-                  <span>已报价</span></label>
-              </span>
+              <div class="order-state-left">
+                <span class="order-state-label">订单状态</span>
+                <span id="orderStateRadioGroup" style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <label class="order-state-option"><input type="radio" name="orderState" value="10" checked>
+                    <span>待报价</span></label>
+                  <label class="order-state-option"><input type="radio" name="orderState" value="20">
+                    <span>报价中</span></label>
+                  <label class="order-state-option"><input type="radio" name="orderState" value="30">
+                    <span>已报价</span></label>
+                </span>
+              </div>
+              <div class="order-state-actions">
+                <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
+                <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
+              </div>
+              <div class="order-state-right"></div>
             </div>
-            <div class="form-row">
-              <label>最低价</label>
-              <input type="text" id="inputMinPrice" value="" style="width:90px">
-              <label>最高价</label>
-              <input type="text" id="inputMaxPrice" value="" style="width:90px">
-              <button type="button" class="btn btn-ghost" id="btnResetQuery">重置</button>
-              <button type="button" class="btn btn-primary" id="btnQueryOrders">查询订单</button>
-            </div>
-            <div class="form-row form-row-max-quote">
-              <label style="margin-bottom:0;">最大报价</label>
-              <input type="text" id="inputMaxQuoteAmount" value="500" placeholder="不填则不限制" class="input-max-quote"
-                inputmode="numeric" autocomplete="off">
-              <span style="color:var(--text-muted);">元</span>
-              <button type="button" class="btn btn-primary btn-small btn-set-max-quote" id="btnSetMaxQuote">设置</button>
-              <span id="maxQuoteAmountHint" class="max-quote-hint"></span>
-              <span id="maxQuoteCheck" class="max-quote-check hidden" title="已设置">✓</span>
+            <div id="orderFilterCollapsible" class="order-filter-collapsible">
+              <button type="button" class="order-filter-collapsible-toggle" id="orderFilterToggle"
+                aria-expanded="false">
+                <span class="collapse-icon">▼</span>
+                <span id="orderFilterToggleText">展开筛选条件</span>
+              </button>
+              <div class="order-filter-collapsible-body">
+                <div class="form-row">
+                  <label>最低价</label>
+                  <input type="text" id="inputMinPrice" value="" style="width:90px">
+                  <label>最高价</label>
+                  <input type="text" id="inputMaxPrice" value="" style="width:90px">
+                </div>
+                <div class="form-row form-row-max-quote">
+                  <label style="margin-bottom:0;">最大报价</label>
+                  <input type="text" id="inputMaxQuoteAmount" value="500" placeholder="不填则不限制" class="input-max-quote"
+                    inputmode="numeric" autocomplete="off">
+                  <span style="color:var(--text-muted);">元</span>
+                  <button type="button" class="btn btn-primary btn-small btn-set-max-quote"
+                    id="btnSetMaxQuote">设置</button>
+                  <span id="maxQuoteAmountHint" class="max-quote-hint"></span>
+                  <span id="maxQuoteCheck" class="max-quote-check hidden" title="已设置">✓</span>
+                </div>
+                <div class="form-row form-row-align-top">
+                  <label>手机成色</label>
+                  <div id="colorGradeList" class="color-grade-wrap brands-chosen">加载中…</div>
+                </div>
+              </div>
             </div>
             <div id="orderListMsg" class="msg info hidden"></div>
             <div class="table-wrap">
@@ -1369,13 +1807,14 @@
                     <th>预估金额</th>
                     <th>规格</th>
                     <th>厂商</th>
+                    <th>成色</th>
                     <th>倒计时</th>
                     <th>操作</th>
                   </tr>
                 </thead>
                 <tbody id="orderListBody">
                   <tr>
-                    <td colspan="7" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
+                    <td colspan="8" style="color:var(--text-muted)">点击「查询订单」获取列表</td>
                   </tr>
                 </tbody>
               </table>
@@ -1404,105 +1843,125 @@
       </div>
     </div>
     <div id="tabPanelSchedule" class="tab-panel hidden">
-      <div class="schedule-layout">
-        <div class="schedule-left">
-          <section>
-            <h2 class="schedule-condition-title">定时任务条件 <span id="scheduleConditionHint"
-                class="schedule-condition-hint-inline hidden"></span></h2>
-            <div id="scheduleMsg" class="msg info hidden" style="display:none !important;" aria-hidden="true"></div>
-            <p style="color:var(--text-muted); margin-top:8px;">按条件查询待报价列表，执行时对每条先抢单再按设定报价金额报价。类型固定为「手机」。</p>
-            <div class="form-row">
-              <label>任务名称</label>
-              <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:240px;">
-            </div>
-            <div class="form-row form-row-align-top">
-              <label>厂商</label>
-              <div class="schedule-field-wrap">
-                <div id="scheduleManufacturersList" class="brands-chosen">加载中…</div>
-              </div>
-            </div>
-            <div class="form-row">
-              <label>类型</label>
-              <span style="color:var(--text-muted);">手机</span>
-            </div>
-            <div class="form-row form-row-align-top">
-              <label>品牌</label>
-              <div class="schedule-field-wrap">
-                <div id="scheduleBrandsCollapsible" class="brands-collapsible">
-                  <button type="button" class="brands-collapsible-toggle" id="scheduleBrandsToggle"
-                    aria-expanded="false">
-                    <span class="collapse-icon">▼</span>
-                    <span id="scheduleBrandsToggleText">展开品牌</span>
-                  </button>
-                  <div class="brands-collapsible-body">
-                    <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="form-row">
-              <label>抢单金额范围</label>
-              <input type="text" id="scheduleTaskMinPrice" placeholder="最低价" style="width:90px;">
-              <span style="color:var(--text-muted);">～</span>
-              <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
-            </div>
-            <div class="form-row form-row-align-top">
-              <label>抢单条件</label>
-              <div class="schedule-field-wrap schedule-conditions-wrap">
-                <table class="schedule-conditions-table">
-                  <thead>
-                    <tr>
-                      <th>报价金额</th>
-                      <th>机型</th>
-                      <th>存储</th>
-                      <th class="schedule-cond-th-action"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="scheduleConditionsBody"></tbody>
-                </table>
-                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleAddCondition"
-                  style="margin-top:8px;">+ 添加条件</button>
-              </div>
-            </div>
-            <div class="form-row">
-              <label>频率</label>
-              <select id="scheduleTaskFrequency" style="width:140px;">
-                <option value="1">1秒/次</option>
-                <option value="2">2秒/次</option>
-                <option value="3" selected>3秒/次</option>
-                <option value="5">5秒/次</option>
-                <option value="10">10秒/次</option>
-                <option value="30">30秒/次</option>
-                <option value="60">60秒/次</option>
-              </select>
-            </div>
-            <div class="form-row" style="gap:10px;">
-              <button type="button" class="btn btn-primary" id="btnScheduleSave">保存任务</button>
-              <button type="button" class="btn btn-ghost btn-small" id="btnScheduleCancelEdit"
-                style="display:none;">取消编辑</button>
-            </div>
-          </section>
-        </div>
+      <div class="schedule-layout schedule-layout-list-only">
         <div class="schedule-right">
           <section>
             <div class="schedule-list-sticky-header">
-              <h2>任务列表 <span id="scheduleTaskCountWrap" class="schedule-task-count">（任务数量：<span
-                    id="scheduleTaskCountNum">0</span>）</span></h2>
+              <div class="schedule-list-title-row">
+                <h2>任务列表 <span id="scheduleTaskCountWrap" class="schedule-task-count">（任务数量：<span
+                      id="scheduleTaskCountNum">0</span>）</span></h2>
+                <div class="schedule-list-title-actions">
+                  <button type="button" class="btn btn-primary btn-small" id="btnScheduleAddTask">添加任务</button>
+                  <input type="file" id="scheduleImportFile" accept=".xlsx,.xls" style="display:none;">
+                  <button type="button" class="btn btn-primary btn-small" id="btnScheduleImport">导入价格列表</button>
+                  <button type="button" class="btn btn-primary btn-small" id="btnScheduleExport">导出价格列表</button>
+                </div>
+              </div>
               <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
                   id="scheduleGrabbedCountNum">0</span></p>
               <div class="form-row" style="margin-bottom:12px; gap:8px;margin-left: 12px;">
                 <button type="button" class="btn btn-primary btn-small" id="btnScheduleStartAll">一键全部启动</button>
-                <button type="button" class="btn btn-ghost btn-small" id="btnScheduleStopAll">一键全部暂停</button>
+                <button type="button" class="btn btn-primary btn-small" id="btnScheduleStopAll">一键全部暂停</button>
                 <button type="button" class="btn btn-ghost btn-small" id="btnScheduleDeleteAll"
                   style="color:var(--danger);">删除全部任务</button>
               </div>
             </div>
             <div id="scheduleTaskListContainer">
               <div id="scheduleTaskList" class="schedule-task-list"></div>
-              <p id="scheduleTaskListEmpty" class="schedule-task-empty">暂无任务，请在左侧添加。</p>
+              <p id="scheduleTaskListEmpty" class="schedule-task-empty">暂无任务，请点击「添加任务」添加。</p>
             </div>
           </section>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scheduleTaskModal" class="modal-overlay hidden">
+    <div class="modal schedule-task-modal">
+      <div class="schedule-task-modal-fixed">
+        <h3>定时任务条件 <span id="scheduleConditionHint" class="schedule-condition-hint-inline hidden"></span></h3>
+        <div id="scheduleMsg" class="msg info hidden" style="display:none !important;" aria-hidden="true"></div>
+        <div class="form-row">
+          <label>任务名称</label>
+          <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:100%; max-width:280px;">
+        </div>
+        <div class="form-row form-row-align-top">
+          <label>厂商</label>
+          <div class="schedule-field-wrap">
+            <div id="scheduleManufacturersList" class="brands-chosen">加载中…</div>
+          </div>
+        </div>
+        <div class="form-row schedule-task-range-freq-row">
+          <label>抢单金额范围</label>
+          <input type="text" id="scheduleTaskMinPrice" placeholder="最低价" style="width:90px;">
+          <span style="color:var(--text-muted);">～</span>
+          <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
+          <label style="margin-left:20px;">频率</label>
+          <select id="scheduleTaskFrequency" style="width:140px;">
+            <option value="1">1秒/次</option>
+            <option value="2">2秒/次</option>
+            <option value="3" selected>3秒/次</option>
+            <option value="5">5秒/次</option>
+            <option value="10">10秒/次</option>
+            <option value="30">30秒/次</option>
+            <option value="60">60秒/次</option>
+          </select>
+          <label class="schedule-quick-locate-label" style="margin-left:20px;">快速定位</label>
+          <input type="text" id="scheduleQuickLocate" class="schedule-quick-locate-input" placeholder="输入机型模糊搜索（辅助，不入参）" style="width:160px;" autocomplete="off" data-auxiliary="true">
+          <button type="button" class="btn btn-primary btn-small" id="btnScheduleQuickLocate" title="定位到匹配的条件行（辅助功能，不入参）">定位</button>
+        </div>
+        <div class="form-row form-row-align-top">
+          <label>品牌</label>
+          <div class="schedule-field-wrap">
+            <div id="scheduleBrandsCollapsible" class="brands-collapsible">
+              <button type="button" class="brands-collapsible-toggle" id="scheduleBrandsToggle" aria-expanded="false">
+                <span class="collapse-icon">▼</span>
+                <span id="scheduleBrandsToggleText">展开品牌</span>
+              </button>
+              <div class="brands-collapsible-body">
+                <div id="scheduleTaskBrandsList" class="brands-chosen">加载后显示手机下品牌</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-task-modal-scroll-outer">
+        <div class="schedule-task-modal-scroll">
+          <div class="schedule-conditions-header-row">
+            <label>抢单条件</label>
+            <span class="schedule-conditions-desc">可添加多条，每条机型与保底价必填，保底价 1～500 元；机型+存储不可重复。</span>
+            <button type="button" class="btn btn-primary btn-small schedule-add-condition-btn" id="btnScheduleAddCondition">+ 添加条件</button>
+          </div>
+          <div class="schedule-field-wrap schedule-conditions-wrap">
+              <div class="schedule-conditions-table-wrap">
+                <table class="schedule-conditions-table schedule-conditions-table-8">
+                  <thead>
+                    <tr>
+                      <th class="schedule-cond-th-num">序号</th>
+                      <th>机型</th>
+                      <th>存储</th>
+                      <th>靓机</th>
+                      <th>小花</th>
+                      <th>大花</th>
+                      <th>外爆</th>
+                      <th>内爆</th>
+                      <th>保底价</th>
+                      <th class="schedule-cond-th-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="scheduleConditionsBody"></tbody>
+                </table>
+              </div>
+          </div>
+        </div>
+        <div class="schedule-scroll-buttons-column">
+          <button type="button" class="schedule-scroll-arrow-btn" id="btnScheduleScrollToBottom" title="滚动到底部" aria-label="滚动到底部">▼</button>
+          <button type="button" class="schedule-scroll-arrow-btn" id="btnScheduleScrollToTop" title="滚动到顶部" aria-label="滚动到顶部">▲</button>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:16px; flex-shrink:0;">
+        <button type="button" class="btn btn-primary" id="btnScheduleSave">保存任务</button>
+        <button type="button" class="btn btn-ghost btn-small" id="btnScheduleCancelEdit">取消</button>
       </div>
     </div>
   </div>
@@ -1536,6 +1995,10 @@
               class="btn btn-ghost btn-small btn-copy-quote-field" data-target="quoteStorage" title="复制">复制</button>
           </div>
         </div>
+        <div class="form-row quote-detail-row">
+          <label>成色</label>
+          <span id="quoteColorGrade">-</span>
+        </div>
       </div>
       <div class="form-row">
         <label>预估金额</label>
@@ -1556,6 +2019,12 @@
         <button type="button" class="btn btn-ghost" id="btnQuoteCancel">取消</button>
         <button type="button" class="btn btn-primary" id="btnQuoteSubmit">提交报价</button>
       </div>
+    </div>
+  </div>
+
+  <div id="importLoadingModal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal" style="max-width:280px; text-align:center;">
+      <p id="importLoadingText" style="margin:0; font-size:1rem;">正在导入中…</p>
     </div>
   </div>
 
@@ -1716,7 +2185,29 @@
         } else {
           showMsg(msg, '已加载厂商与分类', 'success');
         }
+        await loadColorGradeList();
       } catch (e) { showMsg(msg, String(e), 'error'); }
+    }
+    var colorGradeListLoaded = false;
+    async function loadColorGradeList() {
+      var wrap = document.getElementById('colorGradeList');
+      if (!wrap) return;
+      if (colorGradeListLoaded) return;
+      wrap.textContent = '加载中…';
+      try {
+        var r = await api('/api/color-grade-level');
+        if (!r.success) { wrap.textContent = r.message || '加载失败'; return; }
+        var list = r.data && Array.isArray(r.data) ? r.data : [];
+        list.sort(function (a, b) { return (a.weight || 0) - (b.weight || 0); });
+        wrap.innerHTML = list.map(function (item) {
+          var id = item.gradeId != null ? item.gradeId : item.id;
+          var name = (item.gradeName || item.name || '').trim() || ('ID' + id);
+          var esc = name.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return '<label class="tag"><input type="checkbox" data-grade-id="' + id + '"> ' + esc + '</label>';
+        }).join('');
+        if (list.length === 0) wrap.innerHTML = '<span style="color:var(--text-muted)">暂无成色选项</span>';
+        colorGradeListLoaded = true;
+      } catch (e) { wrap.textContent = '加载失败'; }
     }
     async function updateUserDisplay() {
       const el = document.getElementById('loginStatus');
@@ -1780,18 +2271,39 @@
     function startCountdownTimer() {
       if (countdownTimerId != null) clearInterval(countdownTimerId);
       countdownTimerId = setInterval(function () {
+        var now = Date.now();
         document.querySelectorAll('.order-countdown[data-countdown]').forEach(function (el) {
+          var orderStateAttr = el.getAttribute('data-order-state');
+          var isQuoted = orderStateAttr === '30';
+          function setEnded() {
+            el.textContent = isQuoted ? '等待竞拍结果' : '已结束';
+            el.classList.add('ended');
+            if (isQuoted) el.classList.add('waiting-result');
+            el.removeAttribute('data-countdown');
+            el.removeAttribute('data-deadline');
+          }
+          var deadlineMs = el.getAttribute('data-deadline');
+          if (deadlineMs != null && deadlineMs !== '') {
+            var dm = parseInt(deadlineMs, 10);
+            if (!isNaN(dm) && now >= dm) {
+              setEnded();
+              return;
+            }
+          }
           var sec = parseInt(el.getAttribute('data-countdown'), 10);
           if (isNaN(sec) || sec <= 0) {
-            el.textContent = '已结束';
-            el.classList.add('ended');
-            el.removeAttribute('data-countdown');
+            setEnded();
             return;
           }
           sec -= 1;
           el.setAttribute('data-countdown', String(sec));
-          el.textContent = sec > 0 ? formatCountdown(sec) : '已结束';
-          if (sec <= 0) { el.classList.add('ended'); el.removeAttribute('data-countdown'); }
+          el.textContent = sec > 0 ? formatCountdown(sec) : (isQuoted ? '等待竞拍结果' : '已结束');
+          if (sec <= 0) {
+            el.classList.add('ended');
+            if (isQuoted) el.classList.add('waiting-result');
+            el.removeAttribute('data-countdown');
+            el.removeAttribute('data-deadline');
+          }
         });
       }, 1000);
     }
@@ -1809,6 +2321,8 @@
       var maxPriceStr = document.getElementById('inputMaxPrice').value.trim();
       var checkedManufacturers = [].slice.call(document.querySelectorAll('#manufacturersList input[type="checkbox"]:checked'));
       var subOrderSourceNames = checkedManufacturers.map(function (el) { return String(el.getAttribute('data-name') || '').trim(); }).filter(Boolean);
+      var colorGradeChecks = [].slice.call(document.querySelectorAll('#colorGradeList input[type="checkbox"]:checked'));
+      var colorGradeIds = colorGradeChecks.map(function (el) { var id = el.getAttribute('data-grade-id'); return id != null ? parseInt(id, 10) : null; }).filter(function (n) { return n != null && !isNaN(n); });
       var orderStateEl = document.querySelector("input[name=\"orderState\"]:checked");
       var body = {
         userId: authUserId,
@@ -1820,6 +2334,7 @@
       };
       if (minPriceStr) body.minPrice = minPriceStr;
       if (maxPriceStr) body.maxPrice = maxPriceStr;
+      if (colorGradeIds.length > 0) body.colorGradeIds = colorGradeIds;
       try {
         var r = await api('/api/order-list', { method: 'POST', body: JSON.stringify(body) });
         if (!r.success) { showMsg(msg, r.message || '查询失败', 'error'); return; }
@@ -1828,10 +2343,10 @@
         var total = data.totalCount !== undefined ? data.totalCount : (data.pageCount !== undefined ? data.pageCount : 0);
         var orderState = (body.orderState || '10').toString();
         var showQuoteCol = orderState === '30';
-        var colCount = showQuoteCol ? 8 : 7;
+        var colCount = showQuoteCol ? 9 : 8;
         var theadTr = document.getElementById('orderListHead');
-        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
-        else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>倒计时</th><th>操作</th>';
+        if (showQuoteCol) theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>报价金额</th><th>规格</th><th>厂商</th><th>成色</th><th>倒计时</th><th>操作</th>';
+        else theadTr.innerHTML = '<th>机型</th><th>存储容量</th><th>预估金额</th><th>规格</th><th>厂商</th><th>成色</th><th>倒计时</th><th>操作</th>';
         totalEl.textContent = '共 ' + total + ' 项';
         var currentPage = body.pageIndex || 1;
         var pageSizeNum = body.pageSize || 10;
@@ -1852,8 +2367,42 @@
           var specParts = [o.catName || '手机', o.brandName || '', o.memory || ''].filter(Boolean);
           var specStr = specParts.length ? specParts.join(' | ') : '-';
           var manufacturer = o.subOrderSourceName || o.brandName || '-';
-          var countdownSec = o.countdown != null ? parseInt(o.countdown, 10) : null;
-          var countdownHtml = countdownSec != null ? '<span class="order-countdown" data-countdown="' + countdownSec + '">' + formatCountdown(countdownSec) + '</span>' : '<span class="order-countdown ended">-</span>';
+          var colorGradeName = (o.colorGradeName != null && String(o.colorGradeName).trim()) ? String(o.colorGradeName).trim() : '-';
+          var colorGradeDisplay = colorGradeName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          var countdownHtml;
+          (function () {
+            var orderStateForCountdown = String(o.orderState !== undefined ? o.orderState : '');
+            var isQuotedState = orderStateForCountdown === '30';
+            function endedHtml() {
+              if (isQuotedState) return '<span class="order-countdown ended waiting-result" data-order-state="30">等待竞拍结果</span>';
+              return '<span class="order-countdown ended">已结束</span>';
+            }
+            var now = Date.now();
+            var deadlineStr = o.deadlineTime != null ? String(o.deadlineTime).trim() : '';
+            var deadlineMs = NaN;
+            if (deadlineStr) {
+              var s = deadlineStr.replace(' ', 'T');
+              deadlineMs = new Date(s).getTime();
+            }
+            if (!isNaN(deadlineMs) && now >= deadlineMs) {
+              countdownHtml = endedHtml();
+              return;
+            }
+            var countdownSec = o.countdown != null ? parseInt(o.countdown, 10) : null;
+            if (countdownSec != null && !isNaN(countdownSec) && countdownSec <= 0) {
+              countdownHtml = endedHtml();
+              return;
+            }
+            var displaySec = countdownSec;
+            if (!isNaN(deadlineMs) && deadlineMs > now) {
+              displaySec = Math.max(0, Math.floor((deadlineMs - now) / 1000));
+            }
+            if (displaySec == null || isNaN(displaySec) || displaySec <= 0) {
+              countdownHtml = endedHtml();
+              return;
+            }
+            countdownHtml = '<span class="order-countdown" data-countdown="' + displaySec + '" data-order-state="' + orderStateForCountdown.replace(/"/g, '&quot;') + '"' + (!isNaN(deadlineMs) ? ' data-deadline="' + deadlineMs + '"' : '') + '>' + formatCountdown(displaySec) + '</span>';
+          })();
           var orderStateVal = String(o.orderState !== undefined ? o.orderState : '');
           var actionLabel = orderStateVal === '10' ? '抢单' : (orderStateVal === '30' ? '修改报价' : '报价');
           var actualPriceVal = (o.actualPrice != null && o.actualPrice !== '') ? String(o.actualPrice) : '';
@@ -1869,7 +2418,8 @@
           var modelCopyBtn = modelRaw ? ' <button type="button" class="btn-copy-model btn btn-ghost btn-small" title="复制机型" data-model="' + modelVal + '">复制</button>' : '';
           var modelTd = '<td class="order-list-model-cell" style="color:var(--text-muted); font-size:13px"><span class="order-list-model-text">' + modelDisplay + '</span>' + modelCopyBtn + '</td>';
           var storageTd = '<td class="order-list-copy-cell" title="单击复制" style="color:var(--text-muted); font-size:13px">' + storageDisplay + '</td>';
-          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
+          var colorGradeVal = (colorGradeName || '-').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return '<tr>' + modelTd + storageTd + '<td>' + apprizeStr + '</td>' + quoteTd + '<td style="color:var(--text-muted); font-size:13px">' + specStr + '</td><td>' + manufacturer + '</td><td style="color:#fff; font-size:13px">' + colorGradeDisplay + '</td><td>' + countdownHtml + '</td><td><button type="button" class="btn btn-primary btn-small" data-record-id="' + recordId + '" data-order-id="' + orderId + '" data-product-name="' + productNameEsc + '" data-brand="' + brandVal + '" data-model="' + modelVal + '" data-storage="' + storageVal + '" data-color-grade="' + colorGradeVal + '" data-actual-price="' + actualPriceVal + '" data-order-state="' + orderStateVal + '" data-apprize="' + apprizeData + '" data-apprize-display="' + apprizeStr + '">' + actionLabel + '</button></td></tr>';
         }).join('');
         startCountdownTimer();
       } catch (e) { showMsg(msg, String(e), 'error'); }
@@ -1954,6 +2504,7 @@
     document.getElementById('btnResetQuery').onclick = async function () {
       document.querySelector('input[name="orderState"][value="10"]').checked = true;
       document.querySelectorAll('#manufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+      document.querySelectorAll('#colorGradeList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
       document.getElementById('inputMinPrice').value = '';
       document.getElementById('inputMaxPrice').value = '';
       document.getElementById('inputPage').value = '1';
@@ -1963,6 +2514,18 @@
       doQueryOrders();
     };
     document.getElementById('orderStateRadioGroup').addEventListener('change', function (e) { if (e.target.name === 'orderState') doQueryOrders(); });
+    (function () {
+      var wrap = document.getElementById('orderFilterCollapsible');
+      var btn = document.getElementById('orderFilterToggle');
+      var txt = document.getElementById('orderFilterToggleText');
+      if (wrap && btn && txt) {
+        btn.addEventListener('click', function () {
+          var expanded = wrap.classList.toggle('expanded');
+          btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          txt.textContent = expanded ? '收起筛选条件' : '展开筛选条件';
+        });
+      }
+    })();
     document.querySelectorAll('.tab-nav-item').forEach(function (el) {
       el.addEventListener('click', function () {
         if (el.classList.contains('disabled')) return;
@@ -1971,10 +2534,9 @@
         el.classList.add('active');
         document.getElementById('tabPanelGrab').classList.toggle('hidden', tab !== 'grab');
         document.getElementById('tabPanelSchedule').classList.toggle('hidden', tab !== 'schedule');
+        if (tab === 'grab') loadColorGradeList();
         if (tab === 'schedule') {
           loadScheduleOptions().then(function () {
-            var tbody = document.getElementById('scheduleConditionsBody');
-            if (tbody && !tbody.querySelector('tr')) setScheduleConditionsInForm([]);
             loadScheduleGrabbedCount();
             if (typeof updateScheduleSaveButtonState === 'function') updateScheduleSaveButtonState();
           });
@@ -2043,6 +2605,11 @@
     var scheduleTaskTimers = {};
     var scheduleTaskStarting = {};
     var scheduleGrabbedCountTimer = null;
+    function updateScheduleImportButtonState() {
+      var hasRunning = Object.keys(scheduleTaskTimers).length > 0 || Object.keys(scheduleTaskStarting).length > 0;
+      var btnImport = document.getElementById('btnScheduleImport');
+      if (btnImport) btnImport.disabled = hasRunning;
+    }
     var scheduleGrabbedCountValue = 0;
     function saveScheduledTasks() {
       try { localStorage.setItem(SCHEDULE_STORAGE_KEY, JSON.stringify(scheduledTasks)); } catch (_) { }
@@ -2057,6 +2624,7 @@
       if (scheduledTasks.length === 0) {
         listEl.innerHTML = '';
         if (emptyEl) emptyEl.classList.remove('hidden');
+        updateScheduleImportButtonState();
         return;
       }
       if (emptyEl) emptyEl.classList.add('hidden');
@@ -2080,39 +2648,28 @@
             '<button type="button" class="btn btn-ghost btn-small schedule-btn-delete" data-id="' + t.id + '">删除</button>';
         }
         var conds = t.conditions && t.conditions.length ? t.conditions : [];
-        if (!conds.length && (t.quoteAmount || t.modelName)) {
-          conds = [{ quoteAmount: t.quoteAmount, modelName: t.modelName, storage: t.storage }];
-        }
-        if (!conds.length && (t.quoteAmounts && t.quoteAmounts.length)) {
-          var len = Math.max(t.quoteAmounts.length, (t.modelNames || []).length, (t.storageList || []).length);
-          for (var ci = 0; ci < len; ci++) {
-            conds.push({
-              quoteAmount: (t.quoteAmounts || [])[ci],
-              modelName: (t.modelNames || [])[ci],
-              storage: (t.storageList || [])[ci]
-            });
-          }
-        }
-        function fmtCondDetail(c) {
-          var s = '报价：' + (c.quoteAmount || '-') + '元 · 机型：' + (c.modelName || '-');
-          if (c.storage) s += ' · 存储：' + c.storage;
-          return s;
+        var condPriceKeys = ['1001', '1002', '1003', '1004', '1005', 'floorPrice'];
+        var condPriceLabels = { '1001': '靓机', '1002': '小花', '1003': '大花', '1004': '外爆', '1005': '内爆', 'floorPrice': '保底价' };
+        function fmtCondLine(c) {
+          var parts = [];
+          if ((c.modelName || '').trim()) parts.push('机型: ' + (c.modelName || '').trim());
+          if ((c.storage || '').trim()) parts.push('存储: ' + (c.storage || '').trim());
+          condPriceKeys.forEach(function (k) {
+            var v = (c[k] || '').trim();
+            if (v) parts.push((condPriceLabels[k] || k) + ': ' + v + '元');
+          });
+          return parts.join(' ');
         }
         var basicStr = '厂商: ' + manStr + ' | 品牌: ' + brandStr + ' | 金额: ' + rangeStr + ' | 频率: ' + freqStr;
         var bodyHtml = '<div class="schedule-task-card-body-line">' + basicStr + '</div>';
         if (conds.length > 0) {
           bodyHtml += '<div class="schedule-task-conditions-block">';
-          bodyHtml += '<div class="schedule-task-condition-line">';
-          bodyHtml += '<span class="schedule-task-condition-label">条件1</span><span class="schedule-task-condition-detail">' + fmtCondDetail(conds[0]).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+          bodyHtml += '<div class="schedule-task-condition-line"><span class="schedule-task-condition-detail">1. ' + fmtCondLine(conds[0]).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></div>';
           if (conds.length > 1) {
-            bodyHtml += '<button type="button" class="schedule-task-conditions-toggle" data-count="' + (conds.length - 1) + '">展开更多（' + (conds.length - 1) + '）</button>';
-          }
-          bodyHtml += '</div>';
-          if (conds.length > 1) {
+            bodyHtml += '<div class="schedule-task-condition-line schedule-task-conditions-toggle-row"><button type="button" class="schedule-task-conditions-toggle" data-count="' + (conds.length - 1) + '">展开更多（' + (conds.length - 1) + '）</button></div>';
             bodyHtml += '<div class="schedule-task-conditions-more">';
             for (var ci = 1; ci < conds.length; ci++) {
-              var detail = fmtCondDetail(conds[ci]).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-              bodyHtml += '<div class="schedule-task-condition-line"><span class="schedule-task-condition-label">条件' + (ci + 1) + '</span><span class="schedule-task-condition-detail">' + detail + '</span></div>';
+              bodyHtml += '<div class="schedule-task-condition-line"><span class="schedule-task-condition-detail">' + (ci + 1) + '. ' + fmtCondLine(conds[ci]).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></div>';
             }
             bodyHtml += '</div>';
           }
@@ -2123,6 +2680,7 @@
           '<div class="schedule-task-card-body">' + bodyHtml + '</div>' +
           '<div class="schedule-task-card-actions">' + actions + '</div></div>';
       }).join('');
+      updateScheduleImportButtonState();
       listEl.querySelectorAll('.schedule-btn-auto').forEach(function (btn) {
         btn.onclick = function () { startScheduleTaskAuto(Number(btn.dataset.id)); };
       });
@@ -2135,6 +2693,7 @@
           var task = scheduledTasks.find(function (t) { return t.id === id; });
           if (!task || scheduleTaskTimers[id]) return;
           fillScheduleFormWithTask(task);
+          openScheduleTaskModal();
         };
       });
       listEl.querySelectorAll('.schedule-btn-delete').forEach(function (btn) {
@@ -2161,22 +2720,11 @@
       document.getElementById('scheduleTaskMinPrice').value = task.minPrice || '';
       document.getElementById('scheduleTaskMaxPrice').value = task.maxPrice || '';
       var conditions = task.conditions && task.conditions.length ? task.conditions : [];
-      if (!conditions.length && (task.quoteAmount || task.modelName)) {
-        conditions = [{ quoteAmount: task.quoteAmount || '', modelName: task.modelName || '', storage: task.storage || undefined }];
-      }
-      if (!conditions.length && (task.quoteAmounts && task.quoteAmounts.length)) {
-        var len = Math.max(task.quoteAmounts.length, (task.modelNames || []).length, (task.storageList || []).length);
-        for (var i = 0; i < len; i++) {
-          conditions.push({
-            quoteAmount: (task.quoteAmounts[i] || '').trim(),
-            modelName: ((task.modelNames || [])[i] || '').trim(),
-            storage: ((task.storageList || [])[i] || '').trim() || undefined
-          });
-        }
-      }
-      setScheduleConditionsInForm(conditions.length ? conditions : [{ quoteAmount: '', modelName: '', storage: '' }]);
+      setScheduleConditionsInForm(conditions.length ? conditions : [{}]);
       var freqSelect = document.getElementById('scheduleTaskFrequency');
       if (freqSelect) freqSelect.value = task.frequency || '3';
+      var quickLocate = document.getElementById('scheduleQuickLocate');
+      if (quickLocate) quickLocate.value = '';
       var brandKey = (task.brandIds && task.brandIds[0]) ? String(task.brandIds[0]) : '';
       var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
       for (var i = 0; i < radios.length; i++) {
@@ -2202,7 +2750,7 @@
       document.getElementById('scheduleTaskName').value = '';
       document.getElementById('scheduleTaskMinPrice').value = '';
       document.getElementById('scheduleTaskMaxPrice').value = '';
-      setScheduleConditionsInForm([{ quoteAmount: '', modelName: '', storage: '' }]);
+      setScheduleConditionsInForm([{}]);
       var freqSelect = document.getElementById('scheduleTaskFrequency');
       if (freqSelect) freqSelect.value = '3';
       var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
@@ -2210,24 +2758,8 @@
         if ((radios[i].getAttribute('data-key') || '').trim() === '') { radios[i].checked = true; break; }
       }
       document.querySelectorAll('#scheduleManufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
-    }
-    function getScheduleConditionsFromForm() {
-      var tbody = document.getElementById('scheduleConditionsBody');
-      if (!tbody) return [];
-      var rows = tbody.querySelectorAll('tr');
-      var conditions = [];
-      for (var i = 0; i < rows.length; i++) {
-        var row = rows[i];
-        var quoteEl = row.querySelector('.schedule-cond-quote');
-        var modelEl = row.querySelector('.schedule-cond-model');
-        var storageEl = row.querySelector('.schedule-cond-storage');
-        var quote = (quoteEl && quoteEl.value || '').trim();
-        var model = (modelEl && modelEl.value || '').trim();
-        var storage = (storageEl && storageEl.value || '').trim() || undefined;
-        if (storage === '选填') storage = undefined;
-        conditions.push({ quoteAmount: quote, modelName: model, storage: storage });
-      }
-      return conditions;
+      var quickLocate = document.getElementById('scheduleQuickLocate');
+      if (quickLocate) quickLocate.value = '';
     }
     function getScheduleBrandListSortedByLength() {
       var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
@@ -2262,177 +2794,349 @@
         }
         break;
       }
+      var bestName = null;
+      var bestIndex = -1;
       for (var j = 0; j < brandList.length; j++) {
         var name = brandList[j].name;
-        if (name && m.indexOf(name.toLowerCase()) >= 0) return name;
+        if (!name) continue;
+        var idx = m.indexOf(name.toLowerCase());
+        if (idx >= 0 && (bestIndex < 0 || idx < bestIndex)) {
+          bestIndex = idx;
+          bestName = name;
+        }
       }
-      return null;
+      return bestName;
     }
-    function syncScheduleBrandFromFirstCondition() {
-      var conditions = getScheduleConditionsFromForm();
-      var firstWithModel = null;
-      for (var i = 0; i < conditions.length; i++) {
-        if (conditions[i].modelName && conditions[i].modelName.trim().length > 0) {
-          firstWithModel = conditions[i];
-          break;
-        }
-      }
-      var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
-      if (!firstWithModel) {
-        for (var r0 = 0; r0 < radios.length; r0++) {
-          if ((radios[r0].getAttribute('data-key') || '').trim() === '') {
-            radios[r0].checked = true;
-            return;
-          }
-        }
-        return;
-      }
-      var matchedBrandName = getBrandNameFromFormByModel(firstWithModel.modelName);
-      if (!matchedBrandName) return;
-      var matchedLower = matchedBrandName.toLowerCase();
-      for (var r = 0; r < radios.length; r++) {
-        var name = (radios[r].getAttribute('data-name') || '').trim();
-        if (name && name.toLowerCase() === matchedLower) {
-          radios[r].checked = true;
-          return;
-        }
-      }
-    }
-    function validateScheduleConditions() {
-      var conditions = getScheduleConditionsFromForm();
-      var requiredInvalidIndices = [];
-      var duplicateRowIndices = [];
-      var nonEmptyRows = [];
-      for (var i = 0; i < conditions.length; i++) {
-        var c = conditions[i];
-        var hasAny = (c.quoteAmount || c.modelName || (c.storage && c.storage.trim()));
-        if (!hasAny) continue;
-        nonEmptyRows.push({ index: i, condition: c });
-        var q = parseFloat(c.quoteAmount);
-        var quoteOk = c.quoteAmount && !isNaN(q) && q >= 1 && q <= 500;
-        var modelOk = c.modelName && c.modelName.trim().length > 0;
-        if (!quoteOk || !modelOk) requiredInvalidIndices.push(i);
-      }
-      if (nonEmptyRows.length === 0) {
-        return { valid: false, message: '至少一条完整条件（报价1～500元+机型）', invalidRowIndices: [] };
-      }
-      var modelStorageToFirstIndex = {};
-      for (var j = 0; j < nonEmptyRows.length; j++) {
-        var modelKey = (nonEmptyRows[j].condition.modelName || '').trim().toLowerCase();
-        var storageKey = (nonEmptyRows[j].condition.storage || '').trim().toLowerCase();
-        if (storageKey === '选填') storageKey = '';
-        if (!modelKey) continue;
-        var compositeKey = modelKey + '\x01' + storageKey;
-        if (modelStorageToFirstIndex.hasOwnProperty(compositeKey)) {
-          duplicateRowIndices.push(nonEmptyRows[j].index);
-          duplicateRowIndices.push(modelStorageToFirstIndex[compositeKey]);
-        } else {
-          modelStorageToFirstIndex[compositeKey] = nonEmptyRows[j].index;
-        }
-      }
-      duplicateRowIndices = duplicateRowIndices.filter(function (v, i, a) { return a.indexOf(v) === i; });
-      var brandsLower = [];
-      for (var k = 0; k < nonEmptyRows.length; k++) {
-        var b = getBrandNameFromFormByModel(nonEmptyRows[k].condition.modelName);
-        var bl = (b || '').toLowerCase();
-        if (bl && brandsLower.indexOf(bl) === -1) brandsLower.push(bl);
-      }
-      if (brandsLower.length > 1) {
-        var brandInvalid = [];
-        for (var n = 0; n < nonEmptyRows.length; n++) brandInvalid.push(nonEmptyRows[n].index);
-        return { valid: false, message: '所有子条件应为同一品牌，不同品牌不能放在一起', invalidRowIndices: brandInvalid };
-      }
-      var selectedRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
-      var selectedBrandKeyAttr = selectedRadio ? (selectedRadio.getAttribute('data-key') || '').trim() : '';
-      var selectedBrandName = selectedRadio ? String(selectedRadio.getAttribute('data-name') || '').trim() : '';
-      if (selectedBrandKeyAttr !== '') {
-        var brandMismatchIndices = [];
-        var requiredBrandLower = (selectedBrandName || '').toLowerCase();
-        for (var p = 0; p < nonEmptyRows.length; p++) {
-          var rowBrandName = getBrandNameFromFormByModel(nonEmptyRows[p].condition.modelName);
-          var rowBrandLower = (rowBrandName || '').toLowerCase();
-          if (rowBrandLower && rowBrandLower !== requiredBrandLower) {
-            brandMismatchIndices.push(nonEmptyRows[p].index);
-          }
-        }
-        if (brandMismatchIndices.length > 0) {
-          return { valid: false, message: '子条件机型品牌须与上方所选品牌一致', invalidRowIndices: brandMismatchIndices };
-        }
-      }
-      var invalidRowIndices = requiredInvalidIndices.slice();
-      for (var d = 0; d < duplicateRowIndices.length; d++) {
-        if (invalidRowIndices.indexOf(duplicateRowIndices[d]) === -1) invalidRowIndices.push(duplicateRowIndices[d]);
-      }
-      var message = '';
-      if (requiredInvalidIndices.length > 0 && duplicateRowIndices.length > 0) {
-        message = '请完善子条件（报价1～500元、机型必填）；并删除重复的机型+存储组合';
-      } else if (requiredInvalidIndices.length > 0) {
-        message = '请完善子条件（报价1～500元、机型必填）';
-      } else if (duplicateRowIndices.length > 0) {
-        message = '请删除重复的机型+存储组合';
-      }
-      return {
-        valid: invalidRowIndices.length === 0,
-        message: message,
-        invalidRowIndices: invalidRowIndices
-      };
-    }
-    function renderScheduleConditionRow(condition) {
-      condition = condition || {};
-      var quote = String(condition.quoteAmount || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      var model = String(condition.modelName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      var storage = String(condition.storage || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // 成色/底价用 ID 与 floorPrice，与后端一致；表头仍显示中文（靓机/小花/…/保底价）
+    var SCHEDULE_COND_PRICE_KEYS = ['1001', '1002', '1003', '1004', '1005', 'floorPrice'];
+    var SCHEDULE_COND_INPUT_CLASS = { '1001': 'schedule-cond-1001', '1002': 'schedule-cond-1002', '1003': 'schedule-cond-1003', '1004': 'schedule-cond-1004', '1005': 'schedule-cond-1005', 'floorPrice': 'schedule-cond-floor' };
+    function renderScheduleConditionRow(cond) {
+      cond = cond || {};
       var tr = document.createElement('tr');
       tr.className = 'schedule-condition-row';
-      tr.innerHTML = '<td><input type="text" class="schedule-cond-quote" placeholder="1-500元" inputmode="numeric" autocomplete="off" value="' + quote + '"></td>' +
-        '<td><input type="text" class="schedule-cond-model" placeholder="必填" value="' + model + '"></td>' +
-        '<td><input type="text" class="schedule-cond-storage" placeholder="选填" value="' + storage + '"></td>' +
-        '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
-      tr.querySelector('.schedule-cond-quote').addEventListener('input', function () { this.value = this.value.replace(/[^\d.]/g, ''); updateScheduleSaveButtonState(); });
-      tr.querySelector('.schedule-cond-quote').addEventListener('change', updateScheduleSaveButtonState);
-      tr.querySelector('.schedule-cond-model').addEventListener('input', function () {
-        syncScheduleBrandFromFirstCondition();
-        updateScheduleSaveButtonState();
+      var model = String(cond.modelName || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      var storage = String(cond.storage || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      var cells = '<td class="schedule-cond-num"></td><td><input type="text" class="schedule-cond-model" placeholder="必填" value="' + model + '"></td>';
+      cells += '<td><input type="text" class="schedule-cond-storage" placeholder="选填" value="' + storage + '"></td>';
+      SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
+        var cls = SCHEDULE_COND_INPUT_CLASS[k];
+        var v = String(cond[k] != null ? cond[k] : '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var ph = k === 'floorPrice' ? '必填 1-500' : '1-500';
+        cells += '<td><input type="text" class="' + cls + ' schedule-cond-price" data-key="' + k + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off" value="' + v + '"></td>';
       });
-      tr.querySelector('.schedule-cond-model').addEventListener('change', function () { syncScheduleBrandFromFirstCondition(); updateScheduleSaveButtonState(); });
+      cells += '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
+      tr.innerHTML = cells;
+      tr.querySelector('.schedule-cond-model').addEventListener('input', updateScheduleSaveButtonState);
+      tr.querySelector('.schedule-cond-model').addEventListener('change', updateScheduleSaveButtonState);
       tr.querySelector('.schedule-cond-storage').addEventListener('input', updateScheduleSaveButtonState);
       tr.querySelector('.schedule-cond-storage').addEventListener('change', updateScheduleSaveButtonState);
-      tr.querySelector('.schedule-cond-remove').onclick = function () {
-        tr.remove();
-        updateScheduleSaveButtonState();
-      };
+      tr.querySelectorAll('.schedule-cond-price').forEach(function (inp) {
+        inp.addEventListener('input', function () { this.value = this.value.replace(/[^\d.]/g, ''); updateScheduleSaveButtonState(); });
+        inp.addEventListener('change', updateScheduleSaveButtonState);
+      });
+      tr.querySelector('.schedule-cond-remove').onclick = function () { tr.remove(); updateScheduleSaveButtonState(); };
       return tr;
+    }
+    function getScheduleConditionsFromForm() {
+      var tbody = document.getElementById('scheduleConditionsBody');
+      if (!tbody) return [];
+      var rows = tbody.querySelectorAll('tr');
+      var list = [];
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var modelEl = row.querySelector('.schedule-cond-model');
+        var storageEl = row.querySelector('.schedule-cond-storage');
+        var modelName = (modelEl && modelEl.value ? modelEl.value.trim() : '');
+        var storage = (storageEl && storageEl.value ? storageEl.value.trim() : '') || undefined;
+        var obj = { modelName: modelName, storage: storage };
+        row.querySelectorAll('.schedule-cond-price').forEach(function (inp) {
+          var k = inp.getAttribute('data-key');
+          if (k) obj[k] = (inp.value ? inp.value.trim() : '');
+        });
+        SCHEDULE_COND_PRICE_KEYS.forEach(function (k) { if (obj[k] === undefined) obj[k] = ''; });
+        list.push(obj);
+      }
+      return list;
     }
     function setScheduleConditionsInForm(conditions) {
       var tbody = document.getElementById('scheduleConditionsBody');
       if (!tbody) return;
       tbody.innerHTML = '';
-      (conditions && conditions.length ? conditions : [{ quoteAmount: '', modelName: '', storage: '' }]).forEach(function (c) {
+      (conditions && conditions.length ? conditions : [{}]).forEach(function (c) {
         tbody.appendChild(renderScheduleConditionRow(c));
       });
       updateScheduleSaveButtonState();
     }
+    function validateScheduleConditions() {
+      var conditions = getScheduleConditionsFromForm();
+      var invalidRowIndices = [];
+      var requiredInvalid = [];
+      var duplicateInvalid = [];
+      var modelStorageSeen = {};
+      for (var i = 0; i < conditions.length; i++) {
+        var c = conditions[i];
+        var hasAny = c.modelName || (c.storage && c.storage.trim()) || SCHEDULE_COND_PRICE_KEYS.some(function (k) { return (c[k] || '').trim(); });
+        if (!hasAny) continue;
+        var modelOk = (c.modelName || '').trim().length > 0;
+        var floorVal = (c.floorPrice || '').trim();
+        var floorNum = parseFloat(floorVal);
+        var floorOk = floorVal && !isNaN(floorNum) && floorNum >= 1 && floorNum <= 500;
+        if (!modelOk || !floorOk) requiredInvalid.push(i);
+        var storageNorm = (c.storage || '').trim().toLowerCase();
+        var modelNorm = (c.modelName || '').trim().toLowerCase();
+        var key = modelNorm + '\x01' + storageNorm;
+        if (modelStorageSeen[key] !== undefined) {
+          duplicateInvalid.push(i);
+          duplicateInvalid.push(modelStorageSeen[key]);
+        } else {
+          modelStorageSeen[key] = i;
+        }
+      }
+      if (requiredInvalid.length > 0) {
+        return { valid: false, message: '每条条件须填机型和 floorPrice（1～500元）', invalidRowIndices: requiredInvalid };
+      }
+      var dupUnique = duplicateInvalid.filter(function (v, idx, a) { return a.indexOf(v) === idx; });
+      if (dupUnique.length > 0) {
+        var nums = dupUnique.slice().sort(function (a, b) { return a - b; }).map(function (i) { return i + 1; });
+        var msg = '序号 ' + nums.join('、') + ' 机型+存储不可重复';
+        return { valid: false, message: msg, invalidRowIndices: dupUnique };
+      }
+      var hasValid = conditions.some(function (c) {
+        var modelOk = (c.modelName || '').trim().length > 0;
+        var floorVal = (c.floorPrice || '').trim();
+        var n = parseFloat(floorVal);
+        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
+      });
+      if (!hasValid) {
+        return { valid: false, message: '请至少添加一条完整条件', invalidRowIndices: [] };
+      }
+      return { valid: true, message: '', invalidRowIndices: [] };
+    }
     document.getElementById('btnScheduleAddCondition').onclick = function () {
       var tbody = document.getElementById('scheduleConditionsBody');
-      if (tbody) tbody.appendChild(renderScheduleConditionRow({}));
+      if (tbody) tbody.insertBefore(renderScheduleConditionRow({}), tbody.firstChild);
       updateScheduleSaveButtonState();
     };
+    (function () {
+      var scrollEl = document.querySelector('.schedule-task-modal-scroll');
+      var btnTop = document.getElementById('btnScheduleScrollToTop');
+      var btnBottom = document.getElementById('btnScheduleScrollToBottom');
+      if (btnTop && scrollEl) btnTop.onclick = function () { scrollEl.scrollTop = 0; };
+      if (btnBottom && scrollEl) btnBottom.onclick = function () { scrollEl.scrollTop = scrollEl.scrollHeight - scrollEl.clientHeight; };
+    })();
+    var scheduleQuickLocateIndex = 0;
+    var scheduleQuickLocateLastKeyword = '';
+    function runScheduleQuickLocate() {
+      var input = document.getElementById('scheduleQuickLocate');
+      var tbody = document.getElementById('scheduleConditionsBody');
+      var scrollEl = document.querySelector('.schedule-task-modal-scroll');
+      if (!input || !tbody || !scrollEl) return;
+      var keyword = (input.value || '').trim().toLowerCase();
+      if (!keyword) { showToast('请输入机型关键词', 'info'); return; }
+      if (keyword !== scheduleQuickLocateLastKeyword) {
+        scheduleQuickLocateLastKeyword = keyword;
+        scheduleQuickLocateIndex = 0;
+      }
+      var rows = tbody.querySelectorAll('tr.schedule-condition-row');
+      var matches = [];
+      for (var i = 0; i < rows.length; i++) {
+        var modelInput = rows[i].querySelector('.schedule-cond-model');
+        var modelVal = (modelInput && modelInput.value ? modelInput.value.trim() : '').toLowerCase();
+        if (modelVal && modelVal.indexOf(keyword) !== -1) matches.push(rows[i]);
+      }
+      if (!matches.length) { showToast('未找到匹配的机型', 'info'); return; }
+      var idx = scheduleQuickLocateIndex % matches.length;
+      var found = matches[idx];
+      scheduleQuickLocateIndex = (scheduleQuickLocateIndex + 1) % matches.length;
+      found.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      found.classList.add('schedule-condition-row-highlight');
+      setTimeout(function () { found.classList.remove('schedule-condition-row-highlight'); }, 1500);
+      if (matches.length > 1) showToast('第 ' + (idx + 1) + '/' + matches.length + ' 条匹配，继续点击定位可顺移下一条', 'success');
+    }
+    var quickLocateInput = document.getElementById('scheduleQuickLocate');
+    var btnQuickLocate = document.getElementById('btnScheduleQuickLocate');
+    if (quickLocateInput) {
+      quickLocateInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runScheduleQuickLocate(); } });
+      quickLocateInput.addEventListener('input', function () { scheduleQuickLocateLastKeyword = ''; });
+    }
+    if (btnQuickLocate) btnQuickLocate.onclick = runScheduleQuickLocate;
+    var scheduleTaskModalEl = document.getElementById('scheduleTaskModal');
+    function openScheduleTaskModal() {
+      if (scheduleTaskModalEl) scheduleTaskModalEl.classList.remove('hidden');
+      var scrollEl = document.querySelector('.schedule-task-modal-scroll');
+      if (scrollEl) scrollEl.scrollTop = 0;
+    }
+    function closeScheduleTaskModal() { if (scheduleTaskModalEl) scheduleTaskModalEl.classList.add('hidden'); }
+    document.getElementById('btnScheduleAddTask').onclick = function () {
+      clearScheduleTaskForm();
+      clearScheduleEditMode();
+      updateScheduleSaveButtonState();
+      openScheduleTaskModal();
+    };
+    scheduleTaskModalEl && scheduleTaskModalEl.addEventListener('click', function (e) {
+      if (e.target === scheduleTaskModalEl) { closeScheduleTaskModal(); }
+    });
     document.getElementById('btnScheduleCancelEdit').onclick = function () {
       clearScheduleTaskForm();
       clearScheduleEditMode();
       updateScheduleSaveButtonState();
+      closeScheduleTaskModal();
     };
+    document.getElementById('btnScheduleImport').onclick = function () { document.getElementById('scheduleImportFile').click(); };
+    (function () {
+      var btnExport = document.getElementById('btnScheduleExport');
+      if (btnExport) {
+        btnExport.onclick = function () {
+          if (!authToken) { showToast('请先登录', 'error'); return; }
+          if (!scheduledTasks.length) { showToast('暂无任务可导出', 'error'); return; }
+          fetch('/api/export-price-list', {
+            method: 'POST',
+            headers: { 'token': authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tasks: scheduledTasks })
+          }).then(function (r) {
+            if (!r.ok) {
+              return r.text().then(function (t) {
+                try { var j = JSON.parse(t); showToast(j.message || '导出失败', 'error'); } catch (_) { showToast('导出失败', 'error'); }
+              });
+            }
+            return r.blob();
+          }).then(function (blob) {
+            if (!blob) return;
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = '价格列表.xlsx';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('导出成功', 'success');
+          }).catch(function (e) { showToast('导出失败: ' + (e && e.message ? e.message : '网络错误'), 'error'); });
+        };
+      }
+    })();
+    (function () {
+      var fileEl = document.getElementById('scheduleImportFile');
+      var btnImport = document.getElementById('btnScheduleImport');
+      if (!fileEl || !btnImport) return;
+      fileEl.addEventListener('change', function () {
+        var file = fileEl.files && fileEl.files[0];
+        fileEl.value = '';
+        if (!file) return;
+        if (!authToken) { showToast('请先登录', 'error'); return; }
+        if (Object.keys(scheduleTaskTimers).length > 0 || Object.keys(scheduleTaskStarting).length > 0) {
+          showToast('请先全部停止任务后再导入', 'error');
+          return;
+        }
+        var fd = new FormData();
+        fd.append('file', file);
+        var msg = document.getElementById('scheduleMsg');
+        var importModal = document.getElementById('importLoadingModal');
+        var importLoadingText = document.getElementById('importLoadingText');
+        var btnText = btnImport.textContent || '导入价格列表';
+        btnImport.disabled = true;
+        btnImport.textContent = '导入中…';
+        if (importModal) { importModal.classList.remove('hidden'); importModal.setAttribute('aria-hidden', 'false'); }
+        if (importLoadingText) importLoadingText.textContent = '正在导入中…';
+        showMsg(msg, '正在解析…', 'info');
+        function stopLoading() {
+          btnImport.disabled = false;
+          btnImport.textContent = btnText;
+          hideMsg(msg);
+          if (importModal) { importModal.classList.add('hidden'); importModal.setAttribute('aria-hidden', 'true'); }
+        }
+        fetch('/api/import-price-list', {
+          method: 'POST',
+          headers: { 'token': authToken },
+          body: fd
+        }).then(function (r) { return r.text().then(function (t) { try { return JSON.parse(t); } catch (_) { return { success: false, message: '解析响应失败' }; } }); }).then(function (res) {
+          if (!res.success) { stopLoading(); showToast(res.message || '导入失败', 'error'); return; }
+          var list = res.data && Array.isArray(res.data) ? res.data : [];
+          if (!list.length) { stopLoading(); showToast('文件中无有效数据（需含品牌、机型、保底价）', 'error'); return; }
+          loadScheduleOptions().then(function () {
+            var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
+            var brandNameToKey = {};
+            radios.forEach(function (r) {
+              var key = (r.getAttribute('data-key') || '').trim();
+              var name = (r.getAttribute('data-name') || '').trim();
+              if (name) brandNameToKey[name.toLowerCase()] = { key: key, name: name };
+            });
+            var added = 0;
+            var overwritten = 0;
+            var skipped = 0;
+            var baseId = Date.now();
+            var newConditions = function (conditions) {
+              return conditions.map(function (c) {
+                var out = { modelName: String(c.modelName || '').trim(), storage: (c.storage && String(c.storage).trim()) || undefined };
+                ['1001', '1002', '1003', '1004', '1005', 'floorPrice'].forEach(function (k) { out[k] = String(c[k] || '').trim(); });
+                return out;
+              });
+            };
+            list.forEach(function (item, idx) {
+              var brandName = (item.brandName || '').trim();
+              var conditions = item.conditions || [];
+              if (!brandName || !conditions.length) { skipped++; return; }
+              var brandLower = brandName.toLowerCase();
+              var matched = brandNameToKey[brandLower] || null;
+              for (var k in brandNameToKey) {
+                if (!matched && (k.indexOf(brandLower) !== -1 || brandLower.indexOf(k) !== -1)) {
+                  matched = brandNameToKey[k]; break;
+                }
+              }
+              var brandKey = matched ? matched.key : '';
+              var displayBrandName = matched ? matched.name : brandName;
+              var taskName = brandName + '抢单';
+              var existing = scheduledTasks.find(function (t) { return (t.name || '').trim() === taskName; });
+              if (existing) {
+                existing.manufacturerNames = [];
+                existing.categoryId = schedulePhoneCatId;
+                existing.brandIds = brandKey ? [brandKey] : [];
+                existing.brandName = displayBrandName;
+                existing.minPrice = undefined;
+                existing.maxPrice = undefined;
+                existing.conditions = newConditions(conditions);
+                existing.frequency = '3';
+                overwritten++;
+                return;
+              }
+              var id = baseId + idx;
+              scheduledTasks.push({
+                id: id,
+                name: taskName,
+                manufacturerNames: [],
+                categoryId: schedulePhoneCatId,
+                brandIds: brandKey ? [brandKey] : [],
+                brandName: displayBrandName,
+                minPrice: undefined,
+                maxPrice: undefined,
+                conditions: newConditions(conditions),
+                frequency: '3'
+              });
+              added++;
+            });
+            saveScheduledTasks();
+            renderScheduleTaskList();
+            stopLoading();
+            var msg = '已导入 ' + added + ' 个任务';
+            if (overwritten) msg += '，覆盖 ' + overwritten + ' 条';
+            if (skipped) msg += '，跳过 ' + skipped + ' 条';
+            showToast(msg, 'success');
+          });
+        }).catch(function (e) {
+          stopLoading();
+          showToast('导入失败: ' + (e && e.message ? e.message : '网络错误'), 'error');
+        });
+      });
+    })();
     function getScheduleFormTask() {
+      // 快速定位为辅助功能，仅用于在条件列表中滚动定位，不入参、不参与保存与执行
       var name = document.getElementById('scheduleTaskName').value.trim();
       if (!name) return null;
       var validation = validateScheduleConditions();
       if (!validation.valid) return null;
       var conditions = getScheduleConditionsFromForm();
       var validConditions = conditions.filter(function (c) {
-        var hasAny = (c.quoteAmount || c.modelName || (c.storage && c.storage.trim()));
-        if (!hasAny) return false;
-        var q = parseFloat(c.quoteAmount);
-        return (c.quoteAmount && !isNaN(q) && q >= 1 && q <= 500) && (c.modelName && c.modelName.trim().length > 0);
+        var modelOk = (c.modelName || '').trim().length > 0;
+        var floorVal = (c.floorPrice || '').trim();
+        var n = parseFloat(floorVal);
+        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
       });
       if (!validConditions.length) return null;
       var brandRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
@@ -2450,9 +3154,7 @@
         brandName: brandName,
         minPrice: document.getElementById('scheduleTaskMinPrice').value.trim() || undefined,
         maxPrice: document.getElementById('scheduleTaskMaxPrice').value.trim() || undefined,
-        conditions: validConditions.map(function (c) {
-          return { quoteAmount: c.quoteAmount.trim(), modelName: c.modelName.trim(), storage: (c.storage && c.storage.trim()) || undefined };
-        }),
+        conditions: validConditions,
         frequency: freqEl ? freqEl.value : '3'
       };
     }
@@ -2464,7 +3166,7 @@
       if (tbody) {
         var rows = tbody.querySelectorAll('tr');
         for (var i = 0; i < rows.length; i++) {
-          rows[i].classList.toggle('schedule-condition-row-error', validation.invalidRowIndices.indexOf(i) !== -1);
+          rows[i].classList.toggle('schedule-condition-row-error', validation.invalidRowIndices && validation.invalidRowIndices.indexOf(i) !== -1);
         }
       }
       var valid = nameValid && validation.valid;
@@ -2479,7 +3181,7 @@
       } else {
         var parts = [];
         if (!nameValid) parts.push('任务名称');
-        if (!validation.valid) parts.push(validation.message || '至少一条完整条件（报价1～500元+机型）');
+        if (!validation.valid) parts.push(validation.message || '至少一条完整条件');
         hintEl.textContent = '（请完善：' + parts.join('；') + '）';
         hintEl.classList.remove('hidden');
       }
@@ -2501,16 +3203,17 @@
       var msg = document.getElementById('scheduleMsg');
       updateScheduleSaveButtonState();
       var t = getScheduleFormTask();
+      var taskNameVal = (document.getElementById('scheduleTaskName').value || '').trim();
       if (!t) {
         var validation = validateScheduleConditions();
-        var errText = (document.getElementById('scheduleTaskName').value || '').trim() ? (validation.message || '请完善子条件（报价、机型必填）') : '请填写任务名称';
+        var errText = taskNameVal ? ('任务「' + taskNameVal + '」：' + (validation.message || '请至少一条完整条件')) : (validation.message || '请填写任务名称');
         showMsg(msg, errText, 'error');
         return;
       }
       var nameTrim = t.name.trim();
       var isDuplicate = scheduledTasks.some(function (task) { return task.id !== currentEditingTaskId && (task.name || '').trim() === nameTrim; });
       if (isDuplicate) {
-        showMsg(msg, '任务名称不能重复', 'error');
+        showMsg(msg, '任务「' + nameTrim + '」：任务名称不能重复', 'error');
         document.getElementById('scheduleTaskName').classList.add('schedule-input-error');
         return;
       }
@@ -2536,6 +3239,7 @@
         showMsg(msg, '', 'info');
         hideMsg(msg);
         showToast('修改成功', 'success');
+        closeScheduleTaskModal();
       } else {
         var id = Date.now();
         scheduledTasks.push({ id: id, name: t.name, manufacturerNames: t.manufacturerNames, categoryId: t.categoryId, brandIds: t.brandIds, brandName: t.brandName, minPrice: t.minPrice, maxPrice: t.maxPrice, conditions: t.conditions, frequency: t.frequency });
@@ -2545,16 +3249,21 @@
         showMsg(msg, '', 'info');
         hideMsg(msg);
         showToast('添加成功', 'success');
+        closeScheduleTaskModal();
       }
     };
     async function startScheduleTaskAuto(taskId) {
       var task = scheduledTasks.find(function (t) { return t.id === taskId; });
       if (!task) { showToast('任务不存在', 'error'); return; }
       var conds = task.conditions && task.conditions.length ? task.conditions : [];
-      if (!conds.length && (task.quoteAmount || task.modelName)) conds = [{ quoteAmount: task.quoteAmount, modelName: task.modelName, storage: task.storage }];
+      if (!conds.length && (task.quoteAmount || task.modelName)) conds = [{ floorPrice: task.quoteAmount, modelName: task.modelName, storage: task.storage }];
       if (!conds.length) { showToast('请先添加至少一条抢单条件', 'error'); return; }
-      var invalid = conds.find(function (c) { var q = parseFloat(c.quoteAmount); return !c.modelName || isNaN(q) || q < 1 || q > 500; });
-      if (invalid) { showToast('每条条件须包含机型且报价 1～500 元', 'error'); return; }
+      var invalid = conds.find(function (c) {
+        var price = String(c.floorPrice != null ? c.floorPrice : '').trim();
+        var q = parseFloat(price);
+        return !(c.modelName || '').trim() || !price || isNaN(q) || q < 1 || q > 500;
+      });
+      if (invalid) { showToast('每条条件须包含机型且底价（floorPrice）1～500 元', 'error'); return; }
       if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
       if (scheduleTaskStarting[taskId]) return;
       var sec = Math.max(1, parseInt(task.frequency, 10) || 1);
@@ -2599,11 +3308,13 @@
     };
     document.getElementById('btnScheduleDeleteAll').onclick = function () {
       if (scheduledTasks.length === 0) { showToast('暂无任务', 'error'); return; }
+      var runningCount = Object.keys(scheduleTaskTimers).length;
+      if (runningCount > 0) { showToast('请先全部暂停后再删除', 'error'); return; }
       if (!confirm('确定要删除全部 ' + scheduledTasks.length + ' 个任务吗？')) return;
-      for (var id in scheduleTaskTimers) { if (scheduleTaskTimers.hasOwnProperty(id)) { clearInterval(scheduleTaskTimers[id]); } }
       scheduleTaskTimers = {};
       scheduleTaskStarting = {};
       scheduledTasks = [];
+      updateScheduleImportButtonState();
       saveScheduledTasks();
       clearScheduleEditMode();
       showToast('已删除全部任务', 'success');
@@ -2614,9 +3325,6 @@
       var msg = document.getElementById('scheduleMsg');
       if (!isAuto) hideMsg(msg);
       var conds = task.conditions && task.conditions.length ? task.conditions : [];
-      if (!conds.length && (task.quoteAmount || task.modelName)) {
-        conds = [{ quoteAmount: task.quoteAmount, modelName: task.modelName, storage: task.storage }];
-      }
       try {
         var r = await api('/api/execute-task', {
           method: 'POST',
@@ -2627,7 +3335,7 @@
             brandIds: task.brandIds,
             minPrice: task.minPrice,
             maxPrice: task.maxPrice,
-            conditions: conds,
+            conditions: conds.length ? conds : undefined,
             userId: authUserId
           })
         });
@@ -2777,6 +3485,7 @@
         document.getElementById('quoteBrand').textContent = btn.dataset.brand || '-';
         document.getElementById('quoteModel').textContent = btn.dataset.model || '-';
         document.getElementById('quoteStorage').textContent = btn.dataset.storage || '-';
+        document.getElementById('quoteColorGrade').textContent = btn.dataset.colorGrade || '-';
         document.getElementById('quoteApprizeDisplay').textContent = btn.dataset.apprizeDisplay || '-';
         document.getElementById('quoteApprizeValue').value = btn.dataset.apprize || '';
         var ap = (btn.dataset.actualPrice || '').trim();
@@ -2808,12 +3517,23 @@
       doQueryOrders();
     };
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var scheduleModal = document.getElementById('scheduleTaskModal');
+        if (scheduleModal && !scheduleModal.classList.contains('hidden')) {
+          e.preventDefault();
+          document.getElementById('btnScheduleCancelEdit').click();
+          return;
+        }
+        var modal = document.getElementById('quoteModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          e.preventDefault();
+          document.getElementById('btnQuoteCancel').click();
+        }
+        return;
+      }
       var modal = document.getElementById('quoteModal');
       if (!modal || modal.classList.contains('hidden')) return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        document.getElementById('btnQuoteCancel').click();
-      } else if (e.key === 'Enter' && document.activeElement && document.activeElement.tagName !== 'TEXTAREA') {
+      if (e.key === 'Enter' && document.activeElement && document.activeElement.tagName !== 'TEXTAREA') {
         e.preventDefault();
         document.getElementById('btnQuoteSubmit').click();
       }

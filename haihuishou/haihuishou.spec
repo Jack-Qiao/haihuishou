@@ -1,12 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
-# 在项目根目录（codingAi）执行：pyinstaller haihuishou.spec
+# 在 haihuishou 项目目录执行：pyinstaller haihuishou.spec
 # 打包完成后，可执行文件在 dist/haihuishou（macOS/Linux）或 dist/haihuishou.exe（Windows）
 
 import os
 
 project_root = os.path.dirname(os.path.abspath(SPEC))
-haihuishou_dir = os.path.join(project_root, 'haihuishou')
-templates_src = os.path.join(haihuishou_dir, 'templates')
+haihuishou_pkg = os.path.join(project_root, 'haihuishou')
+templates_src = os.path.join(haihuishou_pkg, 'templates')
 
 # 把 haihuishou/templates 打包到 bundle 根目录的 templates
 datas = [(templates_src, 'templates')]
@@ -18,6 +18,7 @@ a = Analysis(
     hiddenimports=[
         'flask',
         'requests',
+        'openpyxl',
         'haihuishou',
         'haihuishou.app_ui',
         'haihuishou.api',
