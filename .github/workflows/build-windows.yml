@@ -1,5 +1,5 @@
-# 在 Windows 上打包嗨回收抢单工具，生成 haihuishou_app.exe
-# 推送代码后可在 Actions 页面下载产物；也可在本地 Windows 执行：pyinstaller haihuishou.spec
+# 在 Windows 上打包嗨回收抢单工具，生成 haihuishou.exe
+# 推送代码后可在 Actions 页面下载产物；也可在本地 Windows 于 haihuishou/ 目录执行：pyinstaller haihuishou.spec
 
 name: Build Windows
 
@@ -9,13 +9,14 @@ on:
     branches: [main, master]
     paths:
       - 'haihuishou/**'
-      - 'launch_haihuishou.py'
-      - 'haihuishou.spec'
       - '.github/workflows/build-windows.yml'
 
 jobs:
   build:
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: haihuishou
     steps:
       - uses: actions/checkout@v4
 
@@ -27,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller flask requests
+          pip install pyinstaller flask requests openpyxl
 
       - name: Build with PyInstaller
         run: |
@@ -37,4 +38,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: haihuishou-windows
-          path: dist/haihuishou_app.exe
+          path: haihuishou/dist/haihuishou.exe

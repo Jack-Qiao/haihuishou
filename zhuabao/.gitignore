@@ -1,0 +1,5 @@
+wechat_capture/
+*.log
+__pycache__/
+.env
+*.pyc

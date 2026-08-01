@@ -5,7 +5,7 @@
   -p 端口  默认 5050
   -h 地址  默认 127.0.0.1（对外用 0.0.0.0）
   -d       调试模式（不自动打开浏览器）
-打包: pyinstaller haihuishou.spec
+打包: 在本目录执行 pyinstaller haihuishou.spec
 """
 
 import argparse
