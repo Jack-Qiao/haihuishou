@@ -1,0 +1,27 @@
+haihuishou/haihuishou/app_ui.py
+  s_fddc3b1ccf30b0::t_7dd5d982f262fc 372-376
+  s_fddc3b1ccf30b0::t_05941b49580cb2 503-507
+haihuishou/haihuishou.spec
+  s_fddc3b1ccf30b0::t_b476ce581e9292 6,15-29,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.39-trip",
+  "base_commit_sha": "1a1428db70489ad4fb67c96cf2aa2cdeff7cbad4",
+  "prompts": {},
+  "humans": {
+    "h_46299a26f19d6f": {
+      "author": "qiaow <qiaow@trip.com>"
+    }
+  },
+  "sessions": {
+    "s_fddc3b1ccf30b0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9f349d35-ea4a-4fb3-bd61-3d53dabfec1e",
+        "model": "default"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
