@@ -3,6 +3,7 @@
 # 打包完成后，可执行文件在 dist/haihuishou（macOS/Linux）或 dist/haihuishou.exe（Windows）
 
 import os
+from PyInstaller.utils.hooks import collect_submodules
 
 project_root = os.path.dirname(os.path.abspath(SPEC))
 haihuishou_pkg = os.path.join(project_root, 'haihuishou')
@@ -11,20 +12,26 @@ templates_src = os.path.join(haihuishou_pkg, 'templates')
 # 把 haihuishou/templates 打包到 bundle 根目录的 templates
 datas = [(templates_src, 'templates')]
 
+# openpyxl 在接口里懒加载；只写 'openpyxl' 时子模块/依赖常未打进包，对方机器会报「未安装 openpyxl」
+hiddenimports = [
+    'flask',
+    'requests',
+    'openpyxl',
+    'et_xmlfile',
+    'haihuishou',
+    'haihuishou.app_ui',
+    'haihuishou.api',
+    'haihuishou.grab_tool',
+    'haihuishou.__init__',
+]
+hiddenimports += collect_submodules('openpyxl')
+hiddenimports += collect_submodules('et_xmlfile')
+
 a = Analysis(
     [os.path.join(project_root, 'launch_haihuishou.py')],
     pathex=[project_root],
     datas=datas,
-    hiddenimports=[
-        'flask',
-        'requests',
-        'openpyxl',
-        'haihuishou',
-        'haihuishou.app_ui',
-        'haihuishou.api',
-        'haihuishou.grab_tool',
-        'haihuishou.__init__',
-    ],
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

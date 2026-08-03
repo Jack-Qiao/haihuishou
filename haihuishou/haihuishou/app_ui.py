@@ -369,8 +369,11 @@ def api_import_price_list():
         return jsonify({"success": False, "message": "请上传 .xlsx 或 .xls 格式的 Excel 文件"}), 400
     try:
         from openpyxl import load_workbook
-    except ImportError:
-        return jsonify({"success": False, "message": "服务端未安装 openpyxl，无法解析 Excel"}), 500
+    except ImportError as e:
+        return jsonify({
+            "success": False,
+            "message": "服务端未安装 openpyxl，无法解析 Excel（打包时请用最新 haihuishou.spec 重新打包以打入 openpyxl）。详情: %s" % str(e),
+        }), 500
     try:
         # 保存到临时文件再解析，避免上传流不可 seek 导致 read_only 模式失败
         import tempfile
@@ -497,8 +500,11 @@ def api_export_price_list():
     try:
         from openpyxl import Workbook
         import io
-    except ImportError:
-        return jsonify({"success": False, "message": "服务端未安装 openpyxl，无法生成 Excel"}), 500
+    except ImportError as e:
+        return jsonify({
+            "success": False,
+            "message": "服务端未安装 openpyxl，无法生成 Excel（打包时请用最新 haihuishou.spec 重新打包以打入 openpyxl）。详情: %s" % str(e),
+        }), 500
     body = request.get_json() or {}
     tasks = body.get("tasks")
     if not tasks or not isinstance(tasks, list):
