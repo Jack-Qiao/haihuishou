@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>竞价侠</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --text-muted: #8b9cb3;
+      --accent: #22c55e;
+      --accent-hover: #16a34a;
+      --primary: #22c55e;
+      --danger: #ef4444;
+      --warn: #f97316;
+      --radius: 10px;
+      --font: 'Noto Sans SC', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    html, body {
+      scrollbar-color: var(--border) var(--surface);
+      scrollbar-width: thin;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar { width: 8px; height: 8px; }
+    html::-webkit-scrollbar-track, body::-webkit-scrollbar-track { background: var(--surface); }
+    html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .hidden { display: none !important; }
+
+    .btn {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.06); }
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+    }
+    .btn-ghost { background: transparent; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+
+    input[type="text"], input[type="password"], input[type="number"], input[type="date"], select {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--accent);
+    }
+    .login-row { display: flex; align-items: center; gap: 12px; }
+    .status { color: var(--text-muted); font-size: 13px; }
+    .status.logged-in::before {
+      content: "●";
+      color: var(--accent);
+      margin-right: 4px;
+    }
+
+    .main-tabs {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 24px;
+    }
+    .tab-nav { display: flex; gap: 4px; }
+    .tab-nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      user-select: none;
+    }
+    .tab-nav-item.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    #appContent {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .tab-panel {
+      padding: 20px 24px;
+      flex: 1;
+    }
+    .tab-panel.hidden { display: none; }
+
+    .section-title {
+      font-size: 1.05rem;
+      margin: 0 0 12px 0;
+      font-weight: 600;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .toolbar label { color: var(--text-muted); font-size: 13px; }
+
+    .msg {
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .msg.info { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .msg.success { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); }
+    .msg.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .msg.warn { background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); color: #fdba74; }
+
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      background: var(--bg);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      font-size: 13px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+    tbody tr.row-quoting { background: rgba(34, 197, 94, 0.06); }
+    tbody tr.row-quoting:hover { background: rgba(34, 197, 94, 0.1); }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: var(--border);
+      color: var(--text-muted);
+    }
+    .tag.quoting { background: rgba(34, 197, 94, 0.15); color: var(--accent); }
+    .tag.pending { background: rgba(139, 156, 179, 0.15); color: var(--text-muted); }
+
+    .cell-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 4px;
+      color: var(--text-muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .pagination .pager { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .pagination .pager .btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow: auto;
+    }
+    .modal h3 {
+      margin: 0 0 16px 0;
+      font-size: 1.05rem;
+    }
+    .modal .form-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .modal .form-row label {
+      color: var(--text-muted);
+      min-width: 80px;
+      font-size: 13px;
+    }
+    .modal .form-row input:not([type="checkbox"]):not([type="radio"]) {
+      flex: 1;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .quote-apprize {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .detail-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      max-height: 360px;
+      overflow: auto;
+      color: var(--text);
+    }
+    .detail-block.plain {
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 8px 16px;
+    }
+    .detail-grid .cell {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border);
+      min-width: 0;
+    }
+    .detail-grid .cell .k {
+      color: var(--text-muted);
+      flex: 0 0 90px;
+      font-size: 12px;
+    }
+    .detail-grid .cell .v {
+      color: var(--text);
+      word-break: break-all;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .detail-grid .cell .v.strong { color: var(--accent); font-weight: 600; }
+    .detail-section-title {
+      margin: 12px 0 6px 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+    .detail-section-title:first-child { margin-top: 0; }
+    .detail-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .detail-images img {
+      width: 88px;
+      height: 88px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: zoom-in;
+    }
+
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .login-card h1 {
+      margin: 0 0 8px 0;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+    .login-card .sub {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+    .login-card .form-row { margin-bottom: 16px; }
+    .login-card .form-row label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 13px; }
+    .login-card input { width: 100%; }
+    .login-card .btn-primary { width: 100%; padding: 10px; margin-top: 8px; }
+
+    .toast-wrap {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      pointer-events: none;
+    }
+    .toast {
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      margin-bottom: 8px;
+    }
+    .toast.success { background: #22c55e; color: #fff; }
+    .toast.error { background: #ef4444; color: #fff; }
+    .toast.info { background: #3b82f6; color: #fff; }
+  </style>
+</head>
+
+<body>
+  <div id="loginScreen">
+    <div class="login-card">
+      <h1>竞价侠</h1>
+      <p class="sub">请先登录后使用</p>
+      <div class="form-row">
+        <label>手机号</label>
+        <input type="text" id="loginPhone" placeholder="请输入手机号" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label>密码</label>
+        <input type="password" id="loginPwd" placeholder="请输入密码" autocomplete="off">
+      </div>
+      <div id="loginMsg" class="msg hidden"></div>
+      <button type="button" class="btn btn-primary" id="btnLogin">登录</button>
+    </div>
+  </div>
+
+  <div id="appContent" class="hidden">
+    <header>
+      <h1>竞价侠</h1>
+      <div class="login-row">
+        <span class="status logged-in" id="loginStatus">已登录</span>
+        <button type="button" class="btn btn-ghost" id="btnLogout">退出</button>
+      </div>
+    </header>
+    <div class="main-tabs">
+      <nav class="tab-nav">
+        <span class="tab-nav-item active" data-tab="auction">竞价列表</span>
+        <span class="tab-nav-item" data-tab="grab">报价中</span>
+        <span class="tab-nav-item" data-tab="myBids">已报价</span>
+      </nav>
+    </div>
+
+    <div id="tabPanelAuction" class="tab-panel">
+      <div class="toolbar">
+        <label>每页</label>
+        <select id="pageSizeAuction">
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="500">500</option>
+        </select>
+        <button type="button" class="btn btn-primary" id="btnRefreshAuction">刷新列表</button>
+        <span id="auctionMsg" class="status"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tableAuction">
+          <thead>
+            <tr>
+              <th style="width:80px;">订单ID</th>
+              <th>产品名称</th>
+              <th style="width:110px;">类目</th>
+              <th style="width:120px;">状态</th>
+              <th style="width:280px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="auctionTbody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="auctionTotalHint">共 0 条</span>
+        <div class="pager" id="auctionPager"></div>
+      </div>
+    </div>
+
+    <div id="tabPanelGrab" class="tab-panel hidden">
+      <div class="toolbar">
+        <button type="button" class="btn btn-primary" id="btnRefreshGrab">刷新</button>
+        <span id="grabMsg" class="status"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tableGrab">
+          <thead>
+            <tr>
+              <th style="width:80px;">订单ID</th>
+              <th>产品名称</th>
+              <th style="width:110px;">类目</th>
+              <th style="width:280px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="grabTbody">
+            <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="grabTotalHint">共 0 条</span>
+      </div>
+    </div>
+
+    <div id="tabPanelMyBids" class="tab-panel hidden">
+      <div class="toolbar">
+        <label>状态</label>
+        <select id="myBidsStatus">
+          <option value="bidding" selected>报价中</option>
+          <option value="win">已中标</option>
+          <option value="lose">未中标</option>
+          <option value="">全部</option>
+        </select>
+        <label>开始日期</label>
+        <input type="date" id="myBidsDateAfter">
+        <label>结束日期</label>
+        <input type="date" id="myBidsDateBefore">
+        <label>每页</label>
+        <select id="pageSizeMyBids">
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button type="button" class="btn btn-primary" id="btnRefreshMyBids">查询</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tableMyBids">
+          <thead>
+            <tr>
+              <th style="width:80px;">订单ID</th>
+              <th>产品名称</th>
+              <th style="width:110px;">报价金额</th>
+              <th style="width:110px;">状态</th>
+              <th style="width:160px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="myBidsTbody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="myBidsTotalHint">共 0 条</span>
+        <div class="pager" id="myBidsPager"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 出价弹窗 -->
+  <div id="bidModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 id="bidModalTitle">提交报价</h3>
+      <div id="bidQuoteInfo" class="hidden">
+        <div class="form-row">
+          <label>产品名称</label>
+          <span id="bidProductName">-</span>
+        </div>
+        <div class="form-row">
+          <label>订单 ID</label>
+          <span id="bidOrderId">-</span>
+        </div>
+      </div>
+      <div id="bidDetailBlock" class="detail-block hidden">加载详情中…</div>
+      <div id="bidQuoteListSection" class="hidden">
+        <div class="form-row" style="align-items: flex-start;">
+          <label>报价数据</label>
+          <div id="bidQuoteListContent" style="flex:1;"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>报价金额</label>
+        <input type="text" id="bidAmountInput" placeholder="请输入报价金额" inputmode="decimal">
+        <span style="color:var(--text-muted);">元</span>
+      </div>
+      <div id="bidMsg" class="msg hidden"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btnBidCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="btnBidSubmit">提交报价</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ---------- 基础工具 ----------
+      var $ = function (id) { return document.getElementById(id); };
+
+      function api(url, opts) {
+        opts = opts || {};
+        var init = {
+          method: opts.method || 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+        };
+        if (opts.body) init.body = JSON.stringify(opts.body);
+        return fetch(url, init).then(function (r) { return r.json().catch(function () { return {}; }); });
+      }
+
+      function toast(msg, kind) {
+        var wrap = $('toastWrap');
+        var el = document.createElement('div');
+        el.className = 'toast ' + (kind || 'info');
+        el.textContent = msg;
+        wrap.appendChild(el);
+        setTimeout(function () {
+          el.style.transition = 'opacity 0.3s';
+          el.style.opacity = '0';
+          setTimeout(function () { el.remove(); }, 300);
+        }, 2000);
+      }
+
+      function showMsg(el, text, kind) {
+        if (!el) return;
+        if (!text) { el.classList.add('hidden'); el.textContent = ''; return; }
+        el.className = 'msg ' + (kind || 'info');
+        el.textContent = text;
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      // ---------- 状态 ----------
+      var state = {
+        loggedIn: false,
+        userId: null,
+        auctionList: [],
+        auctionTotal: 0,
+        auctionPage: 1,
+        auctionPageSize: 20,
+        myBidsList: [],
+        myBidsTotal: 0,
+        myBidsPage: 1,
+        myBidsPageSize: 20,
+        grabOrderIds: [],  // 报价中列表：只有此列表中包含的 orderId 才展示报价数据列表详情
+        grabList: [],      // 报价中列表原始数据（供「报价中」Tab 渲染）
+        currentBid: null,  // 当前正在处理的出价上下文
+      };
+
+      // ---------- 登录 / 登出 ----------
+      function setLoggedIn(userInfo) {
+        state.loggedIn = true;
+        state.userId = userInfo && (userInfo.id || userInfo.userId);
+        $('loginScreen').classList.add('hidden');
+        $('appContent').classList.remove('hidden');
+        var name = userInfo && (userInfo.username || userInfo.realName || userInfo.name);
+        $('loginStatus').textContent = '已登录：' + (name || ('用户 ' + (state.userId || '')));
+        refreshAuctionList();
+        refreshGrabOrderIds();
+      }
+
+      function setLoggedOut() {
+        state.loggedIn = false;
+        state.userId = null;
+        $('loginScreen').classList.remove('hidden');
+        $('appContent').classList.add('hidden');
+        $('loginPhone').value = '';
+        $('loginPwd').value = '';
+      }
+
+      function doLogin() {
+        var phone = ($('loginPhone').value || '').trim();
+        var pwd = $('loginPwd').value || '';
+        if (!phone || !pwd) {
+          showMsg($('loginMsg'), '请填写手机号和密码', 'error');
+          return;
+        }
+        showMsg($('loginMsg'), '登录中…', 'info');
+        api('/api/login', { method: 'POST', body: { phone: phone, password: pwd } }).then(function (r) {
+          if (r && r.success) {
+            showMsg($('loginMsg'), '', '');
+            var info = (r.data && r.data.user) || r.data || {};
+            setLoggedIn(info);
+          } else {
+            showMsg($('loginMsg'), (r && r.message) || '登录失败', 'error');
+          }
+        }).catch(function (e) { showMsg($('loginMsg'), '登录异常：' + e, 'error'); });
+      }
+
+      function doLogout() {
+        api('/api/logout', { method: 'POST' }).then(function () { setLoggedOut(); });
+      }
+
+      // ---------- Tab 切换 ----------
+      function switchTab(name) {
+        document.querySelectorAll('.tab-nav-item').forEach(function (el) {
+          el.classList.toggle('active', el.getAttribute('data-tab') === name);
+        });
+        $('tabPanelAuction').classList.toggle('hidden', name !== 'auction');
+        $('tabPanelGrab').classList.toggle('hidden', name !== 'grab');
+        $('tabPanelMyBids').classList.toggle('hidden', name !== 'myBids');
+        if (name === 'auction') refreshAuctionList();
+        if (name === 'grab') refreshGrabList();
+        if (name === 'myBids') refreshMyBids();
+      }
+
+      // ---------- 报价中列表 Tab ----------
+      function refreshGrabList() {
+        showMsg($('grabMsg'), '加载中…', 'info');
+        return Promise.all([
+          api('/api/grab-order-list'),
+          // 顺便拉一次竞价列表以便按 id 补齐产品名/类目
+          api('/api/order-list', { method: 'POST', body: { pageIndex: 1, pageSize: 3000 } }),
+        ]).then(function (arr) {
+          var r = arr[0], a = arr[1];
+          if (r && r.success) {
+            state.grabList = (r.data && r.data.results) || [];
+            state.grabOrderIds = (r.data && r.data.ids) || [];
+          } else {
+            state.grabList = [];
+            state.grabOrderIds = [];
+            toast((r && r.message) || '加载失败', 'error');
+          }
+          if (a && a.success) {
+            var lst = (a.data && a.data.results) || [];
+            var map = {};
+            for (var i = 0; i < lst.length; i++) {
+              var it = lst[i];
+              var id = it && (it.id || it.orderId);
+              if (id != null) map[String(id)] = it;
+            }
+            state.auctionMap = map;
+          }
+          renderGrabTable();
+          showMsg($('grabMsg'), '', '');
+        });
+      }
+
+      function renderGrabTable() {
+        var tbody = $('grabTbody');
+        var list = state.grabList || [];
+        var map = state.auctionMap || {};
+        // 报价中列表返回的是 id；用 auction_list 匹配，匹配不到的直接丢弃不展示
+        var normalized = [];
+        for (var i = 0; i < list.length; i++) {
+          var item = list[i];
+          if (item && typeof item === 'object') {
+            var oid0 = item.orderId || item.order_id || item.id;
+            if (oid0 != null && map[String(oid0)]) normalized.push(map[String(oid0)]);
+            continue;
+          }
+          var full = map[String(item)];
+          if (full) normalized.push(full);
+        }
+        if (!normalized.length) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
+        } else {
+          var rows = normalized.map(function (o) {
+            var oid = o.orderId || o.order_id || o.id;
+            var name = o.model_name || o.modelName || o.productName || o.name || '-';
+            var cate = o.cate_name || o.categoryName || '-';
+            var actions = '<div class="cell-actions">'
+              + '<button class="btn btn-small" data-action="detail" data-oid="' + escapeHtml(oid) + '">查看详情</button>'
+              + '<button class="btn btn-primary btn-small" data-action="bid" data-oid="' + escapeHtml(oid) + '" data-name="' + escapeHtml(name) + '">出价</button>'
+              + '<button class="btn btn-danger btn-small" data-action="cancel" data-oid="' + escapeHtml(oid) + '">取消</button>'
+              + '</div>';
+            return '<tr class="row-quoting">'
+              + '<td>' + escapeHtml(oid) + '</td>'
+              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + escapeHtml(cate) + '</td>'
+              + '<td>' + actions + '</td>'
+              + '</tr>';
+          }).join('');
+          tbody.innerHTML = rows;
+        }
+        $('grabTotalHint').textContent = '共 ' + normalized.length + ' 条';
+      }
+
+      // ---------- 报价中 id 列表（决定详情展示） ----------
+      function refreshGrabOrderIds() {
+        return api('/api/grab-order-list').then(function (r) {
+          if (r && r.success) {
+            state.grabOrderIds = (r.data && r.data.ids) || [];
+            state.grabList = (r.data && r.data.results) || state.grabList || [];
+          }
+          return state.grabOrderIds;
+        }).catch(function () { return state.grabOrderIds; });
+      }
+
+      function orderIsQuoting(orderId) {
+        if (orderId == null) return false;
+        var s = String(orderId);
+        for (var i = 0; i < state.grabOrderIds.length; i++) {
+          if (String(state.grabOrderIds[i]) === s) return true;
+        }
+        return false;
+      }
+
+      // ---------- 竞价列表 ----------
+      function refreshAuctionList() {
+        state.auctionPageSize = parseInt($('pageSizeAuction').value, 10) || 20;
+        showMsg($('auctionMsg'), '加载中…', 'info');
+        return Promise.all([
+          api('/api/order-list', { method: 'POST', body: { pageIndex: state.auctionPage, pageSize: state.auctionPageSize } }),
+          api('/api/grab-order-list'),
+        ]).then(function (arr) {
+          var r = arr[0], g = arr[1];
+          if (r && r.success) {
+            state.auctionList = (r.data && r.data.results) || [];
+            state.auctionTotal = (r.data && r.data.totalCount) || state.auctionList.length;
+          } else {
+            state.auctionList = [];
+            state.auctionTotal = 0;
+          }
+          if (g && g.success) {
+            state.grabOrderIds = (g.data && g.data.ids) || [];
+          }
+          renderAuctionTable();
+          showMsg($('auctionMsg'), '', '');
+        });
+      }
+
+      function renderAuctionTable() {
+        var tbody = $('auctionTbody');
+        if (!state.auctionList.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
+        } else {
+          var rows = state.auctionList.map(function (o) {
+            var oid = o.id || o.orderId;
+            var name = o.model_name || o.modelName || o.productName || o.name || '-';
+            var cate = o.cate_name || o.categoryName || '-';
+            var quoting = orderIsQuoting(oid);
+            var statusTag = quoting
+              ? '<span class="tag quoting">报价中</span>'
+              : '<span class="tag pending">待竞价</span>';
+            var actions = '<div class="cell-actions">'
+              + '<button class="btn btn-small" data-action="detail" data-oid="' + escapeHtml(oid) + '">查看详情</button>'
+              + '<button class="btn btn-primary btn-small" data-action="bid" data-oid="' + escapeHtml(oid) + '" data-name="' + escapeHtml(name) + '">出价</button>';
+            if (quoting) {
+              actions += '<button class="btn btn-danger btn-small" data-action="cancel" data-oid="' + escapeHtml(oid) + '">取消</button>';
+            }
+            actions += '</div>';
+            return '<tr class="' + (quoting ? 'row-quoting' : '') + '">'
+              + '<td>' + escapeHtml(oid) + '</td>'
+              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + escapeHtml(cate) + '</td>'
+              + '<td>' + statusTag + '</td>'
+              + '<td>' + actions + '</td>'
+              + '</tr>';
+          }).join('');
+          tbody.innerHTML = rows;
+        }
+        $('auctionTotalHint').textContent = '共 ' + state.auctionTotal + ' 条';
+        renderPager('auctionPager', state.auctionPage, state.auctionPageSize, state.auctionTotal, function (p) {
+          state.auctionPage = p;
+          refreshAuctionList();
+        });
+      }
+
+      // ---------- 已报价列表 ----------
+      function refreshMyBids() {
+        state.myBidsPageSize = parseInt($('pageSizeMyBids').value, 10) || 20;
+        var status = $('myBidsStatus').value || '';
+        var dateAfter = $('myBidsDateAfter').value || '';
+        var dateBefore = $('myBidsDateBefore').value || '';
+        var q = new URLSearchParams();
+        q.set('pageIndex', String(state.myBidsPage));
+        q.set('pageSize', String(state.myBidsPageSize));
+        if (status) q.set('status', status);
+        if (dateAfter) q.set('created_at_after', dateAfter);
+        if (dateBefore) q.set('created_at_before', dateBefore);
+        return api('/api/my-bids?' + q.toString()).then(function (r) {
+          if (r && r.success) {
+            state.myBidsList = (r.data && r.data.results) || [];
+            state.myBidsTotal = (r.data && r.data.totalCount) || state.myBidsList.length;
+          } else {
+            state.myBidsList = [];
+            state.myBidsTotal = 0;
+            toast((r && r.message) || '查询失败', 'error');
+          }
+          renderMyBidsTable();
+        });
+      }
+
+      function renderMyBidsTable() {
+        var tbody = $('myBidsTbody');
+        if (!state.myBidsList.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
+        } else {
+          var rows = state.myBidsList.map(function (o) {
+            var oid = o.orderId || o.order_id || o.id;
+            var name = o.model_name || o.modelName || o.productName || o.name || '-';
+            var amt = o.bid_amount || o.bidAmount || o.actualPrice || '-';
+            var st = o.status || o.state || '-';
+            return '<tr>'
+              + '<td>' + escapeHtml(oid) + '</td>'
+              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + escapeHtml(amt) + '</td>'
+              + '<td>' + escapeHtml(st) + '</td>'
+              + '<td><div class="cell-actions">'
+              + '<button class="btn btn-small" data-action="detail" data-oid="' + escapeHtml(oid) + '">查看详情</button>'
+              + '<button class="btn btn-primary btn-small" data-action="bid" data-oid="' + escapeHtml(oid) + '" data-name="' + escapeHtml(name) + '">修改报价</button>'
+              + '</div></td>'
+              + '</tr>';
+          }).join('');
+          tbody.innerHTML = rows;
+        }
+        $('myBidsTotalHint').textContent = '共 ' + state.myBidsTotal + ' 条';
+        renderPager('myBidsPager', state.myBidsPage, state.myBidsPageSize, state.myBidsTotal, function (p) {
+          state.myBidsPage = p;
+          refreshMyBids();
+        });
+      }
+
+      // ---------- 分页 ----------
+      function renderPager(containerId, current, pageSize, total, onPage) {
+        var el = $(containerId);
+        var pages = Math.max(1, Math.ceil(total / pageSize));
+        var buf = [];
+        buf.push('<button class="btn btn-small" data-page="' + Math.max(1, current - 1) + '"' + (current === 1 ? ' disabled' : '') + '>上一页</button>');
+        var start = Math.max(1, current - 2);
+        var end = Math.min(pages, start + 4);
+        start = Math.max(1, end - 4);
+        for (var i = start; i <= end; i++) {
+          buf.push('<button class="btn btn-small' + (i === current ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>');
+        }
+        buf.push('<button class="btn btn-small" data-page="' + Math.min(pages, current + 1) + '"' + (current === pages ? ' disabled' : '') + '>下一页</button>');
+        el.innerHTML = buf.join('');
+        el.querySelectorAll('button[data-page]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var p = parseInt(b.getAttribute('data-page'), 10);
+            if (!isNaN(p) && p !== current) onPage(p);
+          });
+        });
+      }
+
+      // ---------- 查看详情 / 出价弹窗 ----------
+      function openDetail(orderId) {
+        // 查看详情后：接口会将此商品加入报价中列表；随后再对比 grab_order_list 才展示报价数据列表详情
+        state.currentBid = { orderId: orderId, name: '', mode: 'detailOnly' };
+        openBidModal({ orderId: orderId, name: '', mode: 'detailOnly' });
+      }
+
+      function openBid(orderId, productName) {
+        state.currentBid = { orderId: orderId, name: productName, mode: 'bid' };
+        openBidModal({ orderId: orderId, name: productName, mode: 'bid' });
+      }
+
+      function openBidModal(ctx) {
+        var modal = $('bidModal');
+        modal.classList.remove('hidden');
+        $('bidModalTitle').textContent = ctx.mode === 'detailOnly' ? '商品详情' : '提交报价';
+        $('bidQuoteInfo').classList.remove('hidden');
+        $('bidProductName').textContent = ctx.name || '-';
+        $('bidOrderId').textContent = ctx.orderId != null ? ctx.orderId : '-';
+        $('bidDetailBlock').classList.remove('hidden');
+        $('bidDetailBlock').classList.add('plain');
+        $('bidDetailBlock').textContent = '加载详情中…';
+        $('bidQuoteListSection').classList.add('hidden');
+        $('bidQuoteListContent').innerHTML = '';
+        $('bidAmountInput').value = '';
+        showMsg($('bidMsg'), '', '');
+        // 只有详情模式时隐藏出价输入
+        var amountRow = $('bidAmountInput').parentElement;
+        if (ctx.mode === 'detailOnly') {
+          amountRow.style.display = 'none';
+          $('btnBidSubmit').textContent = '关闭';
+        } else {
+          amountRow.style.display = '';
+          $('btnBidSubmit').textContent = '提交报价';
+        }
+        // 拉详情——查看后此商品才会加入 grab_order_list
+        fetchDetailAndMaybeQuoteList(ctx.orderId);
+      }
+
+      function closeBidModal() {
+        $('bidModal').classList.add('hidden');
+        state.currentBid = null;
+      }
+
+      function fetchDetailAndMaybeQuoteList(orderId) {
+        var params = new URLSearchParams({ orderId: String(orderId) });
+        return api('/api/order-detail?' + params.toString()).then(function (r) {
+          if (r && r.success) {
+            var detail = (r.data && r.data.detail) || {};
+            // 格式化展示详情
+            renderOrderDetail(detail);
+            // 更新 grab_order_ids
+            var grabIds = (r.data && r.data.grabIds) || [];
+            state.grabOrderIds = grabIds;
+            // 关键规则：只有当报价中列表包含此商品时，才展示报价数据列表详情
+            var inGrab = orderIsQuoting(orderId);
+            // 从详情里尽量提取报价数据列表；字段名以接口为准，兼容多种命名
+            var quoteList = detail.quote_list || detail.quoteList || detail.bid_list || detail.bidList
+              || detail.records || detail.bids || null;
+            if (inGrab && Array.isArray(quoteList)) {
+              renderQuoteList(quoteList);
+              $('bidQuoteListSection').classList.remove('hidden');
+            } else if (inGrab && quoteList && typeof quoteList === 'object') {
+              renderQuoteList([quoteList]);
+              $('bidQuoteListSection').classList.remove('hidden');
+            } else {
+              $('bidQuoteListSection').classList.add('hidden');
+            }
+            // 补充产品名（若详情里能拿到）
+            var pname = detail.model_name || detail.modelName || detail.productName || detail.name;
+            if (pname && (!state.currentBid || !state.currentBid.name)) {
+              $('bidProductName').textContent = pname;
+            }
+            // 刷新一次列表以让「报价中」标签生效
+            if (!$('tabPanelAuction').classList.contains('hidden')) {
+              renderAuctionTable();
+            }
+          } else {
+            var db = $('bidDetailBlock');
+            db.classList.add('plain');
+            db.textContent = (r && r.message) || '获取详情失败';
+          }
+        });
+      }
+
+      // ---------- 格式化商品详情 ----------
+      function renderOrderDetail(detail) {
+        var db = $('bidDetailBlock');
+        db.classList.remove('plain');
+        if (!detail || typeof detail !== 'object') {
+          db.classList.add('plain');
+          db.textContent = detail == null ? '无详情数据' : String(detail);
+          return;
+        }
+        // 常见字段的中文标签映射
+        var LABELS = {
+          id: '订单ID', order_id: '订单ID', orderId: '订单ID',
+          order_no: '订单号', orderNo: '订单号',
+          cate_name: '品类', categoryName: '品类',
+          model_name: '型号', modelName: '型号',
+          brand: '品牌', brand_name: '品牌',
+          color: '颜色', color_name: '颜色',
+          memory: '内存', storage: '存储', capacity: '容量', memory_size: '内存',
+          network: '网络', operator: '运营商',
+          quality: '成色', color_grade: '成色', colorGrade: '成色',
+          warranty: '保修', has_warranty: '保修',
+          imei: 'IMEI', sn: '序列号',
+          purchase_price: '进价', reference_price: '参考价',
+          expect_price: '期望价', expectPrice: '期望价',
+          highest_price: '最高价', current_price: '当前价', currentPrice: '当前价',
+          bid_amount: '出价', bidAmount: '出价',
+          user_name: '用户', username: '用户', phone: '手机号',
+          city: '城市', province: '省份', region: '地区', address: '地址',
+          status: '状态', status_name: '状态',
+          remark: '备注', desc: '描述', description: '描述',
+          created_at: '创建时间', createdAt: '创建时间',
+          updated_at: '更新时间', updatedAt: '更新时间',
+          expire_at: '截止时间', expireAt: '截止时间',
+          end_time: '结束时间', endTime: '结束时间',
+          start_time: '开始时间', startTime: '开始时间'
+        };
+        // 强调字段（金额、价格类高亮）
+        var STRONG_KEYS = { bid_amount:1, bidAmount:1, expect_price:1, expectPrice:1,
+          highest_price:1, current_price:1, currentPrice:1, purchase_price:1, reference_price:1 };
+        // 需要跳过的键（长文本/大对象另行渲染）
+        var SKIP = { images:1, pic_list:1, picList:1, pics:1, photos:1,
+          quote_list:1, quoteList:1, bid_list:1, bidList:1, records:1, bids:1 };
+
+        var buf = [];
+        // 主要字段网格
+        var cells = [];
+        Object.keys(detail).forEach(function (k) {
+          if (SKIP[k]) return;
+          var v = detail[k];
+          if (v === null || v === undefined || v === '') return;
+          var isPrimitive = (typeof v !== 'object');
+          if (!isPrimitive) return; // 嵌套对象/数组单独处理
+          var label = LABELS[k] || k;
+          var cls = STRONG_KEYS[k] ? 'v strong' : 'v';
+          var text = String(v);
+          cells.push('<div class="cell"><span class="k">' + escapeHtml(label) + '</span>'
+            + '<span class="' + cls + '">' + escapeHtml(text) + '</span></div>');
+        });
+        if (cells.length) {
+          buf.push('<div class="detail-section-title">基本信息</div>');
+          buf.push('<div class="detail-grid">' + cells.join('') + '</div>');
+        }
+
+        // 嵌套对象（如 user、address 等）拉平
+        Object.keys(detail).forEach(function (k) {
+          if (SKIP[k]) return;
+          var v = detail[k];
+          if (!v || typeof v !== 'object' || Array.isArray(v)) return;
+          var subCells = [];
+          Object.keys(v).forEach(function (sk) {
+            var sv = v[sk];
+            if (sv === null || sv === undefined || sv === '' || typeof sv === 'object') return;
+            var label = LABELS[sk] || sk;
+            subCells.push('<div class="cell"><span class="k">' + escapeHtml(label) + '</span>'
+              + '<span class="v">' + escapeHtml(String(sv)) + '</span></div>');
+          });
+          if (subCells.length) {
+            buf.push('<div class="detail-section-title">' + escapeHtml(LABELS[k] || k) + '</div>');
+            buf.push('<div class="detail-grid">' + subCells.join('') + '</div>');
+          }
+        });
+
+        // 图片
+        var images = detail.images || detail.pic_list || detail.picList || detail.pics || detail.photos;
+        if (Array.isArray(images) && images.length) {
+          var imgBuf = images.map(function (it) {
+            var url = typeof it === 'string' ? it : (it && (it.url || it.src || it.path));
+            if (!url) return '';
+            return '<img src="' + escapeHtml(url) + '" onclick="window.open(this.src)"/>';
+          }).join('');
+          if (imgBuf) {
+            buf.push('<div class="detail-section-title">图片</div>');
+            buf.push('<div class="detail-images">' + imgBuf + '</div>');
+          }
+        }
+
+        if (!buf.length) {
+          db.classList.add('plain');
+          db.textContent = JSON.stringify(detail, null, 2);
+          return;
+        }
+        db.innerHTML = buf.join('');
+      }
+
+      function renderQuoteList(list) {
+        var content = $('bidQuoteListContent');
+        if (!list || !list.length) {
+          content.innerHTML = '<span style="color:var(--text-muted);">暂无报价数据</span>';
+          return;
+        }
+        var buf = list.map(function (q) {
+          var amt = q.bid_amount || q.bidAmount || q.actualPrice || q.amount || '-';
+          var user = q.username || q.userName || q.user || q.bidder || '-';
+          var time = q.created_at || q.createdAt || q.time || '';
+          return '<div style="padding:6px 0; border-bottom:1px dashed var(--border);">'
+            + '<span class="quote-apprize">' + escapeHtml(amt) + '</span> 元'
+            + ' <span style="color:var(--text-muted); margin-left:8px;">' + escapeHtml(user) + '</span>'
+            + (time ? ' <span style="color:var(--text-muted); font-size:12px; margin-left:8px;">' + escapeHtml(time) + '</span>' : '')
+            + '</div>';
+        }).join('');
+        content.innerHTML = buf;
+      }
+
+      function submitBid() {
+        if (!state.currentBid) return;
+        if (state.currentBid.mode === 'detailOnly') {
+          closeBidModal();
+          refreshAuctionList();
+          return;
+        }
+        var amt = ($('bidAmountInput').value || '').trim();
+        if (!amt) {
+          showMsg($('bidMsg'), '请输入报价金额', 'error');
+          return;
+        }
+        var n = parseFloat(amt);
+        if (isNaN(n) || n < 1) {
+          showMsg($('bidMsg'), '报价金额需为大于等于 1 的数字', 'error');
+          return;
+        }
+        showMsg($('bidMsg'), '提交中…', 'info');
+        api('/api/place-bid', {
+          method: 'POST',
+          body: { orderId: state.currentBid.orderId, bidAmount: amt },
+        }).then(function (r) {
+          if (r && r.success) {
+            toast('报价提交成功', 'success');
+            closeBidModal();
+            refreshAuctionList();
+            if (!$('tabPanelGrab').classList.contains('hidden')) refreshGrabList();
+            if (!$('tabPanelMyBids').classList.contains('hidden')) refreshMyBids();
+          } else {
+            showMsg($('bidMsg'), (r && r.message) || '报价失败', 'error');
+          }
+        });
+      }
+
+      function cancelGrab(orderId) {
+        if (!confirm('确认取消对该商品的抢单？')) return;
+        api('/api/cancel-grab-order', { method: 'POST', body: { orderId: orderId } }).then(function (r) {
+          if (r && r.success) {
+            toast('已取消抢单', 'success');
+            refreshAuctionList();
+            if (!$('tabPanelGrab').classList.contains('hidden')) refreshGrabList();
+          } else {
+            toast((r && r.message) || '取消失败', 'error');
+          }
+        });
+      }
+
+      // ---------- 事件绑定 ----------
+      function bindEvents() {
+        $('btnLogin').addEventListener('click', doLogin);
+        $('loginPwd').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+        $('btnLogout').addEventListener('click', doLogout);
+        document.querySelectorAll('.tab-nav-item').forEach(function (el) {
+          el.addEventListener('click', function () { switchTab(el.getAttribute('data-tab')); });
+        });
+        $('btnRefreshAuction').addEventListener('click', function () { state.auctionPage = 1; refreshAuctionList(); });
+        $('pageSizeAuction').addEventListener('change', function () { state.auctionPage = 1; refreshAuctionList(); });
+        $('btnRefreshGrab').addEventListener('click', refreshGrabList);
+        $('btnRefreshMyBids').addEventListener('click', function () { state.myBidsPage = 1; refreshMyBids(); });
+        $('pageSizeMyBids').addEventListener('change', function () { state.myBidsPage = 1; refreshMyBids(); });
+
+        $('auctionTbody').addEventListener('click', function (e) {
+          var t = e.target;
+          if (t.tagName !== 'BUTTON') return;
+          var action = t.getAttribute('data-action');
+          var oid = t.getAttribute('data-oid');
+          var name = t.getAttribute('data-name') || '';
+          if (action === 'detail') openDetail(oid);
+          else if (action === 'bid') openBid(oid, name);
+          else if (action === 'cancel') cancelGrab(oid);
+        });
+        $('grabTbody').addEventListener('click', function (e) {
+          var t = e.target;
+          if (t.tagName !== 'BUTTON') return;
+          var action = t.getAttribute('data-action');
+          var oid = t.getAttribute('data-oid');
+          var name = t.getAttribute('data-name') || '';
+          if (action === 'detail') openDetail(oid);
+          else if (action === 'bid') openBid(oid, name);
+          else if (action === 'cancel') cancelGrab(oid);
+        });
+        $('myBidsTbody').addEventListener('click', function (e) {
+          var t = e.target;
+          if (t.tagName !== 'BUTTON') return;
+          var action = t.getAttribute('data-action');
+          var oid = t.getAttribute('data-oid');
+          var name = t.getAttribute('data-name') || '';
+          if (action === 'detail') openDetail(oid);
+          else if (action === 'bid') openBid(oid, name);
+        });
+
+        $('btnBidCancel').addEventListener('click', closeBidModal);
+        $('btnBidSubmit').addEventListener('click', submitBid);
+        $('bidModal').addEventListener('click', function (e) {
+          if (e.target === $('bidModal')) closeBidModal();
+        });
+      }
+
+      // ---------- 启动 ----------
+      function bootstrap() {
+        bindEvents();
+        // 已报价列表默认最近两天：after=昨天，before=今天
+        var today = new Date();
+        var yesterday = new Date(today.getTime() - 24 * 3600 * 1000);
+        var fmt = function (d) {
+          var m = d.getMonth() + 1, dd = d.getDate();
+          return d.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (dd < 10 ? '0' + dd : dd);
+        };
+        $('myBidsDateAfter').value = fmt(yesterday);
+        $('myBidsDateBefore').value = fmt(today);
+        api('/api/status').then(function (r) {
+          if (r && r.loggedIn) {
+            api('/api/user-info').then(function (u) {
+              var info = (u && u.success && u.data) || { id: r.userId };
+              setLoggedIn(info);
+            });
+          } else {
+            setLoggedOut();
+          }
+        });
+      }
+
+      bootstrap();
+    })();
+  </script>
+</body>
+
+</html>

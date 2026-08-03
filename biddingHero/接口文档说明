@@ -1,0 +1,258 @@
+# 竞价侠 API 文档
+
+## 基础说明
+
+- Base URL: `https://jingjiaxia.com`
+- 鉴权方式：除登录接口外，其余接口均使用 `Authorization: Bearer <token>`
+- 文档内容基于 Postman Collection 竞价侠 当前保存的请求整理
+- 参数以请求中现有配置为准
+
+---
+
+## 1. 登录
+
+### 1.1 登陆
+
+- 方法：`POST`
+- 路径：`/api/base/login/`
+
+#### 请求参数
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| phone | string | 是 | 手机号 |
+| password | string | 是 | 密码 |
+
+#### 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "操作成功",
+  "data": {
+    "token": "<token>",
+    "user": {
+      "id": 372,
+      "phone": "15551921000",
+      "username": "郭孟磊"
+    }
+  }
+}
+```
+
+#### 响应说明
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| code | number | 状态码 |
+| msg | string | 提示信息 |
+| data.token | string | 登录 token |
+| data.user | object | 用户信息 |
+
+---
+
+## 2. 列表接口
+
+### 2.1 查询列表
+
+- 方法：`GET`
+- 路径：`/api/base/orders/auction_list/`
+
+#### Query 参数
+
+| 字段 | 类型 | 当前值 | 说明 |
+|---|---|---|---|
+| pageIndex | integer | `1` | 页码 |
+| pageSize | integer | `3000` | 每页数量 |
+
+#### 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "操作成功",
+  "data": {
+    "count": 16,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "id": 9552229,
+        "cate_name": "手机",
+        "model_name": "一加 Ace 3V"
+      }
+    ]
+  }
+}
+```
+
+#### 响应说明
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| code | number | 状态码 |
+| msg | string | 提示信息 |
+| data.count | number | 总数 |
+| data.results | array | 列表数据 |
+
+---
+
+### 2.2 报价中列表
+
+- 方法：`GET`
+- 路径：`/api/base/orders/grab_order_list/`
+
+#### Query 参数
+
+无
+
+#### 响应示例
+
+```json
+{
+  "msg": "暂无抢单数据",
+  "data": []
+}
+```
+
+#### 响应说明
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| msg | string | 提示信息 |
+| data | array | 抢单列表 |
+
+---
+
+### 2.3 已报价列表
+
+- 方法：`GET`
+- 路径：`/api/base/bid-records/my_bids/`
+
+#### Query 参数
+
+| 字段 | 类型 | 当前值 | 说明 |
+|---|---|---|---|
+| pageIndex | integer | `1` | 页码 |
+| pageSize | integer | `20` | 每页数量 |
+| status | string | `bidding` | 状态 |
+| created_at_after | string | `2026-07-31` | 开始日期 |
+| created_at_before | string | `2026-08-01` | 结束日期 |
+
+#### 响应示例
+
+```json
+{
+  "data": {
+    "count": 0,
+    "next": null,
+    "previous": null,
+    "results": []
+  },
+  "code": 0,
+  "msg": "操作成功"
+}
+```
+
+#### 响应说明
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| code | number | 状态码 |
+| msg | string | 提示信息 |
+| data.count | number | 总数 |
+| data.results | array | 报价记录列表 |
+
+---
+
+## 3. 详情接口
+
+### 3.1 获取用户信息
+
+- 方法：`GET`
+- 路径：`/api/base/users/getMyInfo/`
+
+#### Query 参数
+
+无有效业务参数  
+当前请求中保留了空查询串：`?=`
+
+#### 响应示例
+
+暂无
+
+---
+
+### 3.2 商品详情
+
+- 方法：`GET`
+- 路径：`/api/base/orders/9493974/detail_info/`
+
+#### 路径参数
+
+| 字段 | 类型 | 当前值 | 说明 |
+|---|---|---|---|
+| orderId | integer | `9493974` | 订单 ID |
+
+#### 响应示例
+
+暂无
+
+---
+
+## 4. 操作接口
+
+### 4.1 抢单出价接口
+
+- 方法：`POST`
+- 路径：`/api/base/orders/9493974/place_bid/`
+
+#### 路径参数
+
+| 字段 | 类型 | 当前值 | 说明 |
+|---|---|---|---|
+| orderId | integer | `9493974` | 订单 ID |
+
+#### Body 参数
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| bid_amount | string/number | 出价金额 |
+
+#### 响应示例
+
+暂无
+
+---
+
+### 4.2 取消抢单
+
+- 方法：`POST`
+- 路径：`/api/base/orders/9493208/cancel_grab_order/`
+
+#### 路径参数
+
+| 字段 | 类型 | 当前值 | 说明 |
+|---|---|---|---|
+| orderId | integer | `9493208` | 订单 ID |
+
+#### Body 参数
+
+无
+
+#### 响应示例
+
+暂无
+
+---
+
+## 5. 请求清单
+
+- 登陆
+- 查询列表
+- 已报价列表
+- 报价中列表
+- 获取用户信息
+- 抢单出价接口
+- 商品详情
+- 取消抢单
