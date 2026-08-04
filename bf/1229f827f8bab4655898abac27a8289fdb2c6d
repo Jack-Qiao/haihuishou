@@ -1,0 +1,38 @@
+haihuishou/haihuishou/templates/index.html
+  s_fddc3b1ccf30b0::t_1ed48336e7bd49 2637-2665
+  s_fddc3b1ccf30b0::t_d56ef75d046aa0 2904-2905
+  s_fddc3b1ccf30b0::t_04d33fefaabdd9 2986
+  s_fddc3b1ccf30b0::t_668618f93884f9 3230
+  s_fddc3b1ccf30b0::t_f41cd10230b51d 1382,1384-1408
+  s_fddc3b1ccf30b0::t_070272a95caae8 1884-1891
+  s_fddc3b1ccf30b0::t_d88293e38e82ed 3355,3357
+  s_fddc3b1ccf30b0::t_5c0d412b81e009 3429
+  s_fddc3b1ccf30b0::t_2d70ee2c09c291 3120
+  s_fddc3b1ccf30b0::t_5f58181ac9a522 2966-2974
+  s_fddc3b1ccf30b0::t_a50ed25cad4463 1966
+  s_fddc3b1ccf30b0::t_ab2b8686e9c60e 2964-2965,2998
+  s_fddc3b1ccf30b0::t_d9c20cb57ab2f1 2668-2684
+haihuishou/haihuishou/app_ui.py
+  s_fddc3b1ccf30b0::t_788173018be501 30-43
+  s_fddc3b1ccf30b0::t_57605b664ea92a 46-52
+  s_fddc3b1ccf30b0::t_add353b14ac069 492,501
+  s_fddc3b1ccf30b0::t_bc29b819d56474 763,765,780,801,803
+  s_fddc3b1ccf30b0::t_f4a3090c74a65b 739,762,779,800
+  s_fddc3b1ccf30b0::t_a0d5acf458904f 400
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.39-trip",
+  "base_commit_sha": "bf1229f827f8bab4655898abac27a8289fdb2c6d",
+  "prompts": {},
+  "sessions": {
+    "s_fddc3b1ccf30b0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9f349d35-ea4a-4fb3-bd61-3d53dabfec1e",
+        "model": "default"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
