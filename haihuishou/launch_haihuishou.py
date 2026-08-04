@@ -2,7 +2,7 @@
 """
 嗨回收抢单工具 - 快捷启动。
 用法: python launch_haihuishou.py [选项]
-  -p 端口  默认 5050
+  -p 端口  默认 5868
   -h 地址  默认 127.0.0.1（对外用 0.0.0.0）
   -d       调试模式（不自动打开浏览器）
 打包: 在本目录执行 pyinstaller haihuishou.spec
@@ -24,7 +24,7 @@ from haihuishou.app_ui import app
 
 def main():
     parser = argparse.ArgumentParser(description="嗨回收抢单工具")
-    parser.add_argument("-p", "--port", type=int, default=5050, help="端口 (默认 5050)")
+    parser.add_argument("-p", "--port", type=int, default=5868, help="端口 (默认 5868)")
     parser.add_argument("-H", "--host", default="127.0.0.1", metavar="HOST", help="监听地址 (默认 127.0.0.1)")
     parser.add_argument("-d", "--debug", action="store_true", help="调试模式")
     args = parser.parse_args()

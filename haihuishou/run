@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-# 快捷启动嗨回收，用法: ./run 或 ./run -p 8080 或 ./run -H 0.0.0.0 -p 5050
+# 快捷启动嗨回收，用法: ./run 或 ./run -p 8080 或 ./run -H 0.0.0.0 -p 5868
 cd "$(dirname "$0")"
 exec python3 launch_haihuishou.py "$@"

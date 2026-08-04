@@ -3,7 +3,7 @@
 启动抢单工具 Web UI。
 在 haihuishou 项目目录执行：python -m haihuishou.run_ui
 或：python haihuishou/run_ui.py
-默认地址：http://127.0.0.1:5050
+默认地址：http://127.0.0.1:5868
 """
 
 import sys

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 嗨回收抢单工具 - Web UI 服务端。
-启动后浏览器访问 http://127.0.0.1:5050
+启动后浏览器访问 http://127.0.0.1:5868
 """
 
 import os
+import re
 import sys
 import threading
 import unicodedata
@@ -53,10 +54,23 @@ def _fmt_amount(n):
 
 
 def _normalize_storage(s):
-    """统一存储格式便于匹配：去空格、小写，如 4G+128G / 4G + 128G -> 4g+128g"""
+    """
+    统一存储格式便于匹配。
+    例：16G+256G| / 16+256G / 16G + 256G / 16GB+256GB -> 16g+256g
+    """
     if s is None:
         return ""
-    return str(s).strip().lower().replace(" ", "")
+    text = unicodedata.normalize("NFKC", str(s)).strip().lower()
+    text = text.replace(" ", "")
+    text = text.rstrip("|/\\,;，、")
+    text = text.replace("gb", "g").replace("tb", "t")
+    parts = re.findall(r"(\d+)\s*([gt])?", text)
+    if not parts:
+        return text
+    normalized = []
+    for num, unit in parts:
+        normalized.append(num + (unit if unit else "g"))
+    return "+".join(normalized)
 
 
 def _normalize_color_name(s):
@@ -174,12 +188,12 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
     def _find_matching_condition(order_model, order_storage):
         """旧格式：按机型+存储匹配一条条件（条件无存储时只比机型）；无匹配返回 None。"""
         order_model = (order_model or "").strip().lower()
-        order_storage = (order_storage or "").strip().lower()
+        order_storage = _normalize_storage(order_storage)
         for c in conditions:
             if (c.get("modelName") or "").strip().lower() != order_model:
                 continue
             if c.get("storage"):
-                if (c.get("storage") or "").strip().lower() != order_storage:
+                if _normalize_storage(c.get("storage")) != order_storage:
                     continue
             return c
         return None
@@ -201,7 +215,7 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
                 matched.append((o, None))  # 成色为空，只抢单不报价
         else:
             order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
-            order_storage = (o.get("storageCapacity") or o.get("storage") or o.get("memory") or "").strip()
+            order_storage = o.get("storageCapacity") or o.get("storage") or o.get("memory") or ""
             c = _find_matching_condition(order_model, order_storage)
             if not c:
                 continue
@@ -876,7 +890,7 @@ def api_shutdown():
 
 def main():
     host = os.environ.get("HAIHUISHOU_UI_HOST", "127.0.0.1")
-    port = int(os.environ.get("HAIHUISHOU_UI_PORT", "5050"))
+    port = int(os.environ.get("HAIHUISHOU_UI_PORT", "5868"))
     debug = not getattr(sys, "frozen", False)
     if not debug:
         import webbrowser
