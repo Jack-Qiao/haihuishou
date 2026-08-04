@@ -1379,7 +1379,33 @@
     .schedule-list-title-actions {
       flex-shrink: 0;
       display: flex;
+      align-items: center;
       gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .schedule-max-amount-setting {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 4px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .schedule-max-amount-setting label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .schedule-max-amount-setting input {
+      width: 80px;
+    }
+
+    .schedule-max-amount-hint {
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     #scheduleTaskListContainer {
@@ -1855,6 +1881,14 @@
                   <input type="file" id="scheduleImportFile" accept=".xlsx,.xls" style="display:none;">
                   <button type="button" class="btn btn-primary btn-small" id="btnScheduleImport">导入价格列表</button>
                   <button type="button" class="btn btn-primary btn-small" id="btnScheduleExport">导出价格列表</button>
+                  <div class="schedule-max-amount-setting">
+                    <label for="inputScheduleMaxAmount">最大金额</label>
+                    <input type="text" id="inputScheduleMaxAmount" value="5000" placeholder="默认 5000"
+                      inputmode="numeric" autocomplete="off">
+                    <span>元</span>
+                    <button type="button" class="btn btn-primary btn-small" id="btnSetScheduleMaxAmount">设置</button>
+                    <span id="scheduleMaxAmountHint" class="schedule-max-amount-hint"></span>
+                  </div>
                 </div>
               </div>
               <p id="scheduleGrabbedCount" class="schedule-grabbed-count">已抢单数量：<span
@@ -1929,7 +1963,7 @@
         <div class="schedule-task-modal-scroll">
           <div class="schedule-conditions-header-row">
             <label>抢单条件</label>
-            <span class="schedule-conditions-desc">可添加多条，每条机型与保底价必填，保底价 1～500 元；机型+存储不可重复。</span>
+            <span class="schedule-conditions-desc" id="scheduleConditionsDesc">可添加多条，每条机型与保底价必填，保底价 1～5000 元；机型+存储不可重复。</span>
             <button type="button" class="btn btn-primary btn-small schedule-add-condition-btn" id="btnScheduleAddCondition">+ 添加条件</button>
           </div>
           <div class="schedule-field-wrap schedule-conditions-wrap">
@@ -2600,8 +2634,54 @@
       } catch (e) { showMsg(msg, String(e), 'error'); }
     }
     var SCHEDULE_STORAGE_KEY = 'haihuishou_scheduled_tasks';
+    var SCHEDULE_MAX_AMOUNT_KEY = 'haihuishou_schedule_max_amount';
+    var SCHEDULE_MAX_AMOUNT_DEFAULT = 5000;
+    var scheduleMaxAmount = SCHEDULE_MAX_AMOUNT_DEFAULT;
+    try {
+      var savedMax = localStorage.getItem(SCHEDULE_MAX_AMOUNT_KEY);
+      if (savedMax != null && savedMax !== '') {
+        var n = parseFloat(savedMax);
+        if (!isNaN(n) && n >= 1) scheduleMaxAmount = n;
+      }
+    } catch (_) { }
+    function getScheduleMaxAmount() {
+      return (typeof scheduleMaxAmount === 'number' && scheduleMaxAmount >= 1) ? scheduleMaxAmount : SCHEDULE_MAX_AMOUNT_DEFAULT;
+    }
+    function refreshScheduleMaxAmountUI() {
+      var max = getScheduleMaxAmount();
+      var input = document.getElementById('inputScheduleMaxAmount');
+      var hint = document.getElementById('scheduleMaxAmountHint');
+      var desc = document.getElementById('scheduleConditionsDesc');
+      if (input) input.value = String(max);
+      if (hint) hint.textContent = '报价上限 ' + max + ' 元';
+      if (desc) desc.textContent = '可添加多条，每条机型与保底价必填，保底价 1～' + max + ' 元；机型+存储不可重复。';
+      var tbody = document.getElementById('scheduleConditionsBody');
+      if (tbody) {
+        tbody.querySelectorAll('.schedule-cond-price').forEach(function (inp) {
+          var k = inp.getAttribute('data-key');
+          inp.placeholder = k === 'floorPrice' ? ('必填 1-' + max) : ('1-' + max);
+        });
+      }
+    }
     var scheduledTasks = [];
     try { scheduledTasks = JSON.parse(localStorage.getItem(SCHEDULE_STORAGE_KEY) || '[]'); } catch (_) { scheduledTasks = []; }
+    refreshScheduleMaxAmountUI();
+    document.getElementById('inputScheduleMaxAmount').addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d.]/g, '');
+    });
+    document.getElementById('btnSetScheduleMaxAmount').onclick = function () {
+      var v = document.getElementById('inputScheduleMaxAmount').value.trim();
+      var num = parseFloat(v);
+      if (v === '' || isNaN(num) || num < 1) {
+        showToast('请输入不小于 1 的最大金额', 'error');
+        refreshScheduleMaxAmountUI();
+        return;
+      }
+      scheduleMaxAmount = num;
+      try { localStorage.setItem(SCHEDULE_MAX_AMOUNT_KEY, String(num)); } catch (_) { }
+      refreshScheduleMaxAmountUI();
+      showToast('已设置最大金额 ' + num + ' 元', 'success');
+    };
     var scheduleTaskTimers = {};
     var scheduleTaskStarting = {};
     var scheduleGrabbedCountTimer = null;
@@ -2821,7 +2901,8 @@
       SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
         var cls = SCHEDULE_COND_INPUT_CLASS[k];
         var v = String(cond[k] != null ? cond[k] : '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        var ph = k === 'floorPrice' ? '必填 1-500' : '1-500';
+        var max = getScheduleMaxAmount();
+        var ph = k === 'floorPrice' ? ('必填 1-' + max) : ('1-' + max);
         cells += '<td><input type="text" class="' + cls + ' schedule-cond-price" data-key="' + k + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off" value="' + v + '"></td>';
       });
       cells += '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
@@ -2880,8 +2961,17 @@
         var modelOk = (c.modelName || '').trim().length > 0;
         var floorVal = (c.floorPrice || '').trim();
         var floorNum = parseFloat(floorVal);
-        var floorOk = floorVal && !isNaN(floorNum) && floorNum >= 1 && floorNum <= 500;
-        if (!modelOk || !floorOk) requiredInvalid.push(i);
+        var max = getScheduleMaxAmount();
+        var floorOk = floorVal && !isNaN(floorNum) && floorNum >= 1 && floorNum <= max;
+        var pricesOk = true;
+        SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
+          if (k === 'floorPrice') return;
+          var pv = (c[k] || '').trim();
+          if (!pv) return;
+          var pn = parseFloat(pv);
+          if (isNaN(pn) || pn < 1 || pn > max) pricesOk = false;
+        });
+        if (!modelOk || !floorOk || !pricesOk) requiredInvalid.push(i);
         var storageNorm = (c.storage || '').trim().toLowerCase();
         var modelNorm = (c.modelName || '').trim().toLowerCase();
         var key = modelNorm + '\x01' + storageNorm;
@@ -2893,7 +2983,7 @@
         }
       }
       if (requiredInvalid.length > 0) {
-        return { valid: false, message: '每条条件须填机型和 floorPrice（1～500元）', invalidRowIndices: requiredInvalid };
+        return { valid: false, message: '每条条件须填机型、floorPrice，且成色/保底价在 1～' + getScheduleMaxAmount() + '元', invalidRowIndices: requiredInvalid };
       }
       var dupUnique = duplicateInvalid.filter(function (v, idx, a) { return a.indexOf(v) === idx; });
       if (dupUnique.length > 0) {
@@ -2905,7 +2995,7 @@
         var modelOk = (c.modelName || '').trim().length > 0;
         var floorVal = (c.floorPrice || '').trim();
         var n = parseFloat(floorVal);
-        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
+        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= getScheduleMaxAmount();
       });
       if (!hasValid) {
         return { valid: false, message: '请至少添加一条完整条件', invalidRowIndices: [] };
@@ -3027,6 +3117,7 @@
         }
         var fd = new FormData();
         fd.append('file', file);
+        fd.append('maxAmount', String(getScheduleMaxAmount()));
         var msg = document.getElementById('scheduleMsg');
         var importModal = document.getElementById('importLoadingModal');
         var importLoadingText = document.getElementById('importLoadingText');
@@ -3136,7 +3227,7 @@
         var modelOk = (c.modelName || '').trim().length > 0;
         var floorVal = (c.floorPrice || '').trim();
         var n = parseFloat(floorVal);
-        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= 500;
+        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= getScheduleMaxAmount();
       });
       if (!validConditions.length) return null;
       var brandRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
@@ -3261,9 +3352,9 @@
       var invalid = conds.find(function (c) {
         var price = String(c.floorPrice != null ? c.floorPrice : '').trim();
         var q = parseFloat(price);
-        return !(c.modelName || '').trim() || !price || isNaN(q) || q < 1 || q > 500;
+        return !(c.modelName || '').trim() || !price || isNaN(q) || q < 1 || q > getScheduleMaxAmount();
       });
-      if (invalid) { showToast('每条条件须包含机型且底价（floorPrice）1～500 元', 'error'); return; }
+      if (invalid) { showToast('每条条件须包含机型且底价（floorPrice）1～' + getScheduleMaxAmount() + ' 元', 'error'); return; }
       if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
       if (scheduleTaskStarting[taskId]) return;
       var sec = Math.max(1, parseInt(task.frequency, 10) || 1);
@@ -3335,6 +3426,7 @@
             brandIds: task.brandIds,
             minPrice: task.minPrice,
             maxPrice: task.maxPrice,
+            maxAmount: getScheduleMaxAmount(),
             conditions: conds.length ? conds : undefined,
             userId: authUserId
           })

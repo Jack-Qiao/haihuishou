@@ -27,6 +27,29 @@ COLOR_GRADE_ID_TO_NAME = {
 COLOR_GRADE_NAME_TO_ID = {v: k for k, v in COLOR_GRADE_ID_TO_NAME.items()}
 # 成色 ID 列表，报价时用 order.colorGrade 与条件中的 ID key 对比
 COLOR_GRADE_IDS = (1001, 1002, 1003, 1004, 1005)
+DEFAULT_SCHEDULE_MAX_AMOUNT = 5000
+
+
+def _resolve_max_amount(raw, default=DEFAULT_SCHEDULE_MAX_AMOUNT):
+    """解析最大金额上限，默认 5000，至少为 1。"""
+    if raw is None or raw == "":
+        return float(default)
+    try:
+        n = float(str(raw).strip())
+        if n < 1:
+            return float(default)
+        return n
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _fmt_amount(n):
+    """金额展示：整数不带小数。"""
+    try:
+        f = float(n)
+        return str(int(f)) if f == int(f) else str(f)
+    except (TypeError, ValueError):
+        return str(n)
 
 
 def _normalize_storage(s):
@@ -374,6 +397,7 @@ def api_import_price_list():
             "success": False,
             "message": "服务端未安装 openpyxl，无法解析 Excel（打包时请用最新 haihuishou.spec 重新打包以打入 openpyxl）。详情: %s" % str(e),
         }), 500
+    max_amount = _resolve_max_amount(request.form.get("maxAmount"))
     try:
         # 保存到临时文件再解析，避免上传流不可 seek 导致 read_only 模式失败
         import tempfile
@@ -465,7 +489,7 @@ def api_import_price_list():
                 continue
             try:
                 q = float(floor_val)
-                if q < 1 or q > 500:
+                if q < 1 or q > max_amount:
                     continue
             except ValueError:
                 continue
@@ -474,7 +498,7 @@ def api_import_price_list():
                 v = (cond.get(str(gid)) or "").strip()
                 if v:
                     try:
-                        if float(v) < 1 or float(v) > 500:
+                        if float(v) < 1 or float(v) > max_amount:
                             valid = False
                             break
                     except ValueError:
@@ -712,6 +736,7 @@ def api_execute_task():
         brand_ids = [str(x).strip() for x in brand_ids.split(",") if str(x).strip()]
     min_price = (data.get("minPrice") or "").strip() or None
     max_price = (data.get("maxPrice") or "").strip() or None
+    max_amount = _resolve_max_amount(data.get("maxAmount"))
     conditions = data.get("conditions") or []
     if not conditions and (data.get("quoteAmount") or data.get("modelName")):
         conditions = [{
@@ -734,10 +759,10 @@ def api_execute_task():
                 continue
             try:
                 fn = float(floor_val)
-                if fn < 1 or fn > 500:
-                    return task_err("floorPrice 须在 1～500 元范围内")
+                if fn < 1 or fn > max_amount:
+                    return task_err("floorPrice 须在 1～%s 元范围内" % _fmt_amount(max_amount))
             except ValueError:
-                return task_err("floorPrice 须为有效数字，且范围 1～500")
+                return task_err("floorPrice 须为有效数字，且范围 1～%s" % _fmt_amount(max_amount))
             key = (m or "").lower() + "\x01" + (s or "").lower()
             if key in seen_key:
                 first_no = seen_key[key]
@@ -751,8 +776,8 @@ def api_execute_task():
                 if v:
                     try:
                         vn = float(v)
-                        if vn < 1 or vn > 500:
-                            return task_err("成色报价 %s 须在 1～500 元范围内" % key_id)
+                        if vn < 1 or vn > max_amount:
+                            return task_err("成色报价 %s 须在 1～%s 元范围内" % (key_id, _fmt_amount(max_amount)))
                     except ValueError:
                         return task_err("成色报价 %s 须为有效数字" % key_id)
                 row[key_id] = v
@@ -772,10 +797,10 @@ def api_execute_task():
                 continue
             try:
                 qn = float(q)
-                if qn < 1 or qn > 500:
-                    return task_err("每条条件的报价金额须在 1～500 元范围内")
+                if qn < 1 or qn > max_amount:
+                    return task_err("每条条件的报价金额须在 1～%s 元范围内" % _fmt_amount(max_amount))
             except ValueError:
-                return task_err("报价金额须为有效数字，且范围 1～500")
+                return task_err("报价金额须为有效数字，且范围 1～%s" % _fmt_amount(max_amount))
             normalized.append({"quoteAmount": q, "modelName": m, "storage": s})
         if not normalized:
             return task_err("请添加至少一条完整条件（报价+机型）")
