@@ -1,0 +1,30 @@
+haihuishou/run
+  s_fddc3b1ccf30b0::t_30437ff97ea3af 2
+haihuishou/launch_haihuishou.py
+  s_fddc3b1ccf30b0::t_473a1285c8b6ed 27
+  s_fddc3b1ccf30b0::t_adce1151fa3fa2 5
+haihuishou/haihuishou/app_ui.py
+  s_fddc3b1ccf30b0::t_a76acb05523e26 893
+  s_fddc3b1ccf30b0::t_1079359a0a1baf 57-60,63-73
+  s_fddc3b1ccf30b0::t_49f6b22f59de9d 4
+  s_fddc3b1ccf30b0::t_d7eeea473bf6ee 8
+  s_fddc3b1ccf30b0::t_c2821eaebbbdce 191,196,218
+haihuishou/haihuishou/run_ui.py
+  s_fddc3b1ccf30b0::t_47f5cb82b61fd4 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.39-trip",
+  "base_commit_sha": "83f6510fd96ef7df8c1f3004a1927131e9a060a2",
+  "prompts": {},
+  "sessions": {
+    "s_fddc3b1ccf30b0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9f349d35-ea4a-4fb3-bd61-3d53dabfec1e",
+        "model": "default"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
