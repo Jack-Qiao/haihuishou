@@ -8,232 +8,573 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1419;
-      --surface: #1a2332;
-      --border: #2d3a4d;
-      --text: #e6edf3;
-      --text-muted: #8b9cb3;
-      --accent: #22c55e;
-      --accent-hover: #16a34a;
-      --primary: #22c55e;
-      --danger: #ef4444;
-      --warn: #f97316;
-      --radius: 10px;
-      --font: 'Noto Sans SC', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --bg: #f4ede0;
+      --bg-alt: #ebe1cd;
+      --surface: #ffffff;
+      --surface-2: #fbf6ec;
+      --border: #d9cdb3;
+      --border-strong: #b6a684;
+      --text: #241a10;
+      --text-muted: #7a6a52;
+      --accent: #c8321d;
+      --accent-hover: #a3271a;
+      --accent-soft: #f9e0d9;
+      --primary: #c8321d;
+      --gold: #d9a349;
+      --gold-soft: #f6e6c7;
+      --danger: #b91c1c;
+      --warn: #b45309;
+      --success: #15803d;
+      --radius: 6px;
+      --radius-lg: 12px;
+      --shadow: 0 2px 6px rgba(60, 40, 20, 0.08);
+      --shadow-lg: 0 10px 32px rgba(60, 40, 20, 0.14);
+      --font: "Noto Serif SC", "PingFang SC", "Songti SC", "Noto Sans SC", serif;
+      --font-ui: "Noto Sans SC", "PingFang SC", -apple-system, "Helvetica Neue", sans-serif;
+      --font-mono: "JetBrains Mono", "Menlo", monospace;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 500px at 50% -100px, rgba(217, 163, 73, 0.18), transparent 60%),
+        radial-gradient(600px 400px at 100% 100%, rgba(200, 50, 29, 0.06), transparent 60%),
+        var(--bg);
       color: var(--text);
-      font-family: var(--font);
+      font-family: var(--font-ui);
       font-size: 14px;
       line-height: 1.5;
     }
 
     html, body {
-      scrollbar-color: var(--border) var(--surface);
+      scrollbar-color: var(--border-strong) transparent;
       scrollbar-width: thin;
     }
-    html::-webkit-scrollbar, body::-webkit-scrollbar { width: 8px; height: 8px; }
-    html::-webkit-scrollbar-track, body::-webkit-scrollbar-track { background: var(--surface); }
-    html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    html { height: 100%; }
+    html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; }
 
     .hidden { display: none !important; }
 
+    /* ---------- 按钮 ---------- */
     .btn {
       cursor: pointer;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 14px;
-      transition: background 0.15s;
-    }
-    .btn:hover { background: rgba(255, 255, 255, 0.06); }
-    .btn-primary {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
-    }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-danger {
-      background: var(--danger);
-      border-color: var(--danger);
-      color: #fff;
-    }
-    .btn-ghost { background: transparent; }
-    .btn-small { padding: 4px 10px; font-size: 12px; }
-
-    input[type="text"], input[type="password"], input[type="number"], input[type="date"], select {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-family: inherit;
-      font-size: 14px;
-    }
-    input:focus, select:focus { outline: none; border-color: var(--accent); }
-
-    header {
+      border: 1px solid var(--border-strong);
       background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
+      color: var(--text);
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+      box-shadow: 0 1px 0 rgba(60,40,20,0.06);
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary {
+      background: linear-gradient(180deg, #d84228 0%, #b02a17 100%);
+      border-color: var(--accent-hover);
+      color: #fff8ef;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.15);
+      box-shadow: 0 2px 4px rgba(200,50,29,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .btn-primary:hover { background: linear-gradient(180deg, #c8341c 0%, #971e0f 100%); }
+    .btn-danger {
+      background: transparent;
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .btn-danger:hover { background: rgba(185, 28, 28, 0.08); }
+    .btn-ghost { background: transparent; border-color: transparent; }
+    .btn-ghost:hover { background: rgba(60, 40, 20, 0.06); }
+    .btn-small { padding: 4px 12px; font-size: 12px; letter-spacing: 0; }
+
+    /* ---------- 表单 ---------- */
+    input[type="text"], input[type="password"], input[type="number"], input[type="date"], select {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 7px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    /* ---------- 顶栏 ---------- */
+    header {
+      background: linear-gradient(180deg, #241a10 0%, #362415 100%);
+      color: #f9efd6;
+      border-bottom: 3px solid var(--gold);
+      padding: 8px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(60,40,20,0.15);
+      flex: 0 0 auto;
     }
     header h1 {
       margin: 0;
-      font-size: 1.15rem;
-      color: var(--accent);
+      font-family: var(--font);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
-    .login-row { display: flex; align-items: center; gap: 12px; }
-    .status { color: var(--text-muted); font-size: 13px; }
+    header h1::before {
+      content: "";
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle at 30% 30%, #f6d99c, var(--gold) 55%, #8a5e1f);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.35);
+    }
+    .login-row { display: flex; align-items: center; gap: 14px; }
+    .status { color: #d5c299; font-size: 13px; }
     .status.logged-in::before {
       content: "●";
-      color: var(--accent);
-      margin-right: 4px;
+      color: var(--gold);
+      margin-right: 6px;
     }
+    header .btn { background: transparent; border-color: rgba(217,163,73,0.5); color: #f6e6c7; }
+    header .btn:hover { background: rgba(217,163,73,0.15); }
 
+    /* ---------- 主导航 ---------- */
     .main-tabs {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
-      padding: 0 24px;
+      padding: 0 28px;
+      box-shadow: var(--shadow);
     }
-    .tab-nav { display: flex; gap: 4px; }
+    .tab-nav { display: flex; gap: 6px; }
     .tab-nav-item {
-      padding: 12px 20px;
+      padding: 10px 20px;
       cursor: pointer;
       color: var(--text-muted);
-      border-bottom: 2px solid transparent;
+      font-weight: 500;
       user-select: none;
+      position: relative;
+      transition: color 0.15s;
     }
+    .tab-nav-item:hover { color: var(--text); }
     .tab-nav-item.active {
       color: var(--accent);
-      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+    .tab-nav-item.active::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: -1px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px 3px 0 0;
     }
 
     #appContent {
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
+    .main-tabs { flex: 0 0 auto; }
     .tab-panel {
-      padding: 20px 24px;
-      flex: 1;
+      padding: 12px 20px 14px;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      gap: 10px;
     }
     .tab-panel.hidden { display: none; }
-
-    .section-title {
-      font-size: 1.05rem;
-      margin: 0 0 12px 0;
-      font-weight: 600;
+    .tab-panel > .top-bar,
+    .tab-panel > .toolbar,
+    .tab-panel > .pagination { flex: 0 0 auto; }
+    .tab-panel > .table-wrap { flex: 1 1 auto; min-height: 0; }
+    .placeholder-panel {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .placeholder-text {
+      font-size: 18px;
+      color: var(--text-muted);
+      letter-spacing: 6px;
     }
 
+    /* ---------- 顶部工具条（筛选 + 分页 + 刷新） ---------- */
+    .top-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+      z-index: 20;
+    }
+    .top-bar > .filter-panel { flex: 1 1 auto; margin-bottom: 0; }
+    .top-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 6px 12px;
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+      min-height: 46px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .top-tools .total-hint { color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+    .top-tools .pager { display: flex; gap: 4px; align-items: center; }
+    .top-tools select {
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .section-title {
+      font-family: var(--font);
+      font-size: 1.1rem;
+      margin: 0 0 12px 0;
+      font-weight: 700;
+    }
+
+    /* ---------- 工具条 ---------- */
     .toolbar {
       display: flex;
       align-items: center;
       gap: 12px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      margin-bottom: 16px;
+      border-radius: var(--radius-lg);
+      padding: 8px 14px;
+      margin-bottom: 0;
       flex-wrap: wrap;
+      box-shadow: var(--shadow);
     }
-    .toolbar label { color: var(--text-muted); font-size: 13px; }
-
-    .msg {
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-bottom: 12px;
+    .toolbar label {
+      color: var(--text-muted);
       font-size: 13px;
+      font-weight: 500;
     }
-    .msg.info { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); }
-    .msg.success { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); }
-    .msg.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
-    .msg.warn { background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); color: #fdba74; }
 
+    /* ---------- 筛选面板 ---------- */
+    .filter-panel {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 0;
+      box-shadow: var(--shadow);
+      z-index: 20;
+    }
+    .filter-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 14px;
+      cursor: pointer;
+      user-select: none;
+      background: var(--surface-2);
+      border-radius: var(--radius-lg);
+      min-height: 46px;
+    }
+    .filter-panel.open .filter-header {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-header .title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+    .filter-header .summary {
+      color: var(--text-muted);
+      font-size: 12px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .filter-header .summary .tag-sm {
+      display: inline-block;
+      padding: 2px 8px;
+      margin-right: 6px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      border: 1px solid var(--accent);
+    }
+    .filter-header .arrow {
+      color: var(--accent);
+      font-size: 12px;
+      transition: transform 0.2s ease;
+    }
+    .filter-panel.open .arrow { transform: rotate(180deg); }
+    .filter-body {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-bottom-left-radius: var(--radius-lg);
+      border-bottom-right-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 6px 18px 14px;
+      max-height: 70vh;
+      overflow-y: auto;
+      z-index: 21;
+    }
+    .filter-panel.open .filter-body { display: block; }
+    .filter-group {
+      margin-top: 14px;
+    }
+    .filter-group .g-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 16px;
+      min-width: 88px;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+
+    /* ---------- 消息条 ---------- */
+    .msg {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      font-size: 13px;
+      border-left: 3px solid var(--border-strong);
+    }
+    .msg.info { background: #fdf7e6; border-left-color: var(--gold); color: #6a4d1a; }
+    .msg.success { background: #ecfdf3; border-left-color: var(--success); color: #14532d; }
+    .msg.error { background: var(--accent-soft); border-left-color: var(--accent); color: #7a1c0d; }
+    .msg.warn { background: #fef3c7; border-left-color: var(--warn); color: #78350f; }
+
+    /* ---------- 表格 ---------- */
     .table-wrap {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--radius-lg);
       overflow: auto;
+      box-shadow: var(--shadow);
+      scrollbar-color: var(--border-strong) transparent;
+      scrollbar-width: thin;
     }
+    .table-wrap::-webkit-scrollbar { width: 10px; height: 10px; }
+    .table-wrap::-webkit-scrollbar-track { background: transparent; }
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border: 2px solid var(--surface);
+      border-radius: 6px;
+    }
+    .table-wrap::-webkit-scrollbar-thumb:hover { background: var(--gold); }
     table {
       width: 100%;
       border-collapse: collapse;
     }
     thead th {
-      background: var(--bg);
+      background: var(--surface-2);
       color: var(--text-muted);
       text-align: left;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 500;
-      font-size: 13px;
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--border-strong);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 2px;
       position: sticky;
       top: 0;
       z-index: 1;
+      text-transform: none;
     }
     tbody td {
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
-    tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
-    tbody tr.row-quoting { background: rgba(34, 197, 94, 0.06); }
-    tbody tr.row-quoting:hover { background: rgba(34, 197, 94, 0.1); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.12s; }
+    tbody tr:hover { background: var(--gold-soft); }
+    tbody tr.row-quoting {
+      background: var(--accent-soft);
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+    tbody tr.row-quoting:hover { background: #f3cec2; }
 
     .tag {
       display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
       font-size: 12px;
-      background: var(--border);
+      background: var(--surface-2);
       color: var(--text-muted);
+      border: 1px solid var(--border);
     }
-    .tag.quoting { background: rgba(34, 197, 94, 0.15); color: var(--accent); }
-    .tag.pending { background: rgba(139, 156, 179, 0.15); color: var(--text-muted); }
+    .tag.quoting {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: rgba(200,50,29,0.3);
+      font-weight: 600;
+    }
+    .tag.pending {
+      background: var(--gold-soft);
+      color: #7a5312;
+      border-color: rgba(217,163,73,0.4);
+    }
+    .tag.win { background: rgba(46,125,50,0.12); color: #2e7d32; border-color: rgba(46,125,50,0.35); }
+    .tag.lose { background: var(--surface-2); color: var(--text-muted); border-color: var(--border); }
 
     .cell-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
+    .thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      cursor: zoom-in;
+      display: block;
+    }
+    .thumb-empty {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      border: 1px dashed var(--border);
+      background: var(--surface-2);
+      display: block;
+    }
+    .deadline {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .deadline .abs { font-size: 12px; color: var(--text-muted); }
+    .deadline .rem {
+      font-family: var(--font);
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .deadline .rem.warn { color: var(--warn); }
+    .deadline .rem.expired { color: var(--text-muted); font-weight: 500; }
+
+    /* ---------- 分页 ---------- */
     .pagination {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 12px 4px;
+      justify-content: flex-end;
+      padding: 8px 4px 0;
       color: var(--text-muted);
       font-size: 13px;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 16px;
+    }
+    .pagination .total-hint { color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+    .pagination .page-size {
+      padding: 5px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .pagination .jump-to {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .pagination .jump-input {
+      width: 50px;
+      padding: 5px 8px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      text-align: center;
     }
     .pagination .pager { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .pagination .pager .btn.active {
       background: var(--accent);
       border-color: var(--accent);
-      color: #fff;
+      color: #fff8ef;
     }
 
+    /* ---------- 弹窗 ---------- */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(36, 26, 16, 0.55);
+      backdrop-filter: blur(3px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -243,48 +584,58 @@
     .modal {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
+      border-radius: var(--radius-lg);
+      padding: 28px;
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       max-height: 90vh;
       overflow: auto;
+      box-shadow: var(--shadow-lg);
+      border-top: 4px solid var(--accent);
     }
     .modal h3 {
-      margin: 0 0 16px 0;
-      font-size: 1.05rem;
+      margin: 0 0 20px 0;
+      font-family: var(--font);
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--border);
     }
     .modal .form-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 14px;
     }
     .modal .form-row label {
       color: var(--text-muted);
-      min-width: 80px;
+      min-width: 84px;
       font-size: 13px;
+      font-weight: 500;
     }
-    .modal .form-row input:not([type="checkbox"]):not([type="radio"]) {
-      flex: 1;
-    }
+    .modal .form-row input:not([type="checkbox"]):not([type="radio"]) { flex: 1; }
     .modal-actions {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
-      margin-top: 20px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
     }
     .quote-apprize {
-      font-size: 1.2rem;
+      font-family: var(--font);
+      font-size: 1.35rem;
       font-weight: 700;
       color: var(--accent);
     }
+
+    /* ---------- 详情 ---------- */
     .detail-block {
-      background: var(--bg);
+      background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 14px;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
       font-size: 13px;
       max-height: 360px;
       overflow: auto;
@@ -295,103 +646,247 @@
       word-break: break-all;
       font-family: var(--font-mono);
       color: var(--text-muted);
+      font-size: 12px;
     }
     .detail-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 8px 16px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 6px 20px;
     }
     .detail-grid .cell {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: baseline;
-      padding: 6px 0;
+      padding: 7px 0;
       border-bottom: 1px dashed var(--border);
       min-width: 0;
     }
     .detail-grid .cell .k {
       color: var(--text-muted);
-      flex: 0 0 90px;
+      flex: 0 0 88px;
       font-size: 12px;
+      letter-spacing: 1px;
     }
     .detail-grid .cell .v {
       color: var(--text);
       word-break: break-all;
       flex: 1 1 auto;
       min-width: 0;
+      font-weight: 500;
     }
-    .detail-grid .cell .v.strong { color: var(--accent); font-weight: 600; }
+    .detail-grid .cell .v.strong {
+      color: var(--accent);
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 15px;
+    }
     .detail-section-title {
-      margin: 12px 0 6px 0;
+      margin: 14px 0 8px 0;
       font-size: 12px;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
+      color: var(--accent);
+      letter-spacing: 3px;
+      font-weight: 600;
+      padding-left: 10px;
+      border-left: 3px solid var(--accent);
     }
     .detail-section-title:first-child { margin-top: 0; }
+    /* 市场价格参考：修正 heading 间距，使其与基本一致 */
+    #bidDetailBlock .ref-price-block > .detail-section-title { margin-top: 14px; }
+    .detail-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .detail-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .detail-deadline { margin: 0 0 0 auto; }
     .detail-images {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
+      gap: 10px;
+      margin-top: 8px;
     }
+    .ref-table th, .ref-table td {
+      border: 1px solid var(--border-strong);
+      padding: 4px 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .ref-table th { background: var(--surface-muted, #f5f6f8); }
     .detail-images img {
-      width: 88px;
-      height: 88px;
+      width: 96px;
+      height: 96px;
       object-fit: cover;
-      border-radius: 6px;
-      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-strong);
       background: var(--surface);
       cursor: zoom-in;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .detail-images img:hover {
+      transform: scale(1.03);
+      box-shadow: var(--shadow);
     }
 
+    /* ---------- 登录页 ---------- */
     #loginScreen {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
+      background:
+        radial-gradient(600px 400px at 20% 30%, rgba(217,163,73,0.25), transparent 60%),
+        radial-gradient(500px 400px at 80% 70%, rgba(200,50,29,0.12), transparent 60%),
+        var(--bg);
     }
     .login-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 40px;
+      border-radius: var(--radius-lg);
+      padding: 44px 40px;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
+      box-shadow: var(--shadow-lg);
+      border-top: 4px solid var(--accent);
+      position: relative;
+    }
+    .login-card::before {
+      content: "竞";
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-hover));
+      color: var(--gold);
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 6px 14px rgba(200,50,29,0.35), inset 0 -2px 0 rgba(0,0,0,0.15);
+      border: 3px solid var(--surface);
     }
     .login-card h1 {
-      margin: 0 0 8px 0;
-      font-size: 1.5rem;
-      color: var(--accent);
+      margin: 12px 0 6px 0;
+      font-family: var(--font);
+      font-size: 1.75rem;
+      color: var(--text);
+      text-align: center;
+      letter-spacing: 8px;
     }
     .login-card .sub {
       color: var(--text-muted);
       font-size: 13px;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      text-align: center;
+      letter-spacing: 2px;
     }
     .login-card .form-row { margin-bottom: 16px; }
-    .login-card .form-row label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 13px; }
+    .login-card .form-row label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
     .login-card input { width: 100%; }
-    .login-card .btn-primary { width: 100%; padding: 10px; margin-top: 8px; }
+    .login-card .btn-primary { width: 100%; padding: 11px; margin-top: 12px; letter-spacing: 4px; }
 
+    /* ---------- Toast ---------- */
     .toast-wrap {
       position: fixed;
-      top: 20px;
+      top: 24px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 200;
       pointer-events: none;
     }
     .toast {
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 12px 22px;
+      border-radius: var(--radius);
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--shadow-lg);
       margin-bottom: 8px;
+      border-left: 4px solid transparent;
+      background: var(--surface);
+      color: var(--text);
     }
-    .toast.success { background: #22c55e; color: #fff; }
-    .toast.error { background: #ef4444; color: #fff; }
-    .toast.info { background: #3b82f6; color: #fff; }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--accent); }
+    .toast.info { border-left-color: var(--gold); }
+
+    /* ---------- 全屏 Loading ---------- */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(244, 237, 224, 0.72);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .loading-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .loading-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-lg);
+      min-width: 220px;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid var(--gold-soft);
+      border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .loading-text .title {
+      font-family: var(--font);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 3px;
+    }
+    .loading-text .sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* 表格局部 Loading */
+    .table-wrap { position: relative; }
+    .table-wrap .table-loading {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(1px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .table-wrap.loading .table-loading { display: flex; }
+    .table-wrap .spinner { width: 28px; height: 28px; border-width: 3px; }
   </style>
 </head>
 
@@ -426,67 +921,148 @@
         <span class="tab-nav-item active" data-tab="auction">竞价列表</span>
         <span class="tab-nav-item" data-tab="grab">报价中</span>
         <span class="tab-nav-item" data-tab="myBids">已报价</span>
+        <span class="tab-nav-item" data-tab="cron">定时任务</span>
       </nav>
     </div>
 
     <div id="tabPanelAuction" class="tab-panel">
-      <div class="toolbar">
-        <label>每页</label>
-        <select id="pageSizeAuction">
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-          <option value="500">500</option>
-        </select>
-        <button type="button" class="btn btn-primary" id="btnRefreshAuction">刷新列表</button>
-        <span id="auctionMsg" class="status"></span>
+      <div class="top-bar">
+        <div class="filter-panel" id="filterPanel">
+          <div class="filter-header" id="filterHeader">
+            <span class="title">筛选</span>
+            <span class="summary" id="filterSummary">全部</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="filter-body" id="filterBody">
+          <div class="filter-group">
+            <div class="g-title">品类</div>
+            <div class="filter-chips" data-group="cate">
+              <span class="chip" data-value="手机">手机</span>
+              <span class="chip" data-value="平板电脑">平板电脑</span>
+              <span class="chip" data-value="笔记本">笔记本</span>
+              <span class="chip" data-value="智能数码">智能数码</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="g-title">品牌</div>
+            <div class="filter-chips" data-group="brand">
+              <span class="chip" data-value="Apple">Apple</span>
+              <span class="chip" data-value="华为">华为</span>
+              <span class="chip" data-value="荣耀">荣耀</span>
+              <span class="chip" data-value="小米">小米</span>
+              <span class="chip" data-value="红米">红米</span>
+              <span class="chip" data-value="OPPO">OPPO</span>
+              <span class="chip" data-value="vivo">vivo</span>
+              <span class="chip" data-value="IQOO">IQOO</span>
+              <span class="chip" data-value="一加">一加</span>
+              <span class="chip" data-value="魅族">魅族</span>
+              <span class="chip" data-value="其他">其他</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="g-title">货源</div>
+            <div class="filter-chips" data-group="channel">
+              <span class="chip" data-value="华为门店">华为门店</span>
+              <span class="chip" data-value="自营KA体系">自营KA体系</span>
+              <span class="chip" data-value="授权KA体系">授权KA体系</span>
+              <span class="chip" data-value="小米门店">小米门店</span>
+              <span class="chip" data-value="OV门店">OV门店</span>
+              <span class="chip" data-value="三星门店">三星门店</span>
+              <span class="chip" data-value="荣耀门店">荣耀门店</span>
+              <span class="chip" data-value="KA体系">KA体系</span>
+              <span class="chip" data-value="苹果KA门店">苹果KA门店</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="g-title">成色</div>
+            <div class="filter-chips" data-group="quality">
+              <span class="chip" data-value="全新">全新</span>
+              <span class="chip" data-value="靓机">靓机</span>
+              <span class="chip" data-value="小花">小花</span>
+              <span class="chip" data-value="大花">大花</span>
+              <span class="chip" data-value="外爆">外爆</span>
+              <span class="chip" data-value="内爆">内爆</span>
+              <span class="chip" data-value="功能异常">功能异常</span>
+              <span class="chip" data-value="维修更换">维修更换</span>
+              <span class="chip" data-value="无法开机">无法开机</span>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button type="button" class="btn btn-ghost btn-small" id="btnFilterReset">重置</button>
+            <button type="button" class="btn btn-primary btn-small" id="btnFilterApply">确定</button>
+          </div>
+        </div>
+        </div>
+        <div class="top-tools">
+          <button type="button" class="btn btn-ghost btn-small" id="btnResetAuction">重置</button>
+          <button type="button" class="btn btn-primary btn-small" id="btnRefreshAuction">刷新</button>
+        </div>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-wrap" id="auctionTableWrap">
         <table id="tableAuction">
           <thead>
             <tr>
-              <th style="width:80px;">订单ID</th>
+              <th style="width:88px;">订单ID</th>
+              <th style="width:56px;">图</th>
+              <th style="width:90px;">品类</th>
               <th>产品名称</th>
-              <th style="width:110px;">类目</th>
-              <th style="width:120px;">状态</th>
-              <th style="width:280px;">操作</th>
+              <th style="width:90px;">品牌</th>
+              <th style="width:96px;">成色</th>
+              <th style="width:110px;">货源</th>
+              <th style="width:190px;">截止时间</th>
+              <th style="width:96px;">状态</th>
+              <th style="width:260px;">操作</th>
             </tr>
           </thead>
           <tbody id="auctionTbody">
-            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">加载中…</td></tr>
+            <tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
           </tbody>
         </table>
+        <div class="table-loading"><div class="spinner"></div></div>
       </div>
       <div class="pagination">
-        <span id="auctionTotalHint">共 0 条</span>
+        <span class="total-hint" id="auctionTotalHint">共 0 项</span>
         <div class="pager" id="auctionPager"></div>
+        <select id="pageSizeAuction" title="每页" class="page-size">
+          <option value="20">20 条/页</option>
+          <option value="50" selected>50 条/页</option>
+          <option value="100">100 条/页</option>
+          <option value="500">500 条/页</option>
+        </select>
+        <span class="jump-to">跳至<input type="number" min="1" id="auctionJump" class="jump-input"><span>页</span></span>
       </div>
     </div>
 
     <div id="tabPanelGrab" class="tab-panel hidden">
       <div class="toolbar">
-        <button type="button" class="btn btn-primary" id="btnRefreshGrab">刷新</button>
+        <button type="button" class="btn btn-primary btn-small" id="btnRefreshGrab">刷新</button>
         <span id="grabMsg" class="status"></span>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-wrap" id="grabTableWrap">
         <table id="tableGrab">
           <thead>
             <tr>
-              <th style="width:80px;">订单ID</th>
+              <th style="width:88px;">订单ID</th>
+              <th style="width:56px;">图</th>
+              <th style="width:90px;">品类</th>
               <th>产品名称</th>
-              <th style="width:110px;">类目</th>
-              <th style="width:280px;">操作</th>
+              <th style="width:90px;">品牌</th>
+              <th style="width:96px;">成色</th>
+              <th style="width:110px;">货源</th>
+              <th style="width:190px;">截止时间</th>
+              <th style="width:260px;">操作</th>
             </tr>
           </thead>
           <tbody id="grabTbody">
-            <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
+            <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
           </tbody>
         </table>
+        <div class="table-loading"><div class="spinner"></div></div>
       </div>
       <div class="pagination">
-        <span id="grabTotalHint">共 0 条</span>
+        <span class="total-hint" id="grabTotalHint">共 0 项</span>
       </div>
     </div>
 
@@ -503,34 +1079,47 @@
         <input type="date" id="myBidsDateAfter">
         <label>结束日期</label>
         <input type="date" id="myBidsDateBefore">
-        <label>每页</label>
-        <select id="pageSizeMyBids">
-          <option value="20" selected>20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-        <button type="button" class="btn btn-primary" id="btnRefreshMyBids">查询</button>
+        <button type="button" class="btn btn-primary btn-small" id="btnRefreshMyBids">查询</button>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-wrap" id="myBidsTableWrap">
         <table id="tableMyBids">
           <thead>
             <tr>
-              <th style="width:80px;">订单ID</th>
+              <th style="width:88px;">订单ID</th>
+              <th style="width:56px;">图</th>
+              <th style="width:90px;">品类</th>
               <th>产品名称</th>
-              <th style="width:110px;">报价金额</th>
-              <th style="width:110px;">状态</th>
-              <th style="width:160px;">操作</th>
+              <th style="width:90px;">品牌</th>
+              <th style="width:96px;">成色</th>
+              <th style="width:110px;">我的报价</th>
+              <th style="width:150px;">报价时间</th>
+              <th style="width:200px;">截止时间</th>
+              <th style="width:96px;">状态</th>
+              <th style="width:200px;">操作</th>
             </tr>
           </thead>
           <tbody id="myBidsTbody">
-            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
+            <tr><td colspan="11" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>
           </tbody>
         </table>
+        <div class="table-loading"><div class="spinner"></div></div>
       </div>
       <div class="pagination">
-        <span id="myBidsTotalHint">共 0 条</span>
+        <span class="total-hint" id="myBidsTotalHint">共 0 项</span>
         <div class="pager" id="myBidsPager"></div>
+        <select id="pageSizeMyBids" title="每页" class="page-size">
+          <option value="20">20 条/页</option>
+          <option value="50" selected>50 条/页</option>
+          <option value="100">100 条/页</option>
+        </select>
+        <span class="jump-to">跳至<input type="number" min="1" id="myBidsJump" class="jump-input"><span>页</span></span>
+      </div>
+    </div>
+
+    <div id="tabPanelCron" class="tab-panel hidden">
+      <div class="placeholder-panel">
+        <div class="placeholder-text">敬请期待</div>
       </div>
     </div>
   </div>
@@ -571,6 +1160,17 @@
 
   <div class="toast-wrap" id="toastWrap"></div>
 
+  <!-- 全屏 Loading -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        <span class="title" id="loadingTitle">加载中</span>
+        <span class="sub" id="loadingSub">正在拉取最新数据…</span>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       'use strict';
@@ -609,11 +1209,157 @@
         el.textContent = text;
       }
 
+      // ---------- 加载状态 ----------
+      function showLoading(title, sub) {
+        var t = $('loadingTitle'); if (t && title) t.textContent = title;
+        var s = $('loadingSub'); if (s) s.textContent = sub || '正在拉取最新数据…';
+        var o = $('loadingOverlay'); if (o) o.classList.add('show');
+      }
+      function hideLoading() {
+        var o = $('loadingOverlay'); if (o) o.classList.remove('show');
+      }
+      function setTableLoading(wrapId, on) {
+        var w = document.getElementById(wrapId);
+        if (!w) return;
+        w.classList.toggle('loading', !!on);
+      }
+      // 首次加载走全屏 overlay，后续刷新只在表格上蒙一层
+      var _firstLoad = { auction: true, grab: true, myBids: true };
+      function withLoading(key, wrapId, title, task) {
+        var first = _firstLoad[key];
+        if (first) { showLoading(title); _firstLoad[key] = false; }
+        else { setTableLoading(wrapId, true); }
+        var done = function () {
+          if (first) hideLoading();
+          else setTableLoading(wrapId, false);
+        };
+        var p;
+        try { p = task(); } catch (e) { done(); throw e; }
+        if (p && typeof p.then === 'function') {
+          return p.then(function (r) { done(); return r; }, function (e) { done(); throw e; });
+        }
+        done();
+        return p;
+      }
+
       function escapeHtml(s) {
         if (s == null) return '';
         return String(s).replace(/[&<>"']/g, function (c) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
+      }
+
+      // 从对象里按候选键取第一个非空值
+      function pick(o, keys, dft) {
+        if (!o) return dft == null ? '-' : dft;
+        for (var i = 0; i < keys.length; i++) {
+          var v = o[keys[i]];
+          if (v !== undefined && v !== null && v !== '') return v;
+        }
+        return dft == null ? '-' : dft;
+      }
+
+      // 时间格式化
+      function fmtTime(v) {
+        if (v == null || v === '') return '-';
+        // 已经带日期分隔符就截取到分钟
+        var s = String(v);
+        if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s)) return s.substring(0, 16).replace('T', ' ');
+        // 时间戳（秒/毫秒）
+        if (/^\d{10}$/.test(s) || /^\d{13}$/.test(s)) {
+          var n = parseInt(s, 10);
+          if (s.length === 10) n *= 1000;
+          try {
+            var d = new Date(n);
+            var pad = function (x) { return x < 10 ? '0' + x : String(x); };
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+              + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+          } catch (e) { return s; }
+        }
+        return s;
+      }
+
+      // 金额格式化
+      function fmtMoney(v) {
+        if (v == null || v === '' || v === '-') return '-';
+        var n = Number(v);
+        if (!isFinite(n)) return String(v);
+        return '¥' + n.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+      }
+
+      // 解析后端返回的时间字符串（"2026-08-08 16:53:24" 或 ISO）为 ms
+      function parseTs(v) {
+        if (v == null || v === '') return NaN;
+        var s = String(v);
+        if (/^\d{10}$/.test(s)) return parseInt(s, 10) * 1000;
+        if (/^\d{13}$/.test(s)) return parseInt(s, 10);
+        // 兼容 "YYYY-MM-DD HH:mm:ss" —— iOS Safari 不认空格分隔
+        var iso = s.replace(' ', 'T');
+        var ms = Date.parse(iso);
+        return ms;
+      }
+
+      // 把时间统一展示到「秒」：YYYY-MM-DD HH:mm:ss
+      function fmtDateTime(v) {
+        if (v == null || v === '' || v === '-') return v == null ? '-' : String(v);
+        var ms = parseTs(v);
+        if (!isFinite(ms)) return String(v);
+        var pad = function (x) { return x < 10 ? '0' + x : String(x); };
+        var d = new Date(ms);
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+          + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+
+      // 复制文本到剪贴板，并给元素短暂反馈
+      function copyText(txt, el) {
+        var done = function () {
+          if (el) {
+            var orig = el.textContent;
+            el.textContent = '已复制';
+            setTimeout(function () { el.textContent = orig; }, 900);
+          }
+        };
+        var fallback = function () {
+          try {
+            var ta = document.createElement('textarea');
+            ta.value = txt;
+            ta.style.cssText = 'position:fixed;opacity:0;';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          } catch (e) {}
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(done, function () { fallback(); done(); });
+        } else {
+          fallback();
+          done();
+        }
+      }
+
+      // 截止时间：绝对时间 + 剩余倒计时
+      function fmtDeadlineHtml(v) {
+        var ms = parseTs(v);
+        var abs = escapeHtml(v || '-');
+        if (!isFinite(ms)) return '<div class="deadline"><span class="abs">' + abs + '</span></div>';
+        var diff = ms - Date.now();
+        var rem, cls;
+        if (diff <= 0) { rem = '已截止'; cls = 'rem expired'; }
+        else {
+          var sec = Math.floor(diff / 1000);
+          var h = Math.floor(sec / 3600);
+          var m = Math.floor((sec % 3600) / 60);
+          var s = sec % 60;
+          var pad = function (x) { return x < 10 ? '0' + x : String(x); };
+          if (h > 0) rem = h + ':' + pad(m) + ':' + pad(s);
+          else rem = pad(m) + ':' + pad(s);
+          cls = 'rem' + (diff < 60000 ? ' warn' : '');
+        }
+        return '<div class="deadline" data-deadline="' + ms + '">'
+          + '<span class="' + cls + '">' + rem + '</span>'
+          + '<span class="abs">' + abs + '</span>'
+          + '</div>';
       }
 
       // ---------- 状态 ----------
@@ -623,14 +1369,16 @@
         auctionList: [],
         auctionTotal: 0,
         auctionPage: 1,
-        auctionPageSize: 20,
+        auctionPageSize: 50,
         myBidsList: [],
         myBidsTotal: 0,
         myBidsPage: 1,
-        myBidsPageSize: 20,
+        myBidsPageSize: 50,
         grabOrderIds: [],  // 报价中列表：只有此列表中包含的 orderId 才展示报价数据列表详情
         grabList: [],      // 报价中列表原始数据（供「报价中」Tab 渲染）
         currentBid: null,  // 当前正在处理的出价上下文
+        filters: { cate: [], brand: [], channel: [], quality: [] },
+        draftFilters: { cate: [], brand: [], channel: [], quality: [] },
       };
 
       // ---------- 登录 / 登出 ----------
@@ -685,6 +1433,7 @@
         $('tabPanelAuction').classList.toggle('hidden', name !== 'auction');
         $('tabPanelGrab').classList.toggle('hidden', name !== 'grab');
         $('tabPanelMyBids').classList.toggle('hidden', name !== 'myBids');
+        $('tabPanelCron').classList.toggle('hidden', name !== 'cron');
         if (name === 'auction') refreshAuctionList();
         if (name === 'grab') refreshGrabList();
         if (name === 'myBids') refreshMyBids();
@@ -692,33 +1441,34 @@
 
       // ---------- 报价中列表 Tab ----------
       function refreshGrabList() {
-        showMsg($('grabMsg'), '加载中…', 'info');
-        return Promise.all([
-          api('/api/grab-order-list'),
-          // 顺便拉一次竞价列表以便按 id 补齐产品名/类目
-          api('/api/order-list', { method: 'POST', body: { pageIndex: 1, pageSize: 3000 } }),
-        ]).then(function (arr) {
-          var r = arr[0], a = arr[1];
-          if (r && r.success) {
-            state.grabList = (r.data && r.data.results) || [];
-            state.grabOrderIds = (r.data && r.data.ids) || [];
-          } else {
-            state.grabList = [];
-            state.grabOrderIds = [];
-            toast((r && r.message) || '加载失败', 'error');
-          }
-          if (a && a.success) {
-            var lst = (a.data && a.data.results) || [];
-            var map = {};
-            for (var i = 0; i < lst.length; i++) {
-              var it = lst[i];
-              var id = it && (it.id || it.orderId);
-              if (id != null) map[String(id)] = it;
+        return withLoading('grab', 'grabTableWrap', '加载报价中列表', function () {
+          return Promise.all([
+            api('/api/grab-order-list'),
+            // 顺便拉一次竞价列表以便按 id 补齐产品名/类目
+            api('/api/order-list', { method: 'POST', body: { pageIndex: 1, pageSize: 3000 } }),
+          ]).then(function (arr) {
+            var r = arr[0], a = arr[1];
+            if (r && r.success) {
+              state.grabList = (r.data && r.data.results) || [];
+              state.grabOrderIds = (r.data && r.data.ids) || [];
+            } else {
+              state.grabList = [];
+              state.grabOrderIds = [];
+              toast((r && r.message) || '加载失败', 'error');
             }
-            state.auctionMap = map;
-          }
-          renderGrabTable();
-          showMsg($('grabMsg'), '', '');
+            if (a && a.success) {
+              var lst = (a.data && a.data.results) || [];
+              var map = {};
+              for (var i = 0; i < lst.length; i++) {
+                var it = lst[i];
+                var id = it && (it.id || it.orderId);
+                if (id != null) map[String(id)] = it;
+              }
+              state.auctionMap = map;
+            }
+            renderGrabTable();
+            showMsg($('grabMsg'), '', '');
+          });
         });
       }
 
@@ -739,12 +1489,20 @@
           if (full) normalized.push(full);
         }
         if (!normalized.length) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
         } else {
           var rows = normalized.map(function (o) {
-            var oid = o.orderId || o.order_id || o.id;
-            var name = o.model_name || o.modelName || o.productName || o.name || '-';
-            var cate = o.cate_name || o.categoryName || '-';
+            var oid = pick(o, ['id','orderId','order_id']);
+            var name = pick(o, ['model_name','modelName','productName','name']);
+            var cate = pick(o, ['cate_name','categoryName','category']);
+            var brand = pick(o, ['brand_name','brandName','brand']);
+            var quality = pick(o, ['machine_level_name','quality','color_grade','colorGrade','grade']);
+            var channel = pick(o, ['order_channel_name','channelName','channel']);
+            var img = pick(o, ['cover_image','coverImage','image','pic'], '');
+            var thumb = img && img !== '-'
+              ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="window.open(this.src)" loading="lazy" />'
+              : '<span class="thumb-empty"></span>';
+            var deadline = fmtDeadlineHtml(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
             var actions = '<div class="cell-actions">'
               + '<button class="btn btn-small" data-action="detail" data-oid="' + escapeHtml(oid) + '">查看详情</button>'
               + '<button class="btn btn-primary btn-small" data-action="bid" data-oid="' + escapeHtml(oid) + '" data-name="' + escapeHtml(name) + '">出价</button>'
@@ -752,14 +1510,19 @@
               + '</div>';
             return '<tr class="row-quoting">'
               + '<td>' + escapeHtml(oid) + '</td>'
-              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + thumb + '</td>'
               + '<td>' + escapeHtml(cate) + '</td>'
+              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + escapeHtml(brand) + '</td>'
+              + '<td>' + escapeHtml(quality) + '</td>'
+              + '<td>' + escapeHtml(channel) + '</td>'
+              + '<td>' + deadline + '</td>'
               + '<td>' + actions + '</td>'
               + '</tr>';
           }).join('');
           tbody.innerHTML = rows;
         }
-        $('grabTotalHint').textContent = '共 ' + normalized.length + ' 条';
+        $('grabTotalHint').textContent = '共 ' + normalized.length + ' 项';
       }
 
       // ---------- 报价中 id 列表（决定详情展示） ----------
@@ -784,37 +1547,136 @@
 
       // ---------- 竞价列表 ----------
       function refreshAuctionList() {
-        state.auctionPageSize = parseInt($('pageSizeAuction').value, 10) || 20;
-        showMsg($('auctionMsg'), '加载中…', 'info');
-        return Promise.all([
-          api('/api/order-list', { method: 'POST', body: { pageIndex: state.auctionPage, pageSize: state.auctionPageSize } }),
-          api('/api/grab-order-list'),
-        ]).then(function (arr) {
-          var r = arr[0], g = arr[1];
-          if (r && r.success) {
-            state.auctionList = (r.data && r.data.results) || [];
-            state.auctionTotal = (r.data && r.data.totalCount) || state.auctionList.length;
-          } else {
-            state.auctionList = [];
-            state.auctionTotal = 0;
-          }
-          if (g && g.success) {
-            state.grabOrderIds = (g.data && g.data.ids) || [];
-          }
-          renderAuctionTable();
-          showMsg($('auctionMsg'), '', '');
+        state.auctionPageSize = parseInt($('pageSizeAuction').value, 10) || 50;
+        return withLoading('auction', 'auctionTableWrap', '加载竞价列表', function () {
+          return Promise.all([
+            // 拉全量，前端本地做筛选与分页
+            api('/api/order-list', { method: 'POST', body: { pageIndex: 1, pageSize: 3000 } }),
+            api('/api/grab-order-list'),
+          ]).then(function (arr) {
+            var r = arr[0], g = arr[1];
+            if (r && r.success) {
+              state.auctionList = (r.data && r.data.results) || [];
+            } else {
+              state.auctionList = [];
+            }
+            if (g && g.success) {
+              state.grabOrderIds = (g.data && g.data.ids) || [];
+            }
+            renderAuctionTable();
+            showMsg($('auctionMsg'), '', '');
+          });
         });
+      }
+
+      // 应用筛选条件，返回过滤后的数组（多选：组内 OR，组间 AND）
+      function applyAuctionFilters(list) {
+        var f = state.filters || {};
+        var hasAny = (f.cate && f.cate.length) || (f.brand && f.brand.length)
+                  || (f.channel && f.channel.length) || (f.quality && f.quality.length);
+        if (!hasAny) return list.slice();
+        return list.filter(function (o) {
+          if (f.cate && f.cate.length) {
+            var v = String(pick(o, ['cate_name','categoryName','category'], '') || '');
+            var hit = false;
+            for (var i = 0; i < f.cate.length; i++) { if (v.indexOf(f.cate[i]) !== -1) { hit = true; break; } }
+            if (!hit) return false;
+          }
+          if (f.brand && f.brand.length) {
+            var v = String(pick(o, ['brand_name','brandName','brand'], '') || '').toLowerCase();
+            var hit = false;
+            for (var i = 0; i < f.brand.length; i++) { if (v === String(f.brand[i]).toLowerCase()) { hit = true; break; } }
+            if (!hit) return false;
+          }
+          if (f.channel && f.channel.length) {
+            var v = String(pick(o, ['order_channel_name','channelName','channel'], '') || '');
+            var hit = false;
+            for (var i = 0; i < f.channel.length; i++) { if (v.indexOf(f.channel[i]) !== -1) { hit = true; break; } }
+            if (!hit) return false;
+          }
+          if (f.quality && f.quality.length) {
+            var v = String(pick(o, ['machine_level_name','quality','color_grade','colorGrade','grade'], '') || '');
+            var hit = false;
+            for (var i = 0; i < f.quality.length; i++) { if (v.indexOf(f.quality[i]) !== -1) { hit = true; break; } }
+            if (!hit) return false;
+          }
+          return true;
+        });
+      }
+
+      // 筛选面板顶部摘要
+      function updateFilterSummary() {
+        var f = state.filters || {};
+        var parts = [];
+        var add = function (label, arr) {
+          if (arr && arr.length) {
+            parts.push('<span class="tag-sm">' + escapeHtml(label) + ': ' + escapeHtml(arr.join('、')) + '</span>');
+          }
+        };
+        add('品类', f.cate);
+        add('品牌', f.brand);
+        add('货源', f.channel);
+        add('成色', f.quality);
+        var el = $('filterSummary');
+        if (el) el.innerHTML = parts.length ? parts.join('') : '<span style="color:var(--text-muted);">全部</span>';
+      }
+
+      // 把 draftFilters 应用到 chip 高亮
+      function syncFilterChipsFromDraft() {
+        var d = state.draftFilters || {};
+        document.querySelectorAll('.filter-chips').forEach(function (group) {
+          var key = group.getAttribute('data-group');
+          var picked = d[key] || [];
+          group.querySelectorAll('.chip').forEach(function (c) {
+            var v = c.getAttribute('data-value') || '';
+            c.classList.toggle('active', picked.indexOf(v) !== -1);
+          });
+        });
+      }
+
+      function openFilter() {
+        // 打开时以已生效的筛选为基础做草稿
+        state.draftFilters = {
+          cate: (state.filters.cate || []).slice(),
+          brand: (state.filters.brand || []).slice(),
+          channel: (state.filters.channel || []).slice(),
+          quality: (state.filters.quality || []).slice(),
+        };
+        syncFilterChipsFromDraft();
+        $('filterPanel').classList.add('open');
+      }
+      function closeFilter() { $('filterPanel').classList.remove('open'); }
+      function toggleFilter() {
+        if ($('filterPanel').classList.contains('open')) closeFilter();
+        else openFilter();
       }
 
       function renderAuctionTable() {
         var tbody = $('auctionTbody');
-        if (!state.auctionList.length) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
+        var filtered = applyAuctionFilters(state.auctionList || []);
+        var total = filtered.length;
+        state.auctionTotal = total;
+        var pageSize = state.auctionPageSize || 20;
+        var pages = Math.max(1, Math.ceil(total / pageSize));
+        if (state.auctionPage > pages) state.auctionPage = pages;
+        if (state.auctionPage < 1) state.auctionPage = 1;
+        var start = (state.auctionPage - 1) * pageSize;
+        var pageList = filtered.slice(start, start + pageSize);
+        if (!pageList.length) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
         } else {
-          var rows = state.auctionList.map(function (o) {
-            var oid = o.id || o.orderId;
-            var name = o.model_name || o.modelName || o.productName || o.name || '-';
-            var cate = o.cate_name || o.categoryName || '-';
+          var rows = pageList.map(function (o) {
+            var oid = pick(o, ['id','orderId','order_id']);
+            var name = pick(o, ['model_name','modelName','productName','name']);
+            var cate = pick(o, ['cate_name','categoryName','category']);
+            var brand = pick(o, ['brand_name','brandName','brand']);
+            var quality = pick(o, ['machine_level_name','quality','color_grade','colorGrade','grade']);
+            var channel = pick(o, ['order_channel_name','channelName','channel']);
+            var img = pick(o, ['cover_image','coverImage','image','pic'], '');
+            var thumb = img && img !== '-'
+              ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="window.open(this.src)" loading="lazy" />'
+              : '<span class="thumb-empty"></span>';
+            var deadline = fmtDeadlineHtml(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
             var quoting = orderIsQuoting(oid);
             var statusTag = quoting
               ? '<span class="tag quoting">报价中</span>'
@@ -828,18 +1690,23 @@
             actions += '</div>';
             return '<tr class="' + (quoting ? 'row-quoting' : '') + '">'
               + '<td>' + escapeHtml(oid) + '</td>'
-              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + thumb + '</td>'
               + '<td>' + escapeHtml(cate) + '</td>'
+              + '<td>' + escapeHtml(name) + '</td>'
+              + '<td>' + escapeHtml(brand) + '</td>'
+              + '<td>' + escapeHtml(quality) + '</td>'
+              + '<td>' + escapeHtml(channel) + '</td>'
+              + '<td>' + deadline + '</td>'
               + '<td>' + statusTag + '</td>'
               + '<td>' + actions + '</td>'
               + '</tr>';
           }).join('');
           tbody.innerHTML = rows;
         }
-        $('auctionTotalHint').textContent = '共 ' + state.auctionTotal + ' 条';
-        renderPager('auctionPager', state.auctionPage, state.auctionPageSize, state.auctionTotal, function (p) {
+        $('auctionTotalHint').textContent = '共 ' + total + ' 项';
+        renderPager('auctionPager', state.auctionPage, state.auctionPageSize, total, function (p) {
           state.auctionPage = p;
-          refreshAuctionList();
+          renderAuctionTable();
         });
       }
 
@@ -855,34 +1722,60 @@
         if (status) q.set('status', status);
         if (dateAfter) q.set('created_at_after', dateAfter);
         if (dateBefore) q.set('created_at_before', dateBefore);
-        return api('/api/my-bids?' + q.toString()).then(function (r) {
-          if (r && r.success) {
-            state.myBidsList = (r.data && r.data.results) || [];
-            state.myBidsTotal = (r.data && r.data.totalCount) || state.myBidsList.length;
-          } else {
-            state.myBidsList = [];
-            state.myBidsTotal = 0;
-            toast((r && r.message) || '查询失败', 'error');
-          }
-          renderMyBidsTable();
+        return withLoading('myBids', 'myBidsTableWrap', '加载已报价列表', function () {
+          return api('/api/my-bids?' + q.toString()).then(function (r) {
+            if (r && r.success) {
+              state.myBidsList = (r.data && r.data.results) || [];
+              state.myBidsTotal = (r.data && r.data.totalCount) || state.myBidsList.length;
+            } else {
+              state.myBidsList = [];
+              state.myBidsTotal = 0;
+              toast((r && r.message) || '查询失败', 'error');
+            }
+            renderMyBidsTable();
+          });
         });
+      }
+
+      // 状态标签样式：按关键词归类
+      function statusTagCls(s) {
+        s = String(s || '');
+        if (/中标/.test(s) && !/未中标/.test(s)) return 'win';
+        if (/竞|价|报价/.test(s)) return 'quoting';
+        if (/未中标|失败|流拍|lose|fail/.test(s)) return 'lose';
+        return '';
       }
 
       function renderMyBidsTable() {
         var tbody = $('myBidsTbody');
         if (!state.myBidsList.length) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
         } else {
           var rows = state.myBidsList.map(function (o) {
-            var oid = o.orderId || o.order_id || o.id;
-            var name = o.model_name || o.modelName || o.productName || o.name || '-';
-            var amt = o.bid_amount || o.bidAmount || o.actualPrice || '-';
-            var st = o.status || o.state || '-';
+            var oid = pick(o, ['orderId','order_id','order','id']);
+            var name = pick(o, ['model_name','modelName','productName','name']);
+            var cate = pick(o, ['cate_name','categoryName','category']);
+            var brand = pick(o, ['brand_name','brandName','brand']);
+            var quality = pick(o, ['machine_level_name','quality','color_grade','colorGrade','grade']);
+            var myAmt = fmtMoney(pick(o, ['bid_amount','bidAmount','actualPrice','amount','bid_price'], ''));
+            var time = pick(o, ['submitted_at','submittedAt','bid_time','bidTime','created_at','createdAt'], '');
+            var st = pick(o, ['status_display','statusDisplay','status_name','statusName','status','state'], '');
+            var deadline = fmtDeadlineHtml(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
+            var img = pick(o, ['cover_image','coverImage','image','pic'], '');
+            var thumb = img && img !== '-'
+              ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="window.open(this.src)" loading="lazy" />'
+              : '<span class="thumb-empty"></span>';
             return '<tr>'
               + '<td>' + escapeHtml(oid) + '</td>'
+              + '<td>' + thumb + '</td>'
+              + '<td>' + escapeHtml(cate) + '</td>'
               + '<td>' + escapeHtml(name) + '</td>'
-              + '<td>' + escapeHtml(amt) + '</td>'
-              + '<td>' + escapeHtml(st) + '</td>'
+              + '<td>' + escapeHtml(brand) + '</td>'
+              + '<td>' + escapeHtml(quality) + '</td>'
+              + '<td>' + escapeHtml(myAmt) + '</td>'
+              + '<td>' + escapeHtml(fmtDateTime(time)) + '</td>'
+              + '<td>' + deadline + '</td>'
+              + '<td><span class="tag ' + statusTagCls(st) + '">' + escapeHtml(st || '-') + '</span></td>'
               + '<td><div class="cell-actions">'
               + '<button class="btn btn-small" data-action="detail" data-oid="' + escapeHtml(oid) + '">查看详情</button>'
               + '<button class="btn btn-primary btn-small" data-action="bid" data-oid="' + escapeHtml(oid) + '" data-name="' + escapeHtml(name) + '">修改报价</button>'
@@ -891,7 +1784,7 @@
           }).join('');
           tbody.innerHTML = rows;
         }
-        $('myBidsTotalHint').textContent = '共 ' + state.myBidsTotal + ' 条';
+        $('myBidsTotalHint').textContent = '共 ' + state.myBidsTotal + ' 项';
         renderPager('myBidsPager', state.myBidsPage, state.myBidsPageSize, state.myBidsTotal, function (p) {
           state.myBidsPage = p;
           refreshMyBids();
@@ -964,6 +1857,12 @@
         state.currentBid = null;
       }
 
+      // 关闭详情/报价弹窗后：自动刷新当前可见的报价中 / 已报价列表
+      function refreshVisibleLists() {
+        if (!$('tabPanelGrab').classList.contains('hidden')) refreshGrabList();
+        if (!$('tabPanelMyBids').classList.contains('hidden')) refreshMyBids();
+      }
+
       function fetchDetailAndMaybeQuoteList(orderId) {
         var params = new URLSearchParams({ orderId: String(orderId) });
         return api('/api/order-detail?' + params.toString()).then(function (r) {
@@ -993,6 +1892,11 @@
             if (pname && (!state.currentBid || !state.currentBid.name)) {
               $('bidProductName').textContent = pname;
             }
+            // 有订单号则拉取市场参考价，合并进详情区块
+            var orderNo = detail.order_no || detail.orderNo || detail.order_number || detail.orderNumber;
+            if (orderNo) {
+              fetchReferencePrice(orderNo);
+            }
             // 刷新一次列表以让「报价中」标签生效
             if (!$('tabPanelAuction').classList.contains('hidden')) {
               renderAuctionTable();
@@ -1003,6 +1907,114 @@
             db.textContent = (r && r.message) || '获取详情失败';
           }
         });
+      }
+
+      function fetchReferencePrice(orderNo) {
+        var db = $('bidDetailBlock');
+        var markId = 'refPriceMark' + orderNo;
+        var oldMark = document.getElementById(markId);
+        if (oldMark) return; // 已加载过，避免重复
+        var marker = document.createElement('div');
+        marker.id = markId;
+        marker.className = 'ref-price-block';
+        marker.innerHTML = '<div class="detail-section-title">市场价格参考</div>'
+          + '<div style="color:var(--text-muted); padding:8px 0;">加载中…</div>';
+        db.appendChild(marker);
+        var cont = marker.querySelector('div:last-child');
+        var params = new URLSearchParams({ order_number: String(orderNo) });
+        return api('/api/reference-price?' + params.toString()).then(function (r) {
+          if (r && r.success && r.data && r.data.tp_data) {
+            cont.innerHTML = '';
+            cont.appendChild(renderReferencePrice(r.data));
+          } else {
+            cont.textContent = '暂无数据';
+          }
+        }).catch(function () {
+          cont.textContent = '暂无数据';
+        });
+      }
+
+      // 渲染市场参考价：成色 × 容量 二维表
+      function renderReferencePrice(data) {
+        var tp = data.tp_data || {};
+        var subs = tp.sub_model || [];
+        var raw = data.model_name || (tp.model && tp.model.name) || '';
+        var title = document.createElement('div');
+        title.style.cssText = 'font-weight:600; margin-bottom:8px;';
+        title.textContent = raw || data.third_party_name || '';
+
+        // 容量对应表：sub_model_id -> 容量名
+        var caps = subs.map(function (s) { return s.tag_name; });
+
+        // 按成色分组（去空格）：name -> { sub_model_id: price_rate }
+        var groups = {};
+        (tp.tags || []).forEach(function (t) {
+          var name = String(t.tag_name || '').replace(/\s+/g, '');
+          if (!name) return;
+          if (!groups[name]) groups[name] = {};
+          groups[name][t.sub_model_id] = t.price_rate;
+        });
+
+        var wrap = document.createElement('div');
+        wrap.appendChild(title);
+        // 无容量档或无限价档 → 暂无数据
+        if (!subs.length || !Object.keys(groups).length) {
+          var empty = document.createElement('div');
+          empty.style.cssText = 'color:var(--text-muted); padding:8px 0;';
+          empty.textContent = '暂无数据';
+          wrap.appendChild(empty);
+          return wrap;
+        }
+
+        var table = document.createElement('table');
+        table.className = 'ref-table';
+        table.style.cssText = 'width:100%; font-size:12px; border-collapse:collapse; margin-top:4px;';
+        var thead = document.createElement('tr');
+        var th = document.createElement('th');
+        th.textContent = '成色';
+        thead.appendChild(th);
+        caps.forEach(function (c) {
+          var h = document.createElement('th');
+          h.textContent = c;
+          thead.appendChild(h);
+        });
+        var tHead = document.createElement('thead');
+        tHead.appendChild(thead);
+        table.appendChild(tHead);
+
+        var tbody = document.createElement('tbody');
+        Object.keys(groups).forEach(function (g) {
+          var tr = document.createElement('tr');
+          var tdG = document.createElement('td');
+          tdG.style.cssText = 'color:var(--text-muted); white-space:nowrap;';
+          tdG.textContent = g;
+          tr.appendChild(tdG);
+          caps.forEach(function (c, i) {
+            var subId = subs[i] && subs[i].sub_model_id;
+            var rate = groups[g][subId];
+            var td = document.createElement('td');
+            if (rate !== undefined && rate !== null && rate !== 0) {
+              td.textContent = rate + ' 元';
+              td.setAttribute('data-price', String(rate));
+              td.title = '点击复制';
+              td.style.cssText = 'cursor:pointer; text-decoration:underline dotted;';
+            } else {
+              td.textContent = '—';
+              td.style.color = 'var(--text-muted)';
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        // 价格单元格点击复制
+        table.addEventListener('click', function (ev) {
+          var td = ev.target && ev.target.closest ? ev.target.closest('td[data-price]') : null;
+          if (td) copyText(td.getAttribute('data-price'), td);
+        });
+
+        wrap.appendChild(table);
+        return wrap;
       }
 
       // ---------- 格式化商品详情 ----------
@@ -1017,29 +2029,41 @@
         // 常见字段的中文标签映射
         var LABELS = {
           id: '订单ID', order_id: '订单ID', orderId: '订单ID',
-          order_no: '订单号', orderNo: '订单号',
-          cate_name: '品类', categoryName: '品类',
+          order_no: '订单号', orderNo: '订单号', order_number: '订单号', orderNumber: '订单号',
+          order_title: '商品标题', orderTitle: '商品标题', title: '标题',
+          cate_name: '品类', categoryName: '品类', category: '品类',
           model_name: '型号', modelName: '型号',
-          brand: '品牌', brand_name: '品牌',
+          brand: '品牌', brand_name: '品牌', brandName: '品牌',
           color: '颜色', color_name: '颜色',
           memory: '内存', storage: '存储', capacity: '容量', memory_size: '内存',
           network: '网络', operator: '运营商',
           quality: '成色', color_grade: '成色', colorGrade: '成色',
+          machine_level_name: '成色', machine_level_weight: '成色权重',
+          order_channel_name: '货源', orderChannelName: '货源',
           warranty: '保修', has_warranty: '保修',
           imei: 'IMEI', sn: '序列号',
           purchase_price: '进价', reference_price: '参考价',
           expect_price: '期望价', expectPrice: '期望价',
           highest_price: '最高价', current_price: '当前价', currentPrice: '当前价',
-          bid_amount: '出价', bidAmount: '出价',
+          bid_amount: '我的报价', bidAmount: '我的报价', amount: '金额',
+          my_bid: '我的报价', myBid: '我的报价',
           user_name: '用户', username: '用户', phone: '手机号',
+          bidder_name: '报价人', bidderName: '报价人',
           city: '城市', province: '省份', region: '地区', address: '地址',
-          status: '状态', status_name: '状态',
+          receiver_name: '收货人', receiverName: '收货人',
+          receiver_province: '收货省份', receiver_city: '收货城市',
+          receiver_district: '收货区县', receiver_address: '收货地址', receiver_phone: '收货电话',
           remark: '备注', desc: '描述', description: '描述',
           created_at: '创建时间', createdAt: '创建时间',
           updated_at: '更新时间', updatedAt: '更新时间',
+          submitted_at: '报价时间', submittedAt: '报价时间',
+          sign_time: '签收时间', signTime: '签收时间',
+          transaction_time: '成交时间', transactionTime: '成交时间',
           expire_at: '截止时间', expireAt: '截止时间',
           end_time: '结束时间', endTime: '结束时间',
-          start_time: '开始时间', startTime: '开始时间'
+          start_time: '开始时间', startTime: '开始时间',
+          tracking_number: '物流单号', trackingNumber: '物流单号',
+          account_name: '账户', accountName: '账户'
         };
         // 强调字段（金额、价格类高亮）
         var STRONG_KEYS = { bid_amount:1, bidAmount:1, expect_price:1, expectPrice:1,
@@ -1047,59 +2071,77 @@
         // 需要跳过的键（长文本/大对象另行渲染）
         var SKIP = { images:1, pic_list:1, picList:1, pics:1, photos:1,
           quote_list:1, quoteList:1, bid_list:1, bidList:1, records:1, bids:1 };
+        // 内部字段/封面图，不进入字段网格（封面单独展示）
+        var HIDE = { id:1, order_cover:1, orderCover:1, cover_image:1, coverImage:1,
+          is_audit_mode:1, third_party_response:1, thirdPartyResponse:1, error_message:1,
+          platform:1, order:1, bidder:1, bid_source:1, order_channel:1,
+          status:1, status_name:1, order_id:1 };
+        // 时间类字段：统一格式为 YYYY-MM-DD HH:mm:ss
+        var TIME_KEYS = { created_at:1, createdAt:1, updated_at:1, updatedAt:1,
+          submitted_at:1, submittedAt:1, sign_time:1, signTime:1,
+          transaction_time:1, transactionTime:1, bid_time:1, bidTime:1, time:1,
+          deadline_time:1, deadlineTime:1, created_time:1 };
 
         var buf = [];
-        // 主要字段网格
+        // —— 顶部：型号 + 状态 + 右侧倒计时 ——
+        var title = detail.order_title || detail.model_name || detail.modelName
+          || detail.productName || detail.title || '';
+        var statusTx = detail.status_display || detail.statusDisplay
+          || detail.status_name || detail.status || '';
+        var titleHtml = '';
+        if (title) {
+          titleHtml += '<div class="detail-title">' + escapeHtml(title) + '</div>';
+        }
+        if (statusTx) {
+          titleHtml += '<span class="tag ' + statusTagCls(statusTx) + '">' + escapeHtml(statusTx) + '</span>';
+        }
+        // 倒计时放在状态标签右侧
+        var deadlineV = pick(detail, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], '');
+        if (deadlineV) {
+          titleHtml += '<div class="detail-deadline">' + fmtDeadlineHtml(deadlineV) + '</div>';
+        }
+        if (titleHtml) {
+          buf.push('<div class="detail-head">' + titleHtml + '</div>');
+        }
+
+        // —— 基本信息：仅展示有中文标签的字段 ——
         var cells = [];
         Object.keys(detail).forEach(function (k) {
-          if (SKIP[k]) return;
+          if (SKIP[k] || HIDE[k]) return;
           var v = detail[k];
-          if (v === null || v === undefined || v === '') return;
-          var isPrimitive = (typeof v !== 'object');
-          if (!isPrimitive) return; // 嵌套对象/数组单独处理
-          var label = LABELS[k] || k;
+          if (v === null || v === undefined || v === '' || typeof v === 'object') return;
+          var label = LABELS[k];
+          if (!label) return; // 无中文名 → 直接隐藏英文键
           var cls = STRONG_KEYS[k] ? 'v strong' : 'v';
-          var text = String(v);
+          // 时间类字段统一为 YYYY-MM-DD HH:mm:ss
+          if (TIME_KEYS[k]) v = fmtDateTime(v);
           cells.push('<div class="cell"><span class="k">' + escapeHtml(label) + '</span>'
-            + '<span class="' + cls + '">' + escapeHtml(text) + '</span></div>');
+            + '<span class="' + cls + '">' + escapeHtml(String(v)) + '</span></div>');
         });
         if (cells.length) {
           buf.push('<div class="detail-section-title">基本信息</div>');
           buf.push('<div class="detail-grid">' + cells.join('') + '</div>');
         }
 
-        // 嵌套对象（如 user、address 等）拉平
+        // 嵌套对象（如 user、address 等）拉平：同样只显示有中文标签的键
         Object.keys(detail).forEach(function (k) {
-          if (SKIP[k]) return;
+          if (SKIP[k] || HIDE[k]) return;
           var v = detail[k];
           if (!v || typeof v !== 'object' || Array.isArray(v)) return;
           var subCells = [];
           Object.keys(v).forEach(function (sk) {
             var sv = v[sk];
             if (sv === null || sv === undefined || sv === '' || typeof sv === 'object') return;
-            var label = LABELS[sk] || sk;
+            var label = LABELS[sk];
+            if (!label) return;
             subCells.push('<div class="cell"><span class="k">' + escapeHtml(label) + '</span>'
-              + '<span class="v">' + escapeHtml(String(sv)) + '</span></div>');
+              + '<span class="v">' + escapeHtml(String(TIME_KEYS[sk] ? fmtDateTime(sv) : sv)) + '</span></div>');
           });
           if (subCells.length) {
             buf.push('<div class="detail-section-title">' + escapeHtml(LABELS[k] || k) + '</div>');
             buf.push('<div class="detail-grid">' + subCells.join('') + '</div>');
           }
         });
-
-        // 图片
-        var images = detail.images || detail.pic_list || detail.picList || detail.pics || detail.photos;
-        if (Array.isArray(images) && images.length) {
-          var imgBuf = images.map(function (it) {
-            var url = typeof it === 'string' ? it : (it && (it.url || it.src || it.path));
-            if (!url) return '';
-            return '<img src="' + escapeHtml(url) + '" onclick="window.open(this.src)"/>';
-          }).join('');
-          if (imgBuf) {
-            buf.push('<div class="detail-section-title">图片</div>');
-            buf.push('<div class="detail-images">' + imgBuf + '</div>');
-          }
-        }
 
         if (!buf.length) {
           db.classList.add('plain');
@@ -1119,11 +2161,16 @@
           var amt = q.bid_amount || q.bidAmount || q.actualPrice || q.amount || '-';
           var user = q.username || q.userName || q.user || q.bidder || '-';
           var time = q.created_at || q.createdAt || q.time || '';
-          return '<div style="padding:6px 0; border-bottom:1px dashed var(--border);">'
-            + '<span class="quote-apprize">' + escapeHtml(amt) + '</span> 元'
-            + ' <span style="color:var(--text-muted); margin-left:8px;">' + escapeHtml(user) + '</span>'
-            + (time ? ' <span style="color:var(--text-muted); font-size:12px; margin-left:8px;">' + escapeHtml(time) + '</span>' : '')
-            + '</div>';
+          var myBid = q.my_bid || q.myBid;
+          var line = '<span style="color:var(--text-muted);">报价金额：</span>'
+            + '<span class="quote-apprize">' + escapeHtml(amt) + '</span><span> 元</span>';
+          if (myBid !== undefined && myBid !== null && myBid !== '') {
+            line += '<span style="color:var(--text-muted); margin-left:10px;">我的报价：</span>'
+              + '<span class="quote-apprize">' + escapeHtml(String(myBid)) + '</span>';
+          }
+          line += ' <span style="color:var(--text-muted); margin-left:8px;">' + escapeHtml(user) + '</span>'
+            + (time ? ' <span style="color:var(--text-muted); font-size:12px; margin-left:8px;">' + escapeHtml(fmtDateTime(time)) + '</span>' : '');
+          return '<div style="padding:6px 0; border-bottom:1px dashed var(--border);">' + line + '</div>';
         }).join('');
         content.innerHTML = buf;
       }
@@ -1133,6 +2180,7 @@
         if (state.currentBid.mode === 'detailOnly') {
           closeBidModal();
           refreshAuctionList();
+          refreshVisibleLists();
           return;
         }
         var amt = ($('bidAmountInput').value || '').trim();
@@ -1184,10 +2232,72 @@
           el.addEventListener('click', function () { switchTab(el.getAttribute('data-tab')); });
         });
         $('btnRefreshAuction').addEventListener('click', function () { state.auctionPage = 1; refreshAuctionList(); });
-        $('pageSizeAuction').addEventListener('change', function () { state.auctionPage = 1; refreshAuctionList(); });
+        $('btnResetAuction').addEventListener('click', function () {
+          state.filters = { cate: [], brand: [], channel: [], quality: [] };
+          state.draftFilters = { cate: [], brand: [], channel: [], quality: [] };
+          document.querySelectorAll('.filter-chips .chip').forEach(function (c) { c.classList.remove('active'); });
+          state.auctionPage = 1;
+          updateFilterSummary();
+          renderAuctionTable();
+        });
+        $('pageSizeAuction').addEventListener('change', function () { state.auctionPage = 1; renderAuctionTable(); });
         $('btnRefreshGrab').addEventListener('click', refreshGrabList);
         $('btnRefreshMyBids').addEventListener('click', function () { state.myBidsPage = 1; refreshMyBids(); });
         $('pageSizeMyBids').addEventListener('change', function () { state.myBidsPage = 1; refreshMyBids(); });
+
+        // 跳至指定页
+        function bindJump(inputId, apply) {
+          var el = $(inputId);
+          if (!el) return;
+          var go = function () {
+            var p = parseInt(el.value, 10);
+            if (isNaN(p) || p < 1) return;
+            apply(p);
+            el.value = '';
+          };
+          el.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+          el.addEventListener('blur', function () { if (el.value) go(); });
+        }
+        bindJump('auctionJump', function (p) { state.auctionPage = p; renderAuctionTable(); });
+        bindJump('myBidsJump', function (p) { state.myBidsPage = p; refreshMyBids(); });
+
+        // 筛选面板：折叠 + 多选 + 确定/重置
+        $('filterHeader').addEventListener('click', function (e) {
+          e.stopPropagation();
+          toggleFilter();
+        });
+        $('filterBody').addEventListener('click', function (e) { e.stopPropagation(); });
+        document.addEventListener('click', function () {
+          if ($('filterPanel').classList.contains('open')) closeFilter();
+        });
+        document.querySelectorAll('.filter-chips').forEach(function (group) {
+          var key = group.getAttribute('data-group');
+          group.addEventListener('click', function (e) {
+            var chip = e.target.closest && e.target.closest('.chip');
+            if (!chip || !group.contains(chip)) return;
+            var v = chip.getAttribute('data-value') || '';
+            var arr = state.draftFilters[key] || (state.draftFilters[key] = []);
+            var idx = arr.indexOf(v);
+            if (idx === -1) arr.push(v); else arr.splice(idx, 1);
+            chip.classList.toggle('active', arr.indexOf(v) !== -1);
+          });
+        });
+        $('btnFilterReset').addEventListener('click', function () {
+          state.draftFilters = { cate: [], brand: [], channel: [], quality: [] };
+          syncFilterChipsFromDraft();
+        });
+        $('btnFilterApply').addEventListener('click', function () {
+          state.filters = {
+            cate: (state.draftFilters.cate || []).slice(),
+            brand: (state.draftFilters.brand || []).slice(),
+            channel: (state.draftFilters.channel || []).slice(),
+            quality: (state.draftFilters.quality || []).slice(),
+          };
+          state.auctionPage = 1;
+          updateFilterSummary();
+          renderAuctionTable();
+          closeFilter();
+        });
 
         $('auctionTbody').addEventListener('click', function (e) {
           var t = e.target;
@@ -1219,16 +2329,43 @@
           else if (action === 'bid') openBid(oid, name);
         });
 
-        $('btnBidCancel').addEventListener('click', closeBidModal);
+        $('btnBidCancel').addEventListener('click', function () { closeBidModal(); refreshVisibleLists(); });
         $('btnBidSubmit').addEventListener('click', submitBid);
         $('bidModal').addEventListener('click', function (e) {
-          if (e.target === $('bidModal')) closeBidModal();
+          if (e.target === $('bidModal')) { closeBidModal(); refreshVisibleLists(); }
         });
+      }
+
+      // ---------- 倒计时刷新 ----------
+      function tickDeadlines() {
+        var now = Date.now();
+        var nodes = document.querySelectorAll('.deadline[data-deadline]');
+        for (var i = 0; i < nodes.length; i++) {
+          var el = nodes[i];
+          var ms = parseInt(el.getAttribute('data-deadline'), 10);
+          if (!isFinite(ms)) continue;
+          var diff = ms - now;
+          var remEl = el.querySelector('.rem');
+          if (!remEl) continue;
+          if (diff <= 0) {
+            remEl.textContent = '已截止';
+            remEl.className = 'rem expired';
+          } else {
+            var sec = Math.floor(diff / 1000);
+            var h = Math.floor(sec / 3600);
+            var m = Math.floor((sec % 3600) / 60);
+            var s = sec % 60;
+            var pad = function (x) { return x < 10 ? '0' + x : String(x); };
+            remEl.textContent = h > 0 ? (h + ':' + pad(m) + ':' + pad(s)) : (pad(m) + ':' + pad(s));
+            remEl.className = 'rem' + (diff < 60000 ? ' warn' : '');
+          }
+        }
       }
 
       // ---------- 启动 ----------
       function bootstrap() {
         bindEvents();
+        setInterval(tickDeadlines, 1000);
         // 已报价列表默认最近两天：after=昨天，before=今天
         var today = new Date();
         var yesterday = new Date(today.getTime() - 24 * 3600 * 1000);

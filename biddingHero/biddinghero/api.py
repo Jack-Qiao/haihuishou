@@ -201,6 +201,26 @@ class BiddingHeroAPI:
             raise RuntimeError(data.get("msg", "出价失败"))
         return data.get("data", data) or {}
 
+    def get_reference_price(self, order_number: Any) -> Dict[str, Any]:
+        """根据订单编号查询市场价格参考。
+
+        通过订单号（order_number，形如 P202608081819354366）获取该机的市场参考价与成色价位。
+        """
+        if not self._token:
+            raise ValueError("查询参考价需要 token，请先登录")
+        url = self.base_url + "/api/base/products/reference-price-by-order/"
+        r = requests.get(url, params={"order_number": str(order_number)},
+                         headers=self._headers(with_token=True),
+                         timeout=self.timeout, verify=self.verify)
+        r.raise_for_status()
+        try:
+            data = r.json() if r.text.strip() else {}
+        except (ValueError, json.JSONDecodeError):
+            raise RuntimeError("参考价接口返回非 JSON")
+        if data.get("code") is not None and data.get("code") != 0:
+            raise RuntimeError(data.get("msg", "查询参考价失败"))
+        return data.get("data", data) or {}
+
     def cancel_grab_order(self, order_id: Any) -> Dict[str, Any]:
         """取消抢单。"""
         if not self._token:

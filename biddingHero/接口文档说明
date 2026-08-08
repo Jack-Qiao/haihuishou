@@ -256,3 +256,54 @@
 - 抢单出价接口
 - 商品详情
 - 取消抢单
+### 4.1 市场价格参考（按订单号）
+
+- 方法：`GET`
+- 路径：`/api/base/products/reference-price-by-order/`
+
+#### Query 参数
+
+| 字段 | 类型 | 当前值 | 说明 |
+|---|---|---|---|
+| order_number | string | `P202608081819354366` | 订单号 |
+
+#### 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "model_name": "苹果 iPhone 12 Pro Max",
+    "third_party_name": "苹果12ProMax 过保",
+    "tp_data": {
+      "model": { "id": 1259, "level": 3, "name": "苹果12ProMax 过保" },
+      "brand": { "id": 1237, "name": "iphone 12" },
+      "classify": { "id": 1237, "name": "iphone 12" },
+      "sub_model": [
+        { "sub_model_id": 5522, "price": 1, "tag_name": "128G" },
+        { "sub_model_id": 5523, "price": 1, "tag_name": "256G" }
+      ],
+      "tags": [
+        { "sub_model_id": 5522, "price_rate": 1950, "tag_name": "靓    机", "group_name": "成色" }
+      ]
+    }
+  }
+}
+```
+
+#### 响应说明
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| data.model_name | string | 机型名称 |
+| data.tp_data.sub_model | array | 容量档（tag_name 为容量，sub_model_id 对应） |
+| data.tp_data.tags | array | 各成色档位的价格参考（tag_name 成色名，price_rate 价格，sub_model_id 对应容量） |
+
+---
+
+## 5. UI 接口（app_ui）代理
+
+| 路径 | 方法 | 说明 |
+|---|---|---|
+| `/api/reference-price` | GET | 代理市场价格参考，参数 `order_number` |

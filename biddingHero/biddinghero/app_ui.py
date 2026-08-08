@@ -237,6 +237,22 @@ def api_cancel_grab_order():
         return jsonify({"success": False, "message": str(e)}), 200
 
 
+@app.route("/api/reference-price", methods=["GET"])
+def api_reference_price():
+    """根据订单编号查询市场价格参考。"""
+    api = _api_with_session()
+    if not api.token:
+        return jsonify({"success": False, "message": "请先登录"}), 401
+    order_number = (request.args.get("order_number") or request.args.get("orderNumber") or "").strip()
+    if not order_number:
+        return jsonify({"success": False, "message": "缺少 order_number"}), 400
+    try:
+        data = api.get_reference_price(order_number)
+        return jsonify({"success": True, "data": data})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 200
+
+
 @app.route("/api/shutdown", methods=["POST"])
 def api_shutdown():
     def _exit():
