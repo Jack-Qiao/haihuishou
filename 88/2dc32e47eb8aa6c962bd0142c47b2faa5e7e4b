@@ -1,0 +1,19 @@
+biddingHero/biddinghero.spec
+  s_610dbbffd9edbc::t_e6a1329d93a8a1 2-7,48,54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.39-trip",
+  "base_commit_sha": "882dc32e47eb8aa6c962bd0142c47b2faa5e7e4b",
+  "prompts": {},
+  "sessions": {
+    "s_610dbbffd9edbc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b3805ee-7b5b-4ac0-9ebb-8315722caf40",
+        "model": "DeepSeek-V4-Flash"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
