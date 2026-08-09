@@ -1,6 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
-# 在 biddingHero 项目目录执行：pyinstaller biddinghero.spec
-# 打包完成后，可执行文件在 dist/biddinghero（macOS/Linux）或 dist/biddinghero.exe（Windows）
+# 在 biddingHero 项目目录执行：
+#   .build-venv/bin/pyinstaller biddinghero.spec
+# 打包产物：dist/biddinghero —— universal2（同时支持 Apple Silicon 与 Intel Mac）
+#
+# 注意：必须用 universal2 版 Python（python.org 安装的 3.x 即为 universal2）创建构建 venv，
+# 否则 target_arch='universal2' 无法交叉收集两侧架构。
 
 import os
 
@@ -41,13 +45,13 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch=None,
+    target_arch='universal2',
     codesign_identity=None,
     entitlements_file=None,
 )
