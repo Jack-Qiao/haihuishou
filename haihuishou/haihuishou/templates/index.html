@@ -1963,7 +1963,7 @@
         <div class="schedule-task-modal-scroll">
           <div class="schedule-conditions-header-row">
             <label>抢单条件</label>
-            <span class="schedule-conditions-desc" id="scheduleConditionsDesc">可添加多条，每条机型与保底价必填，保底价 1～5000 元；机型+存储不可重复。</span>
+            <span class="schedule-conditions-desc" id="scheduleConditionsDesc">可添加多条，机型必填，价格可空（空价对应成色不抢单）；机型+存储不可重复。</span>
             <button type="button" class="btn btn-primary btn-small schedule-add-condition-btn" id="btnScheduleAddCondition">+ 添加条件</button>
           </div>
           <div class="schedule-field-wrap schedule-conditions-wrap">
@@ -2654,12 +2654,11 @@
       var desc = document.getElementById('scheduleConditionsDesc');
       if (input) input.value = String(max);
       if (hint) hint.textContent = '报价上限 ' + max + ' 元';
-      if (desc) desc.textContent = '可添加多条，每条机型与保底价必填，保底价 1～' + max + ' 元；机型+存储不可重复。';
+      if (desc) desc.textContent = '可添加多条，机型必填，价格可空（空价对应成色不抢单）；机型+存储不可重复。';
       var tbody = document.getElementById('scheduleConditionsBody');
       if (tbody) {
         tbody.querySelectorAll('.schedule-cond-price').forEach(function (inp) {
-          var k = inp.getAttribute('data-key');
-          inp.placeholder = k === 'floorPrice' ? ('必填 1-' + max) : ('1-' + max);
+          inp.placeholder = '选填';
         });
       }
     }
@@ -2901,8 +2900,7 @@
       SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
         var cls = SCHEDULE_COND_INPUT_CLASS[k];
         var v = String(cond[k] != null ? cond[k] : '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        var max = getScheduleMaxAmount();
-        var ph = k === 'floorPrice' ? ('必填 1-' + max) : ('1-' + max);
+        var ph = '选填';
         cells += '<td><input type="text" class="' + cls + ' schedule-cond-price" data-key="' + k + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off" value="' + v + '"></td>';
       });
       cells += '<td class="schedule-cond-td-action"><button type="button" class="btn btn-ghost btn-small schedule-cond-remove">删除</button></td>';
@@ -2950,7 +2948,6 @@
     }
     function validateScheduleConditions() {
       var conditions = getScheduleConditionsFromForm();
-      var invalidRowIndices = [];
       var requiredInvalid = [];
       var duplicateInvalid = [];
       var modelStorageSeen = {};
@@ -2959,19 +2956,7 @@
         var hasAny = c.modelName || (c.storage && c.storage.trim()) || SCHEDULE_COND_PRICE_KEYS.some(function (k) { return (c[k] || '').trim(); });
         if (!hasAny) continue;
         var modelOk = (c.modelName || '').trim().length > 0;
-        var floorVal = (c.floorPrice || '').trim();
-        var floorNum = parseFloat(floorVal);
-        var max = getScheduleMaxAmount();
-        var floorOk = floorVal && !isNaN(floorNum) && floorNum >= 1 && floorNum <= max;
-        var pricesOk = true;
-        SCHEDULE_COND_PRICE_KEYS.forEach(function (k) {
-          if (k === 'floorPrice') return;
-          var pv = (c[k] || '').trim();
-          if (!pv) return;
-          var pn = parseFloat(pv);
-          if (isNaN(pn) || pn < 1 || pn > max) pricesOk = false;
-        });
-        if (!modelOk || !floorOk || !pricesOk) requiredInvalid.push(i);
+        if (!modelOk) requiredInvalid.push(i);
         var storageNorm = (c.storage || '').trim().toLowerCase();
         var modelNorm = (c.modelName || '').trim().toLowerCase();
         var key = modelNorm + '\x01' + storageNorm;
@@ -2983,7 +2968,7 @@
         }
       }
       if (requiredInvalid.length > 0) {
-        return { valid: false, message: '每条条件须填机型、floorPrice，且成色/保底价在 1～' + getScheduleMaxAmount() + '元', invalidRowIndices: requiredInvalid };
+        return { valid: false, message: '每条条件须填写机型（价格可空，空价不抢单）', invalidRowIndices: requiredInvalid };
       }
       var dupUnique = duplicateInvalid.filter(function (v, idx, a) { return a.indexOf(v) === idx; });
       if (dupUnique.length > 0) {
@@ -2992,13 +2977,10 @@
         return { valid: false, message: msg, invalidRowIndices: dupUnique };
       }
       var hasValid = conditions.some(function (c) {
-        var modelOk = (c.modelName || '').trim().length > 0;
-        var floorVal = (c.floorPrice || '').trim();
-        var n = parseFloat(floorVal);
-        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= getScheduleMaxAmount();
+        return (c.modelName || '').trim().length > 0;
       });
       if (!hasValid) {
-        return { valid: false, message: '请至少添加一条完整条件', invalidRowIndices: [] };
+        return { valid: false, message: '请至少添加一条条件（机型必填）', invalidRowIndices: [] };
       }
       return { valid: true, message: '', invalidRowIndices: [] };
     }
@@ -3117,7 +3099,6 @@
         }
         var fd = new FormData();
         fd.append('file', file);
-        fd.append('maxAmount', String(getScheduleMaxAmount()));
         var msg = document.getElementById('scheduleMsg');
         var importModal = document.getElementById('importLoadingModal');
         var importLoadingText = document.getElementById('importLoadingText');
@@ -3140,7 +3121,7 @@
         }).then(function (r) { return r.text().then(function (t) { try { return JSON.parse(t); } catch (_) { return { success: false, message: '解析响应失败' }; } }); }).then(function (res) {
           if (!res.success) { stopLoading(); showToast(res.message || '导入失败', 'error'); return; }
           var list = res.data && Array.isArray(res.data) ? res.data : [];
-          if (!list.length) { stopLoading(); showToast('文件中无有效数据（需含品牌、机型、保底价）', 'error'); return; }
+          if (!list.length) { stopLoading(); showToast('文件中无有效数据（需含品牌、机型）', 'error'); return; }
           loadScheduleOptions().then(function () {
             var radios = document.querySelectorAll('input[name="scheduleTaskBrand"]');
             var brandNameToKey = {};
@@ -3224,10 +3205,7 @@
       if (!validation.valid) return null;
       var conditions = getScheduleConditionsFromForm();
       var validConditions = conditions.filter(function (c) {
-        var modelOk = (c.modelName || '').trim().length > 0;
-        var floorVal = (c.floorPrice || '').trim();
-        var n = parseFloat(floorVal);
-        return modelOk && floorVal && !isNaN(n) && n >= 1 && n <= getScheduleMaxAmount();
+        return (c.modelName || '').trim().length > 0;
       });
       if (!validConditions.length) return null;
       var brandRadio = document.querySelector('input[name="scheduleTaskBrand"]:checked');
@@ -3350,11 +3328,9 @@
       if (!conds.length && (task.quoteAmount || task.modelName)) conds = [{ floorPrice: task.quoteAmount, modelName: task.modelName, storage: task.storage }];
       if (!conds.length) { showToast('请先添加至少一条抢单条件', 'error'); return; }
       var invalid = conds.find(function (c) {
-        var price = String(c.floorPrice != null ? c.floorPrice : '').trim();
-        var q = parseFloat(price);
-        return !(c.modelName || '').trim() || !price || isNaN(q) || q < 1 || q > getScheduleMaxAmount();
+        return !(c.modelName || '').trim();
       });
-      if (invalid) { showToast('每条条件须包含机型且底价（floorPrice）1～' + getScheduleMaxAmount() + ' 元', 'error'); return; }
+      if (invalid) { showToast('每条条件须包含机型（价格可空，空价不抢单）', 'error'); return; }
       if (scheduleTaskTimers[taskId]) { showToast('该任务已在自动执行中', 'error'); return; }
       if (scheduleTaskStarting[taskId]) return;
       var sec = Math.max(1, parseInt(task.frequency, 10) || 1);

@@ -28,29 +28,6 @@ COLOR_GRADE_ID_TO_NAME = {
 COLOR_GRADE_NAME_TO_ID = {v: k for k, v in COLOR_GRADE_ID_TO_NAME.items()}
 # 成色 ID 列表，报价时用 order.colorGrade 与条件中的 ID key 对比
 COLOR_GRADE_IDS = (1001, 1002, 1003, 1004, 1005)
-DEFAULT_SCHEDULE_MAX_AMOUNT = 5000
-
-
-def _resolve_max_amount(raw, default=DEFAULT_SCHEDULE_MAX_AMOUNT):
-    """解析最大金额上限，默认 5000，至少为 1。"""
-    if raw is None or raw == "":
-        return float(default)
-    try:
-        n = float(str(raw).strip())
-        if n < 1:
-            return float(default)
-        return n
-    except (TypeError, ValueError):
-        return float(default)
-
-
-def _fmt_amount(n):
-    """金额展示：整数不带小数。"""
-    try:
-        f = float(n)
-        return str(int(f)) if f == int(f) else str(f)
-    except (TypeError, ValueError):
-        return str(n)
 
 
 def _normalize_storage(s):
@@ -129,35 +106,30 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
     :return: [(order, quote_amount or None), ...]，quote_amount 为 None 时仅抢单不报价
     """
     def _quote_from_cond(order, cond):
-        """按订单成色 ID（colorGrade）从条件中取报价，避免中文 colorGradeName 匹配问题；无则用底价。"""
+        """
+        按订单成色取报价：有成色时只用对应成色价（空则返回空，不抢单）；
+        无成色时用保底价（空则返回空，不抢单）。成色价为空时不回退到保底价。
+        """
         grade_id = order.get("colorGrade")
-        if grade_id is not None:
+        if grade_id is not None and not (isinstance(grade_id, str) and not str(grade_id).strip()):
             try:
-                gid = int(grade_id)
-                key = str(gid)
-                if key in cond:
-                    val = cond.get(key)
-                    if val is not None and str(val).strip():
-                        return str(val).strip()
+                key = str(int(grade_id))
+                val = cond.get(key)
+                if val is not None and str(val).strip():
+                    return str(val).strip()
+                return ""
             except (TypeError, ValueError):
                 pass
-        fallback_key = "floorPrice"
-        val = cond.get(fallback_key)
+        val = cond.get("floorPrice")
         if val is not None and str(val).strip():
             return str(val).strip()
         return ""
 
-    def _order_has_no_color_grade(order):
-        """订单成色为空或不存在时返回 True，此时只抢单不报价。"""
-        g = order.get("colorGrade")
-        if g is None:
-            return True
-        if isinstance(g, str) and not g.strip():
-            return True
-        return False
-
     def _find_condition_and_quote(order):
-        """新格式：按机型+存储匹配一条条件（优先完全一致，否则仅机型），再按成色取报价。无匹配返回 None；有成色则返回 (报价金额,)；成色为空/不存在则返回 (None,) 表示只抢单不报价。"""
+        """
+        新格式：按机型+存储匹配条件，再取报价。
+        无匹配或对应价格为空时返回 None（不抢单）；有价格则返回 (报价金额,)。
+        """
         order_model = (order.get("modelName") or order.get("model") or order.get("goodsName") or "").strip().lower()
         order_storage = _normalize_storage(
             order.get("storageCapacity") or order.get("storage") or order.get("memory")
@@ -180,10 +152,10 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
         chosen = exact_match or model_only_match
         if not chosen:
             return None
-        if _order_has_no_color_grade(order):
-            return (None,)  # 只抢单不报价
         quote = _quote_from_cond(order, chosen)
-        return (quote,) if quote else (None,)
+        if not quote:
+            return None  # 对应价格为空，不抢单
+        return (quote,)
 
     def _find_matching_condition(order_model, order_storage):
         """旧格式：按机型+存储匹配一条条件（条件无存储时只比机型）；无匹配返回 None。"""
@@ -206,33 +178,26 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
             continue
         if use_conditions_list:
             res = _find_condition_and_quote(o)
-            if res is None:
-                continue
-            # res 为 (None,) 表示只抢单不报价，(quote_str,) 表示抢单并报价
-            if res[0] is not None and str(res[0]).strip():
-                matched.append((o, str(res[0]).strip()))
-            else:
-                matched.append((o, None))  # 成色为空，只抢单不报价
+            if res is None or not str(res[0] or "").strip():
+                continue  # 未匹配或价格为空，不抢单
+            matched.append((o, str(res[0]).strip()))
         else:
             order_model = (o.get("modelName") or o.get("model") or o.get("goodsName") or "").strip()
             order_storage = o.get("storageCapacity") or o.get("storage") or o.get("memory") or ""
             c = _find_matching_condition(order_model, order_storage)
             if not c:
                 continue
-            if _order_has_no_color_grade(o):
-                matched.append((o, None))  # 成色为空，只抢单不报价
-            else:
-                q = c.get("quoteAmount")
-                if q and str(q).strip():
-                    matched.append((o, str(q).strip()))
+            q = c.get("quoteAmount")
+            if q and str(q).strip():
+                matched.append((o, str(q).strip()))
+            # 旧格式报价为空则不抢单
     return matched
 
 
 def _execute_task_grab_and_quote(matched, api, user_id, remark):
     """
-    抢单任务 - 对匹配到的订单执行抢单并提交报价。
-    quote_amount 为 None 或空时只抢单不报价。
-    :param matched: [(order, quote_amount or None), ...]
+    抢单任务 - 对匹配到且有报价金额的订单执行抢单并提交报价。
+    :param matched: [(order, quote_amount), ...]，quote_amount 须非空
     :param api: HaihuishouAPI 实例（已 set_token）
     :param user_id: 用户 ID
     :param remark: 报价备注
@@ -244,6 +209,8 @@ def _execute_task_grab_and_quote(matched, api, user_id, remark):
     for o, quote_for_submit in matched:
         record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
         order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
+        if quote_for_submit is None or not str(quote_for_submit).strip():
+            continue
         try:
             raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
             resp_data = raw.get("data") or {}
@@ -255,16 +222,14 @@ def _execute_task_grab_and_quote(matched, api, user_id, remark):
                 errors.append("recordId=%s 抢单异常 subCode=%s" % (record_id, sub_code))
                 continue
             grabbed += 1
-            # 成色为空或不存在时只抢单不报价（quote_for_submit 为 None）
-            if quote_for_submit is not None and str(quote_for_submit).strip():
-                api.submit_quotation(
-                    record_id=int(record_id),
-                    order_id=int(order_id),
-                    actual_price=quote_for_submit,
-                    remark=remark,
-                    user_id=user_id,
-                )
-                quoted += 1
+            api.submit_quotation(
+                record_id=int(record_id),
+                order_id=int(order_id),
+                actual_price=str(quote_for_submit).strip(),
+                remark=remark,
+                user_id=user_id,
+            )
+            quoted += 1
         except Exception as e:
             errors.append("recordId=%s: %s" % (record_id, str(e)))
     return grabbed, quoted, errors
@@ -411,7 +376,6 @@ def api_import_price_list():
             "success": False,
             "message": "服务端未安装 openpyxl，无法解析 Excel（打包时请用最新 haihuishou.spec 重新打包以打入 openpyxl）。详情: %s" % str(e),
         }), 500
-    max_amount = _resolve_max_amount(request.form.get("maxAmount"))
     try:
         # 保存到临时文件再解析，避免上传流不可 seek 导致 read_only 模式失败
         import tempfile
@@ -466,11 +430,6 @@ def api_import_price_list():
                 "success": False,
                 "message": "Excel 需包含表头：品牌、机型（内存、靓机、小花、大花、外爆、内爆、保底价 可选）"
             }), 400
-        if "保底价" not in col_prices:
-            return jsonify({
-                "success": False,
-                "message": "Excel 需包含「保底价」列"
-            }), 400
         by_brand = {}
         for row in rows[1:]:
             if not row:
@@ -484,7 +443,7 @@ def api_import_price_list():
                 storage = str(row[col_storage]).strip()
             if not brand or not model:
                 continue
-            # Excel 表头为中文，输出为成色 ID key（1001～1005）+ floorPrice
+            # Excel 表头为中文，输出为成色 ID key（1001～1005）+ floorPrice；价格可为空
             cond = {"modelName": model, "storage": storage if storage else None}
             name_to_id = {"靓机": 1001, "小花": 1002, "大花": 1003, "外爆": 1004, "内爆": 1005}
             for name in price_keys:
@@ -498,28 +457,6 @@ def api_import_price_list():
                     gid = name_to_id.get(name)
                     if gid is not None:
                         cond[str(gid)] = val
-            floor_val = (cond.get("floorPrice") or "").strip()
-            if not floor_val:
-                continue
-            try:
-                q = float(floor_val)
-                if q < 1 or q > max_amount:
-                    continue
-            except ValueError:
-                continue
-            valid = True
-            for gid in (1001, 1002, 1003, 1004, 1005):
-                v = (cond.get(str(gid)) or "").strip()
-                if v:
-                    try:
-                        if float(v) < 1 or float(v) > max_amount:
-                            valid = False
-                            break
-                    except ValueError:
-                        valid = False
-                        break
-            if not valid:
-                continue
             if brand not in by_brand:
                 by_brand[brand] = []
             by_brand[brand].append(cond)
@@ -750,7 +687,6 @@ def api_execute_task():
         brand_ids = [str(x).strip() for x in brand_ids.split(",") if str(x).strip()]
     min_price = (data.get("minPrice") or "").strip() or None
     max_price = (data.get("maxPrice") or "").strip() or None
-    max_amount = _resolve_max_amount(data.get("maxAmount"))
     conditions = data.get("conditions") or []
     if not conditions and (data.get("quoteAmount") or data.get("modelName")):
         conditions = [{
@@ -768,15 +704,9 @@ def api_execute_task():
                 continue
             m = (c.get("modelName") or "").strip()
             s = (c.get("storage") or "").strip() or ""
-            floor_val = str(c.get("floorPrice") or "").strip()
-            if not m or not floor_val:
+            if not m:
                 continue
-            try:
-                fn = float(floor_val)
-                if fn < 1 or fn > max_amount:
-                    return task_err("floorPrice 须在 1～%s 元范围内" % _fmt_amount(max_amount))
-            except ValueError:
-                return task_err("floorPrice 须为有效数字，且范围 1～%s" % _fmt_amount(max_amount))
+            floor_val = str(c.get("floorPrice") or "").strip()
             key = (m or "").lower() + "\x01" + (s or "").lower()
             if key in seen_key:
                 first_no = seen_key[key]
@@ -786,18 +716,10 @@ def api_execute_task():
             row = {"modelName": m, "storage": s or None, "floorPrice": floor_val}
             for gid in COLOR_GRADE_IDS:
                 key_id = str(gid)
-                v = str(c.get(key_id) or "").strip()
-                if v:
-                    try:
-                        vn = float(v)
-                        if vn < 1 or vn > max_amount:
-                            return task_err("成色报价 %s 须在 1～%s 元范围内" % (key_id, _fmt_amount(max_amount)))
-                    except ValueError:
-                        return task_err("成色报价 %s 须为有效数字" % key_id)
-                row[key_id] = v
+                row[key_id] = str(c.get(key_id) or "").strip()
             normalized.append(row)
         if not normalized:
-            return task_err("请至少添加一条完整条件（机型+floorPrice）")
+            return task_err("请至少添加一条条件（机型必填，价格可空）")
         conditions = normalized
     elif conditions:
         normalized = []
@@ -807,17 +729,12 @@ def api_execute_task():
             q = (c.get("quoteAmount") or "").strip()
             m = (c.get("modelName") or "").strip()
             s = (c.get("storage") or "").strip() or None
-            if not q or not m:
+            if not m:
                 continue
-            try:
-                qn = float(q)
-                if qn < 1 or qn > max_amount:
-                    return task_err("每条条件的报价金额须在 1～%s 元范围内" % _fmt_amount(max_amount))
-            except ValueError:
-                return task_err("报价金额须为有效数字，且范围 1～%s" % _fmt_amount(max_amount))
+            # 报价可空：空则该条件不参与抢单
             normalized.append({"quoteAmount": q, "modelName": m, "storage": s})
         if not normalized:
-            return task_err("请添加至少一条完整条件（报价+机型）")
+            return task_err("请添加至少一条条件（机型必填）")
         conditions = normalized
     else:
         return task_err("请添加至少一条抢单条件")
