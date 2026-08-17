@@ -1,0 +1,79 @@
+biddingHero/biddinghero/grab_task.py
+  s_cdad8c0fedc545::t_8b1ab5877d4fed 113-121,146-148,154,164
+  s_cdad8c0fedc545::t_24824fec4f8ea2 122-143,158-160
+  s_cdad8c0fedc545::t_495d9e08170ae5 1-112,145,149-153,155-157,161-163,165-315
+  s_cdad8c0fedc545::t_6ee46cc5500589 144
+biddingHero/biddinghero/templates/index.html
+  s_cdad8c0fedc545::t_617abcf02e3905 1585
+  s_cdad8c0fedc545::t_cf5db16eb1ca67 1741-1777
+  s_cdad8c0fedc545::t_4457a8405a3d9e 2715-2718,2721
+  s_cdad8c0fedc545::t_a8231957518840 1816-1916
+  s_cdad8c0fedc545::t_c48bd7904d86c6 2876
+  s_cdad8c0fedc545::t_e63f6df5333cb6 3105-3111,3113-3115,3160,3162,3167,3234-3237
+  s_cdad8c0fedc545::t_fac2410a962eed 2833-2835
+  s_cdad8c0fedc545::t_7209df7038767f 3144
+  s_cdad8c0fedc545::t_9516f52d0bc0ab 771,773-783
+  s_cdad8c0fedc545::t_5483966bd4c6bc 2374-2377
+  s_cdad8c0fedc545::t_2624b50ea1086e 4045-4053,4055-4058
+  s_cdad8c0fedc545::t_9c9eef307a88f6 2832,2836,2843-2847,2851
+  s_cdad8c0fedc545::t_5f76b85301f373 2837,2849,2854
+  s_cdad8c0fedc545::t_698f5259099b70 3145-3159,3161,3163-3166,3168-3175,3178,3180-3190,3217
+  s_cdad8c0fedc545::t_4130cbbc9019a2 2574
+  s_cdad8c0fedc545::t_78780ad993e0d0 2094
+  s_cdad8c0fedc545::t_f90888a1314e21 784-805
+  s_cdad8c0fedc545::t_295a133d618cb8 3015-3047,3049-3052
+  s_cdad8c0fedc545::t_635fdc253db177 2711-2714,2719-2720,2722-2726
+  s_cdad8c0fedc545::t_480ac1f0b91e4c 3117,3120-3121
+  s_cdad8c0fedc545::t_85f24c20f000c8 2857,2861
+  s_cdad8c0fedc545::t_c26cb84d356be5 2512
+  s_cdad8c0fedc545::t_0e9cdd62e161a5 2766-2767,2795,2801-2803,2855-2856,2858-2860,2862-2863,2875,2877,2882-2886,2890-2892
+  s_cdad8c0fedc545::t_84104a3152dc34 2069,2071,2074-2091
+  s_cdad8c0fedc545::t_aef1d468165f9b 3112,3116,3122-3143
+  s_cdad8c0fedc545::t_6f148d4dcf1c6e 2157
+  s_cdad8c0fedc545::t_3e4292eb69062d 1551
+  s_cdad8c0fedc545::t_3d383a23a21a44 2291,2468,2577,3048
+  s_cdad8c0fedc545::t_48f2139ba08ad2 705-718
+  s_cdad8c0fedc545::t_31de6793c8213c 2684-2685
+  s_cdad8c0fedc545::t_6cd00d572ed89f 2788-2794,2796-2800
+  s_cdad8c0fedc545::t_e2b25706e2d945 3218
+  s_cdad8c0fedc545::t_358783e9c0647d 2070,2072-2073,2092-2093,2095
+  s_cdad8c0fedc545::t_f87d3b38954697 3118-3119,3176-3177,3179,3191-3216,3219-3233
+  s_cdad8c0fedc545::t_d88c8f6fc0ced6 971-1512,1514-1516
+  s_cdad8c0fedc545::t_f61754fb46d09e 695
+  s_cdad8c0fedc545::t_fe862ce5793592 3438-3444,3457-4044,4054,4059-4343
+  s_cdad8c0fedc545::t_762940face712e 726-746
+  s_cdad8c0fedc545::t_ac59aed5ebd80e 2555,2561-2569,2575
+  s_cdad8c0fedc545::t_59968bc39f986d 2740,2756
+  s_cdad8c0fedc545::t_742a92525e46e7 2787
+  s_cdad8c0fedc545::t_f391b53564ea88 2831,2838-2842,2848,2850,2852-2853
+  s_cdad8c0fedc545::t_93409fa5482657 761-770,772
+  s_cdad8c0fedc545::t_45f679db45bcb5 2516-2530
+  s_cdad8c0fedc545::t_19a5d755399fd1 2224-2227
+biddingHero/biddinghero/app_ui.py
+  s_cdad8c0fedc545::t_84211b2bc144f0 12,15-22
+  s_cdad8c0fedc545::t_cdf5fbf18ee5df 191,206
+  s_cdad8c0fedc545::t_65d27322d774c8 158
+  s_cdad8c0fedc545::t_ebbe7cd00c66f4 266-475
+biddingHero/biddinghero/api.py
+  s_cdad8c0fedc545::t_cf3438425c2fa5 224-246
+biddingHero/需求文档.md
+  s_cdad8c0fedc545::t_98a185b4a49772 138-139,142-144
+  s_cdad8c0fedc545::t_17e1ec5e126599 122
+  s_cdad8c0fedc545::t_65335c8f3aa8c6 96-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.40-trip",
+  "base_commit_sha": "38d8412ee6a7a33fad2c32880c7bd313715e42e7",
+  "prompts": {},
+  "sessions": {
+    "s_cdad8c0fedc545": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ebbc0c-ab2d-4ed4-a063-0a4aa8344432",
+        "model": "glm-5.1"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
