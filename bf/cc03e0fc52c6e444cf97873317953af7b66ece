@@ -1,0 +1,19 @@
+biddingHero/biddinghero/templates/index.html
+  s_cdad8c0fedc545::t_cb5f9e50cab3b0 1535
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.40-trip",
+  "base_commit_sha": "bfcc03e0fc52c6e444cf97873317953af7b66ece",
+  "prompts": {},
+  "sessions": {
+    "s_cdad8c0fedc545": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ebbc0c-ab2d-4ed4-a063-0a4aa8344432",
+        "model": "glm-5.1"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
