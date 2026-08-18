@@ -439,6 +439,13 @@
       width: 100%;
       border-collapse: collapse;
     }
+    td {
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    td:hover {
+      background: rgba(0,0,0,.03);
+    }
     thead th {
       background: var(--surface-2);
       color: var(--text-muted);
@@ -660,7 +667,9 @@
       padding: 7px 0;
       border-bottom: 1px dashed var(--border);
       min-width: 0;
+      cursor: pointer;
     }
+    .detail-grid .cell:hover { background: var(--surface); }
     .detail-grid .cell .k {
       color: var(--text-muted);
       flex: 0 0 88px;
@@ -894,6 +903,37 @@
     .toast.success { border-left-color: var(--success); }
     .toast.error { border-left-color: var(--accent); }
     .toast.info { border-left-color: var(--gold); }
+
+    /* 复制浮层提示 */
+    .copy-tip {
+      position: fixed;
+      z-index: 300;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      background: var(--surface);
+      color: var(--success);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      pointer-events: none;
+      animation: copyTipFade 1s ease forwards;
+      white-space: nowrap;
+    }
+    .copy-tip::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--surface);
+    }
+    @keyframes copyTipFade {
+      0% { opacity: 1; transform: translateY(0); }
+      70% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
 
     /* ---------- 全屏 Loading ---------- */
     .loading-overlay {
@@ -2094,14 +2134,24 @@
       }
       window.openImgLightbox = openImgLightbox;
 
-      // 复制文本到剪贴板，并给元素短暂反馈
+      // 复制文本到剪贴板，浮层提示
       function copyText(txt, el) {
-        var done = function () {
-          if (el) {
-            var orig = el.textContent;
-            el.textContent = '已复制';
-            setTimeout(function () { el.textContent = orig; }, 900);
+        var showTip = function () {
+          var tip = document.createElement('div');
+          tip.className = 'copy-tip';
+          tip.textContent = '✓ 已复制';
+          document.body.appendChild(tip);
+          // 定位在点击元素上方
+          if (el && el.getBoundingClientRect) {
+            var r = el.getBoundingClientRect();
+            tip.style.left = (r.left + r.width / 2 - tip.offsetWidth / 2) + 'px';
+            tip.style.top = (r.top - tip.offsetHeight - 6) + 'px';
+          } else {
+            tip.style.left = '50%';
+            tip.style.top = '80px';
+            tip.style.transform = 'translateX(-50%)';
           }
+          setTimeout(function () { tip.remove(); }, 1050);
         };
         var fallback = function () {
           try {
@@ -2115,11 +2165,29 @@
           } catch (e) {}
         };
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(txt).then(done, function () { fallback(); done(); });
+          navigator.clipboard.writeText(txt).then(showTip, function () { fallback(); showTip(); });
         } else {
           fallback();
           done();
         }
+      }
+
+      // 点击复制：列表表格 td / 详情弹窗 .cell span / .detail-grid .cell
+      function bindCopyOnClick(root) {
+        root.addEventListener('click', function (e) {
+          var td = e.target.closest('td');
+          if (td && !td.querySelector('.cell-actions') && !td.querySelector('.thumb') && !td.querySelector('img.thumb')) {
+            var txt = (td.textContent || '').trim();
+            if (txt && txt !== '-' && txt !== '暂无数据') copyText(txt, td);
+            return;
+          }
+          var cell = e.target.closest('.cell');
+          if (cell) {
+            var span = cell.querySelector('span:last-child') || cell;
+            var txt2 = (span.textContent || '').trim();
+            if (txt2 && txt2 !== '-') copyText(txt2, span);
+          }
+        });
       }
 
       // 截止时间：绝对时间 + 剩余倒计时
@@ -3426,6 +3494,10 @@
       // ---------- 启动 ----------
       function bootstrap() {
         bindEvents();
+        // 点击复制：绑定所有表格和详情区域
+        document.querySelectorAll('table').forEach(function (t) { bindCopyOnClick(t); });
+        var bidDetail = $('bidDetailBlock');
+        if (bidDetail) bindCopyOnClick(bidDetail);
         setInterval(tickDeadlines, 1000);
         // 已报价列表默认最近两天：after=昨天，before=今天
         var today = new Date();
@@ -3560,7 +3632,7 @@
             var collapsedLabel = '展开品牌（共 ' + brands.length + ' 个）';
             if (toggleBtn) toggleBtn.setAttribute('data-collapsed-label', collapsedLabel);
             if (txt && !$('scheduleBrandsCollapsible').classList.contains('expanded')) txt.textContent = collapsedLabel;
-            // “全部”联动
+            // "全部"联动
             var allBox = bList.querySelector('input[type="checkbox"][data-name=""]');
             if (allBox) {
               allBox.addEventListener('change', function () {

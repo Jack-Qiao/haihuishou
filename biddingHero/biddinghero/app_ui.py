@@ -281,7 +281,7 @@ def api_order_report():
 
 @app.route("/api/execute-task", methods=["POST"])
 def api_execute_task():
-    """执行自动抢单任务。body: taskName, categoryNames[], brandNames[], channelNames[], minPrice, maxPrice, maxAmount, conditions[]。"""
+    """执行自动抢单任务。body: taskName, categoryNames[], brandNames[], channelNames[], maxAmount, conditions[]。"""
     api = _api_with_session()
     if not api.token:
         return jsonify({"success": False, "message": "请先登录"}), 401
@@ -296,14 +296,20 @@ def api_execute_task():
     channel_names = data.get("channelNames") or []
     for name, val in (("categoryNames", category_names), ("brandNames", brand_names), ("channelNames", channel_names)):
         if isinstance(val, str):
-            if name == "categoryNames":
-                category_names = [x.strip() for x in val.split(",") if x.strip()]
-            elif name == "brandNames":
-                brand_names = [x.strip() for x in val.split(",") if x.strip()]
-            else:
-                channel_names = [x.strip() for x in val.split(",") if x.strip()]
-    min_price = (str(data.get("minPrice") or "").strip()) or None
-    max_price = (str(data.get("maxPrice") or "").strip()) or None
+            vals = [x.strip() for x in val.split(",") if x.strip()]
+            if name == "categoryNames": category_names = vals
+            elif name == "brandNames": brand_names = vals
+            else: channel_names = vals
+    min_price_raw = str(data.get("minPrice") or "").strip()
+    max_price_raw = str(data.get("maxPrice") or "").strip()
+    try:
+        min_price = float(min_price_raw) if min_price_raw else None
+    except ValueError:
+        return task_err("最低价格式错误")
+    try:
+        max_price = float(max_price_raw) if max_price_raw else None
+    except ValueError:
+        return task_err("最高价格式错误")
     max_amount_raw = str(data.get("maxAmount") or "").strip()
     try:
         max_amount = float(max_amount_raw) if max_amount_raw else None
@@ -313,12 +319,21 @@ def api_execute_task():
     conditions, err = normalize_conditions(conditions_raw)
     if err:
         return task_err(err)
+    # 从条件表自动提取机型和成色
+    model_names = list({str(c.get("modelName") or "").strip().lower() for c in conditions if str(c.get("modelName") or "").strip()})
+    grade_names = []
+    for gn in GRADE_NAMES:
+        gk = "q_" + gn
+        if any(str(c.get(gk) or "").strip() for c in conditions):
+            grade_names.append(gn)
     cond = GrabCondition(
         category_names=category_names,
         brand_names=brand_names,
         channel_names=channel_names,
         min_price=min_price,
         max_price=max_price,
+        grade_names=grade_names,
+        model_names=model_names,
         max_amount=max_amount,
         conditions=conditions,
     )

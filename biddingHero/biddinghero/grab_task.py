@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
-"""竞价侠自动抢单：查询列表 → 前端过滤 → 拉验机报告匹配条件 → 详情=抢单 + 出价。
+"""竞价侠自动抢单：查询列表 → 条件筛选 → 查详情+验机报告匹配 → 报价。
 
-参考嗨回收 grab_tool.py + app_ui._execute_task_* 三段式实现。"""
+流程：
+1. 查询 auction_list，拿到全量数据
+2. 按 brand_name(别名过滤)、cate_name、machine_level_name、model_name、order_channel_name 筛选
+3. 对命中订单查详情(=抢单) + 拉验机报告取内存，匹配条件行按成色报价
+4. 不管报价是否成功，继续下一个
+"""
 
 import re
 import unicodedata
@@ -19,12 +24,13 @@ CONDITION_PRICE_KEYS = GRADE_KEYS + ("floorPrice",)
 
 
 def _normalize_storage(s: Any) -> str:
-    """把 16G+256G / 16+256G / 16GB+256GB → 16g+256g；供 conditions.storage 与订单存储值匹配。"""
+    """把 16G+256G / 16+256G / 16GB+256GB / 12+512G → 16g+256g；供条件行 storage 与订单存储值匹配。"""
     if s is None:
         return ""
     text = unicodedata.normalize("NFKC", str(s)).strip().lower()
     text = text.replace(" ", "")
     text = text.rstrip("|/\\,;，、")
+    # 先统一去掉 GB/TB 后缀
     text = text.replace("gb", "g").replace("tb", "t")
     parts = re.findall(r"(\d+)\s*([gt])?", text)
     if not parts:
@@ -42,7 +48,7 @@ def _pick(order: Dict[str, Any], keys: List[str], default: str = "") -> str:
 
 def extract_storage_from_report(report: Dict[str, Any]) -> str:
     """从验机报告 report_data.inspection_items 中拼出存储字符串。
-    优先 key_name == '内存'（形如 '8+128G'）；否则用 '系统内存' + '储存空间' 拼。"""
+    优先 key_name 包含 '内存'（形如 '8+128G'）；否则用 '系统内存' + '储存空间' 拼。"""
     if not isinstance(report, dict):
         return ""
     rd = report.get("report_data") or {}
@@ -59,11 +65,11 @@ def extract_storage_from_report(report: Dict[str, Any]) -> str:
         vn = str(it.get("value_name") or "").strip()
         if not kn or not vn:
             continue
-        if kn == "内存":
+        if "内存" in kn and "储存" not in kn and "存储" not in kn:
             combined = vn
         elif kn == "系统内存":
             ram = vn
-        elif kn == "储存空间":
+        elif kn in ("储存空间", "存储容量"):
             rom = vn
     if combined:
         return combined
@@ -74,47 +80,21 @@ def extract_storage_from_report(report: Dict[str, Any]) -> str:
 
 @dataclass
 class GrabCondition:
-    category_names: List[str] = field(default_factory=list)   # cate_name 过滤（例："手机"）
-    brand_names: List[str] = field(default_factory=list)      # brand_name 过滤
-    channel_names: List[str] = field(default_factory=list)    # order_channel_name 过滤（前端叫「厂商」）
-    min_price: Optional[str] = None
-    max_price: Optional[str] = None
-    max_amount: Optional[float] = None                        # 最大金额上限，超过不出价
+    category_names: List[str] = field(default_factory=list)       # cate_name 过滤
+    brand_names: List[str] = field(default_factory=list)          # brand_name 过滤（别名匹配）
+    channel_names: List[str] = field(default_factory=list)        # order_channel_name 过滤
+    min_price: Optional[float] = None                             # 最低价过滤
+    max_price: Optional[float] = None                             # 最高价过滤
+    grade_names: List[str] = field(default_factory=list)          # machine_level_name 过滤（全匹配）
+    model_names: List[str] = field(default_factory=list)          # model_name 过滤（全匹配）
+    max_amount: Optional[float] = None                            # 最大金额上限，超过不出价
     conditions: List[Dict[str, Any]] = field(default_factory=list)
-
-
-def _match_price_range(order: Dict[str, Any], min_price: Optional[str], max_price: Optional[str]) -> bool:
-    if not min_price and not max_price:
-        return True
-    for k in ("bid_amount", "reference_price", "start_price", "estimated_price"):
-        v = order.get(k)
-        if v is None or v == "":
-            continue
-        try:
-            n = float(v)
-        except (TypeError, ValueError):
-            continue
-        if min_price:
-            try:
-                if n < float(min_price):
-                    return False
-            except ValueError:
-                pass
-        if max_price:
-            try:
-                if n > float(max_price):
-                    return False
-            except ValueError:
-                pass
-        return True
-    return True
 
 
 def _norm_filter(s: str) -> str:
     """归一化过滤值：字母统一小写，去掉中文特殊符号/空格。"""
     import re as _re
     s = s.strip().lower()
-    # 去掉中文/英文标点、空格、括号等
     s = _re.sub(r'[\s　 \(\)（）\[\]【】\{\}·\-—_/\\,，、:：;；!！?？.。··]+', '', s)
     return s
 
@@ -133,7 +113,6 @@ def _canonical_brand(name: str) -> str:
     mapped = _BRAND_ALIASES.get(n)
     if mapped:
         return mapped
-    # 大小写不敏感匹配别名
     nl = n.lower()
     for k, v in _BRAND_ALIASES.items():
         if k.lower() == nl:
@@ -141,11 +120,28 @@ def _canonical_brand(name: str) -> str:
     return n
 
 
+def _match_price_range(order: Dict[str, Any], min_price: Optional[float], max_price: Optional[float]) -> bool:
+    """按 bid_amount 区间过滤。"""
+    if min_price is None and max_price is None:
+        return True
+    try:
+        amt = float(_pick(order, ["bid_amount", "bidAmount", "price"]))
+    except (TypeError, ValueError):
+        return True  # 无价格字段的不过滤
+    if min_price is not None and amt < min_price:
+        return False
+    if max_price is not None and amt > max_price:
+        return False
+    return True
+
+
 def filter_auction_list(orders: List[Dict[str, Any]], cond: GrabCondition) -> List[Dict[str, Any]]:
-    """按品类/品牌/货源/价格区间对 auction_list 做前端过滤。"""
+    """按 brand(别名)/cate/grade/model/channel/price 对 auction_list 做筛选。"""
     cate_set = {_norm_filter(c) for c in (cond.category_names or []) if c}
     brand_set = {_norm_filter(b) for b in (cond.brand_names or []) if b}
     channel_set = {_norm_filter(c) for c in (cond.channel_names or []) if c}
+    grade_set = {g.strip() for g in (cond.grade_names or []) if g.strip()}
+    model_set = {m.strip().lower() for m in (cond.model_names or []) if m.strip()}
     out = []
     for o in orders or []:
         if not isinstance(o, dict):
@@ -159,6 +155,14 @@ def filter_auction_list(orders: List[Dict[str, Any]], cond: GrabCondition) -> Li
             canon = _canonical_brand(raw)
             v = _norm_filter(canon)
             if v not in brand_set:
+                continue
+        if grade_set:
+            v = _pick(o, ["machine_level_name", "quality", "color_grade", "colorGrade", "grade"]).strip()
+            if v not in grade_set:
+                continue
+        if model_set:
+            v = _pick(o, ["model_name", "modelName", "productName", "name"]).strip().lower()
+            if v not in model_set:
                 continue
         if channel_set:
             v = _norm_filter(_pick(o, ["order_channel_name", "channelName", "channel"]))
@@ -224,7 +228,11 @@ def match_and_price(
         oid = _pick(o, ["id", "orderId", "order_id"])
         if not oid:
             continue
-        report = api.get_order_report_safe(oid)
+        try:
+            report = api.get_order_report_safe(oid)
+        except Exception as e:
+            errors.append("orderId=%s 验机报告失败: %s" % (oid, str(e)))
+            continue
         storage_norm = _normalize_storage(extract_storage_from_report(report))
         row = _find_condition_for_order(o, storage_norm, conditions)
         if not row:
@@ -246,7 +254,7 @@ def grab_and_bid(
     api: BiddingHeroAPI,
     matched: List[Tuple[Dict[str, Any], str]],
 ) -> Tuple[int, int, List[str]]:
-    """竞价侠：详情=抢单 → 出价。"""
+    """竞价侠：详情=抢单 → 出价。不管报价是否成功，继续下一个。"""
     grabbed = 0
     quoted = 0
     errors: List[str] = []
