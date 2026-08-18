@@ -83,8 +83,6 @@ class GrabCondition:
     category_names: List[str] = field(default_factory=list)       # cate_name 过滤
     brand_names: List[str] = field(default_factory=list)          # brand_name 过滤（别名匹配）
     channel_names: List[str] = field(default_factory=list)        # order_channel_name 过滤
-    min_price: Optional[float] = None                             # 最低价过滤
-    max_price: Optional[float] = None                             # 最高价过滤
     grade_names: List[str] = field(default_factory=list)          # machine_level_name 过滤（全匹配）
     model_names: List[str] = field(default_factory=list)          # model_name 过滤（全匹配）
     max_amount: Optional[float] = None                            # 最大金额上限，超过不出价
@@ -120,23 +118,8 @@ def _canonical_brand(name: str) -> str:
     return n
 
 
-def _match_price_range(order: Dict[str, Any], min_price: Optional[float], max_price: Optional[float]) -> bool:
-    """按 bid_amount 区间过滤。"""
-    if min_price is None and max_price is None:
-        return True
-    try:
-        amt = float(_pick(order, ["bid_amount", "bidAmount", "price"]))
-    except (TypeError, ValueError):
-        return True  # 无价格字段的不过滤
-    if min_price is not None and amt < min_price:
-        return False
-    if max_price is not None and amt > max_price:
-        return False
-    return True
-
-
 def filter_auction_list(orders: List[Dict[str, Any]], cond: GrabCondition) -> List[Dict[str, Any]]:
-    """按 brand(别名)/cate/grade/model/channel/price 对 auction_list 做筛选。"""
+    """按 brand(别名)/cate/grade/model/channel 对 auction_list 做筛选。"""
     cate_set = {_norm_filter(c) for c in (cond.category_names or []) if c}
     brand_set = {_norm_filter(b) for b in (cond.brand_names or []) if b}
     channel_set = {_norm_filter(c) for c in (cond.channel_names or []) if c}
@@ -168,8 +151,6 @@ def filter_auction_list(orders: List[Dict[str, Any]], cond: GrabCondition) -> Li
             v = _norm_filter(_pick(o, ["order_channel_name", "channelName", "channel"]))
             if v not in channel_set:
                 continue
-        if not _match_price_range(o, cond.min_price, cond.max_price):
-            continue
         out.append(o)
     return out
 

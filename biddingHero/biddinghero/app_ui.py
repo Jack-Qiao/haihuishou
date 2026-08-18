@@ -300,16 +300,6 @@ def api_execute_task():
             if name == "categoryNames": category_names = vals
             elif name == "brandNames": brand_names = vals
             else: channel_names = vals
-    min_price_raw = str(data.get("minPrice") or "").strip()
-    max_price_raw = str(data.get("maxPrice") or "").strip()
-    try:
-        min_price = float(min_price_raw) if min_price_raw else None
-    except ValueError:
-        return task_err("最低价格式错误")
-    try:
-        max_price = float(max_price_raw) if max_price_raw else None
-    except ValueError:
-        return task_err("最高价格式错误")
     max_amount_raw = str(data.get("maxAmount") or "").strip()
     try:
         max_amount = float(max_amount_raw) if max_amount_raw else None
@@ -330,8 +320,6 @@ def api_execute_task():
         category_names=category_names,
         brand_names=brand_names,
         channel_names=channel_names,
-        min_price=min_price,
-        max_price=max_price,
         grade_names=grade_names,
         model_names=model_names,
         max_amount=max_amount,

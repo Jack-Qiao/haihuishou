@@ -620,7 +620,7 @@
       font-size: 13px;
       font-weight: 500;
     }
-    .modal .form-row input:not([type="checkbox"]):not([type="radio"]) { flex: 1; }
+    .modal .form-row input:not([type="checkbox"]):not([type="radio"]) { }
     .modal-actions {
       display: flex;
       gap: 10px;
@@ -1056,7 +1056,7 @@
     .schedule-task-modal.modal {
       width: 95%;
       max-width: none;
-      max-height: 90vh;
+      max-height: 88vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1070,7 +1070,7 @@
     }
     .schedule-task-modal-scroll-outer {
       flex: 1;
-      min-height: 0;
+      min-height: 200px;
       display: flex;
       flex-direction: row;
       margin-top: 8px;
@@ -1078,7 +1078,7 @@
     }
     .schedule-task-modal-scroll {
       flex: 1;
-      min-height: 0;
+      min-height: 200px;
       overflow-y: auto;
     }
     .schedule-scroll-buttons-column {
@@ -1863,18 +1863,6 @@
         <div class="form-row">
           <label>任务名称</label>
           <input type="text" id="scheduleTaskName" placeholder="例如：华为小米抢单" style="width:100%; max-width:280px;">
-        </div>
-        <div class="form-row form-row-align-top">
-          <label>货源(厂商)</label>
-          <div class="schedule-field-wrap">
-            <div id="scheduleManufacturersList" class="brands-chosen">加载中…</div>
-          </div>
-        </div>
-        <div class="form-row schedule-task-range-freq-row">
-          <label>抢单金额范围</label>
-          <input type="text" id="scheduleTaskMinPrice" placeholder="最低价" style="width:90px;">
-          <span style="color:var(--text-muted);">～</span>
-          <input type="text" id="scheduleTaskMaxPrice" placeholder="最高价" style="width:90px;">
           <label style="margin-left:20px;">频率</label>
           <select id="scheduleTaskFrequency" style="width:140px;">
             <option value="1">1秒/次</option>
@@ -1886,8 +1874,14 @@
             <option value="60">60秒/次</option>
           </select>
           <label class="schedule-quick-locate-label" style="margin-left:20px;">快速定位</label>
-          <input type="text" id="scheduleQuickLocate" class="schedule-quick-locate-input" placeholder="输入机型模糊搜索（辅助，不入参）" style="width:160px;" autocomplete="off" data-auxiliary="true">
+          <input type="text" id="scheduleQuickLocate" class="schedule-quick-locate-input" placeholder="输入机型模糊搜索（辅助，不入参）" style="width:180px;" autocomplete="off" data-auxiliary="true">
           <button type="button" class="btn btn-primary btn-small" id="btnScheduleQuickLocate" title="定位到匹配的条件行（辅助功能，不入参）">定位</button>
+        </div>
+        <div class="form-row form-row-align-top">
+          <label>货源(厂商)</label>
+          <div class="schedule-field-wrap">
+            <div id="scheduleManufacturersList" class="brands-chosen">加载中…</div>
+          </div>
         </div>
         <div class="form-row form-row-align-top">
           <label>品类</label>
@@ -1898,15 +1892,7 @@
         <div class="form-row form-row-align-top">
           <label>品牌</label>
           <div class="schedule-field-wrap">
-            <div id="scheduleBrandsCollapsible" class="brands-collapsible">
-              <button type="button" class="brands-collapsible-toggle" id="scheduleBrandsToggle" aria-expanded="false">
-                <span class="collapse-icon">▼</span>
-                <span id="scheduleBrandsToggleText">展开品牌</span>
-              </button>
-              <div class="brands-collapsible-body">
-                <div id="scheduleTaskBrandsList" class="brands-chosen"></div>
-              </div>
-            </div>
+            <div id="scheduleTaskBrandsList" class="brands-chosen"></div>
           </div>
         </div>
       </div>
@@ -3606,10 +3592,9 @@
         var catEl = $('scheduleCategoryList');
         if (catEl) {
           if (cats.length) {
-            var catHtml = '<label class="tag"><input type="radio" name="scheduleTaskCate" data-name="" checked> 全部</label>';
-            catHtml += cats.map(function (c) {
+            var catHtml = cats.map(function (c) {
               var esc = String(c).replace(/"/g, '&quot;').replace(/</g, '&lt;');
-              return '<label class="tag"><input type="radio" name="scheduleTaskCate" data-name="' + esc + '"> ' + esc + '</label>';
+              return '<label class="tag"><input type="radio" name="scheduleTaskCate" data-name="' + esc + '"' + (c === '手机' ? ' checked' : '') + '> ' + esc + '</label>';
             }).join('');
             catEl.innerHTML = catHtml;
           } else {
@@ -3621,30 +3606,10 @@
         var bList = $('scheduleTaskBrandsList');
         if (bList) {
           if (brands.length) {
-            var allOpt = '<label class="tag" style="cursor:pointer"><input type="checkbox" data-name=""> 全部</label>';
-            var brandOpts = brands.map(function (b) {
+            bList.innerHTML = brands.map(function (b) {
               var esc = String(b).replace(/"/g, '&quot;').replace(/</g, '&lt;');
               return '<label class="tag" style="cursor:pointer"><input type="checkbox" data-name="' + esc + '"> ' + esc + '</label>';
             }).join('');
-            bList.innerHTML = allOpt + brandOpts;
-            var toggleBtn = $('scheduleBrandsToggle');
-            var txt = $('scheduleBrandsToggleText');
-            var collapsedLabel = '展开品牌（共 ' + brands.length + ' 个）';
-            if (toggleBtn) toggleBtn.setAttribute('data-collapsed-label', collapsedLabel);
-            if (txt && !$('scheduleBrandsCollapsible').classList.contains('expanded')) txt.textContent = collapsedLabel;
-            // "全部"联动
-            var allBox = bList.querySelector('input[type="checkbox"][data-name=""]');
-            if (allBox) {
-              allBox.addEventListener('change', function () {
-                bList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
-                  if (cb !== allBox) cb.checked = false;
-                });
-              });
-              bList.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
-                if (cb === allBox) return;
-                cb.addEventListener('change', function () { if (cb.checked) allBox.checked = false; });
-              });
-            }
           } else {
             bList.innerHTML = '<span style="color:var(--text-muted)">暂无品牌</span>';
           }
@@ -3784,8 +3749,6 @@
 
       function fillScheduleFormWithTask(task) {
         $('scheduleTaskName').value = task.name || '';
-        $('scheduleTaskMinPrice').value = task.minPrice || '';
-        $('scheduleTaskMaxPrice').value = task.maxPrice || '';
         renderScheduleConditionsRows(task.conditions && task.conditions.length ? task.conditions : [{}]);
         var freqSelect = $('scheduleTaskFrequency');
         if (freqSelect) freqSelect.value = task.frequency || '3';
@@ -3799,9 +3762,7 @@
         // 品牌（多选）
         var brandNames = (task.brandNames && task.brandNames.length) ? task.brandNames : [];
         document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]').forEach(function (cb) {
-          var n = (cb.getAttribute('data-name') || '');
-          if (n === '') cb.checked = brandNames.length === 0;
-          else cb.checked = brandNames.indexOf(n) !== -1;
+          cb.checked = brandNames.indexOf(cb.getAttribute('data-name') || '') !== -1;
         });
         // 货源(厂商)（多选）
         var chNames = (task.channelNames && task.channelNames.length) ? task.channelNames : (task.manufacturerNames || []);
@@ -3820,17 +3781,15 @@
       }
       function clearScheduleTaskForm() {
         $('scheduleTaskName').value = '';
-        $('scheduleTaskMinPrice').value = '';
-        $('scheduleTaskMaxPrice').value = '';
         renderScheduleConditionsRows([{}]);
         var freqSelect = $('scheduleTaskFrequency'); if (freqSelect) freqSelect.value = '3';
-        // 品类默认「全部」
+        // 品类默认「手机」
         document.querySelectorAll('input[name="scheduleTaskCate"]').forEach(function (r) {
-          r.checked = (r.getAttribute('data-name') || '') === '';
+          r.checked = (r.getAttribute('data-name') || '') === '手机';
         });
-        // 品牌默认「全部」
+        // 品牌默认不选
         document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]').forEach(function (cb) {
-          cb.checked = (cb.getAttribute('data-name') || '') === '';
+          cb.checked = false;
         });
         document.querySelectorAll('#scheduleManufacturersList input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
         var quickLocate = $('scheduleQuickLocate'); if (quickLocate) quickLocate.value = '';
@@ -3844,8 +3803,8 @@
         var validConditions = conditions.filter(function (c) { return (c.modelName || '').trim().length > 0; });
         if (!validConditions.length) return null;
         var catChecked = document.querySelector('input[name="scheduleTaskCate"]:checked');
-        var catName = catChecked ? (catChecked.getAttribute('data-name') || '') : '';
-        var categoryNames = catName ? [catName] : [];
+        var catName = catChecked ? (catChecked.getAttribute('data-name') || '') : '手机';
+        var categoryNames = [catName];
         var brandNames = [].slice.call(document.querySelectorAll('#scheduleTaskBrandsList input[type="checkbox"]:checked'))
           .map(function (cb) { return (cb.getAttribute('data-name') || ''); })
           .filter(function (n) { return n !== ''; });
@@ -3858,8 +3817,6 @@
           categoryNames: categoryNames,
           brandNames: brandNames,
           channelNames: channelNames,
-          minPrice: ($('scheduleTaskMinPrice').value || '').trim() || undefined,
-          maxPrice: ($('scheduleTaskMaxPrice').value || '').trim() || undefined,
           conditions: validConditions,
           frequency: freqEl ? freqEl.value : '3'
         };
@@ -3883,7 +3840,6 @@
           var catStr = (t.categoryNames && t.categoryNames.length) ? t.categoryNames.join('、') : '全部品类';
           var brandStr = (t.brandNames && t.brandNames.length) ? t.brandNames.join('、') : '全部品牌';
           var chStr = (t.channelNames && t.channelNames.length) ? t.channelNames.join('、') : '全部货源';
-          var rangeStr = (t.minPrice || t.maxPrice) ? ((t.minPrice || '') + '～' + (t.maxPrice || '')) : '不限';
           var freqStr = freqLabels[t.frequency] || t.frequency || '3秒/次';
           var isRunning = !!scheduleTaskTimers[t.id];
           var isStarting = !!scheduleTaskStarting[t.id];
@@ -3909,7 +3865,7 @@
             });
             return parts.join(' ');
           }
-          var basicStr = '品类: ' + catStr + ' | 品牌: ' + brandStr + ' | 货源: ' + chStr + ' | 金额: ' + rangeStr + ' | 频率: ' + freqStr;
+          var basicStr = '品类: ' + catStr + ' | 品牌: ' + brandStr + ' | 货源: ' + chStr + ' | 频率: ' + freqStr;
           var bodyHtml = '<div class="schedule-task-card-body-line">' + escapeHtml(basicStr) + '</div>';
           if (conds.length > 0) {
             bodyHtml += '<div class="schedule-task-conditions-block">';
@@ -4007,8 +3963,6 @@
           existing.categoryNames = t.categoryNames;
           existing.brandNames = t.brandNames;
           existing.channelNames = t.channelNames;
-          existing.minPrice = t.minPrice;
-          existing.maxPrice = t.maxPrice;
           existing.conditions = t.conditions;
           existing.frequency = t.frequency;
           saveScheduledTasks();
@@ -4022,7 +3976,6 @@
           scheduledTasks.push({
             id: id, name: t.name,
             categoryNames: t.categoryNames, brandNames: t.brandNames, channelNames: t.channelNames,
-            minPrice: t.minPrice, maxPrice: t.maxPrice,
             conditions: t.conditions, frequency: t.frequency
           });
           saveScheduledTasks();
@@ -4089,8 +4042,6 @@
               categoryNames: task.categoryNames || [],
               brandNames: task.brandNames || [],
               channelNames: task.channelNames || [],
-              minPrice: task.minPrice,
-              maxPrice: task.maxPrice,
               maxAmount: getScheduleMaxAmount(),
               conditions: conds.length ? conds : undefined
             }
@@ -4241,8 +4192,6 @@
                 existing.categoryNames = [];
                 existing.brandNames = matchedBrand ? [matchedBrand] : [];
                 existing.channelNames = [];
-                existing.minPrice = undefined;
-                existing.maxPrice = undefined;
                 existing.conditions = mapConditions(conditions);
                 existing.frequency = '3';
                 overwritten++;
@@ -4254,8 +4203,6 @@
                 categoryNames: [],
                 brandNames: matchedBrand ? [matchedBrand] : [],
                 channelNames: [],
-                minPrice: undefined,
-                maxPrice: undefined,
                 conditions: mapConditions(conditions),
                 frequency: '3'
               });
@@ -4343,16 +4290,6 @@
         };
         var elName = $('scheduleTaskName');
         if (elName) elName.addEventListener('input', updateScheduleSaveButtonState);
-        var brandsCollWrap = $('scheduleBrandsCollapsible');
-        var brandsToggleBtn = $('scheduleBrandsToggle');
-        var brandsToggleTxt = $('scheduleBrandsToggleText');
-        if (brandsCollWrap && brandsToggleBtn && brandsToggleTxt) {
-          brandsToggleBtn.addEventListener('click', function () {
-            var expanded = brandsCollWrap.classList.toggle('expanded');
-            brandsToggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-            brandsToggleTxt.textContent = expanded ? '收起品牌' : (brandsToggleBtn.getAttribute('data-collapsed-label') || '展开品牌');
-          });
-        }
         var scrollEl = document.querySelector('.schedule-task-modal-scroll');
         var btnTop = $('btnScheduleScrollToTop');
         var btnBottom = $('btnScheduleScrollToBottom');
