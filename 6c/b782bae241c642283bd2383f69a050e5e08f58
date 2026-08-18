@@ -1,0 +1,32 @@
+biddingHero/biddinghero/templates/index.html
+  s_cdad8c0fedc545::t_2dedf4e8463d04 623
+  s_cdad8c0fedc545::t_c4262116bc14cc 1895
+  s_cdad8c0fedc545::t_c278da40a6f551 3595,3597
+  s_cdad8c0fedc545::t_87a3f54f642358 3765
+  s_cdad8c0fedc545::t_dfe4dc02203acb 3806-3807
+  s_cdad8c0fedc545::t_6f57ab00d01768 3868
+  s_cdad8c0fedc545::t_3de0cda33e4fd8 1877
+  s_cdad8c0fedc545::t_cbd003bfcaa9b7 1059
+  s_cdad8c0fedc545::t_1ebcea8d0e1476 3786,3788
+  s_cdad8c0fedc545::t_516530f667428f 1073,1081
+  s_cdad8c0fedc545::t_b0d9526b218f30 3609
+  s_cdad8c0fedc545::t_3ff35a04c8b9f1 3790,3792
+biddingHero/biddinghero/grab_task.py
+  s_cdad8c0fedc545::t_c8590228f87caf 122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.40-trip",
+  "base_commit_sha": "6cb782bae241c642283bd2383f69a050e5e08f58",
+  "prompts": {},
+  "sessions": {
+    "s_cdad8c0fedc545": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ebbc0c-ab2d-4ed4-a063-0a4aa8344432",
+        "model": "glm-5.1"
+      },
+      "human_author": "qiaow <qiaow@trip.com>"
+    }
+  }
+}
