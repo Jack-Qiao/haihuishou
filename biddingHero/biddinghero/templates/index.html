@@ -4049,6 +4049,7 @@
           if (r && r.success && r.data) {
             var d = r.data;
             var text = '共 ' + (d.total || 0) + ' 条，抢单 ' + (d.grabbed || 0) + '，报价 ' + (d.quoted || 0);
+            if (d.skipped) text += '，跳过已报价 ' + d.skipped;
             if (!isAuto) toast('执行完成：' + text, 'success');
             if (d.errors && d.errors.length) console.warn('execute-task errors', d.errors);
           } else {

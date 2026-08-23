@@ -5,7 +5,8 @@
 1. 查询 auction_list，拿到全量数据
 2. 按 brand_name(别名过滤)、cate_name、machine_level_name、model_name、order_channel_name 筛选
 3. 对命中订单查详情(=抢单) + 拉验机报告取内存，匹配条件行按成色报价
-4. 不管报价是否成功，继续下一个
+4. 已有自己报价的订单跳过，不再改价
+5. 不管报价是否成功，继续下一个
 """
 
 import re
@@ -231,30 +232,90 @@ def match_and_price(
     return matched, errors
 
 
+_OWN_PRICE_KEYS = (
+    "my_bid", "myBid", "my_bid_amount", "myBidAmount",
+    "user_bid_amount", "current_user_bid",
+)
+
+
+def _nonempty_price(v: Any) -> bool:
+    if v is None:
+        return False
+    s = str(v).strip()
+    return s not in ("", "-", "None", "null")
+
+
+def _detail_has_own_price(detail: Any, user_id: Optional[str] = None) -> bool:
+    """详情里是否已有当前用户自己的报价。"""
+    if not isinstance(detail, dict):
+        return False
+    for k in _OWN_PRICE_KEYS:
+        if _nonempty_price(detail.get(k)):
+            return True
+    uid = str(user_id).strip() if user_id is not None else ""
+    for lk in ("quote_list", "quoteList", "bid_list", "bidList", "records", "bids", "bid_records"):
+        lst = detail.get(lk)
+        if isinstance(lst, dict):
+            lst = [lst]
+        if not isinstance(lst, list):
+            continue
+        for q in lst:
+            if not isinstance(q, dict):
+                continue
+            if _nonempty_price(q.get("my_bid") or q.get("myBid")):
+                return True
+            if q.get("is_mine") is True or q.get("isMine") is True:
+                return True
+            if uid:
+                qid = q.get("user_id") or q.get("userId") or q.get("bidder_id")
+                if qid is not None and str(qid) == uid:
+                    amt = q.get("bid_amount") or q.get("bidAmount") or q.get("amount") or q.get("actualPrice")
+                    if _nonempty_price(amt):
+                        return True
+    inner = detail.get("order")
+    if isinstance(inner, dict):
+        for k in _OWN_PRICE_KEYS:
+            if _nonempty_price(inner.get(k)):
+                return True
+    return False
+
+
 def grab_and_bid(
     api: BiddingHeroAPI,
     matched: List[Tuple[Dict[str, Any], str]],
-) -> Tuple[int, int, List[str]]:
-    """竞价侠：详情=抢单 → 出价。不管报价是否成功，继续下一个。"""
+    skip_ids: Optional[set] = None,
+) -> Tuple[int, int, int, List[str]]:
+    """竞价侠：详情=抢单 → 出价。已有自己报价的跳过；不管报价是否成功，继续下一个。"""
     grabbed = 0
     quoted = 0
+    skipped = 0
     errors: List[str] = []
+    already = {str(x) for x in (skip_ids or set()) if x is not None and str(x).strip()}
+    uid = api.user_id
     for o, bid_amount in matched:
         oid = _pick(o, ["id", "orderId", "order_id"])
         if not oid:
             continue
+        if str(oid) in already:
+            skipped += 1
+            continue
         try:
-            api.get_order_detail(oid)
+            detail = api.get_order_detail(oid)
             grabbed += 1
         except Exception as e:
             errors.append("orderId=%s 抢单(详情)失败: %s" % (oid, str(e)))
             continue
+        if _detail_has_own_price(detail, uid):
+            already.add(str(oid))
+            skipped += 1
+            continue
         try:
             api.place_bid(order_id=oid, bid_amount=bid_amount)
             quoted += 1
+            already.add(str(oid))
         except Exception as e:
             errors.append("orderId=%s 出价失败: %s" % (oid, str(e)))
-    return grabbed, quoted, errors
+    return grabbed, quoted, skipped, errors
 
 
 def normalize_conditions(raw: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], Optional[str]]:
@@ -286,19 +347,33 @@ def execute_task(
     cond: GrabCondition,
     page_size: int = 3000,
 ) -> Dict[str, Any]:
-    """整轮流程：拉全量列表 → 过滤 → 匹配 → 抢单出价。"""
+    """整轮流程：拉全量列表 → 过滤 → 匹配 → 抢单出价（已有自己报价的不改价）。"""
     listing = api.get_auction_list(page_index=1, page_size=page_size)
     orders = listing.get("results") if isinstance(listing, dict) else None
     if not isinstance(orders, list):
         orders = []
+    already = api.list_my_bidding_order_ids()
     candidates = filter_auction_list(orders, cond)
-    matched, match_errs = match_and_price(api, candidates, cond.conditions, cond.max_amount)
-    grabbed, quoted, exec_errs = grab_and_bid(api, matched)
+    fresh: List[Dict[str, Any]] = []
+    skipped_existing = 0
+    uid = api.user_id
+    for o in candidates:
+        oid = _pick(o, ["id", "orderId", "order_id"])
+        if oid and str(oid) in already:
+            skipped_existing += 1
+            continue
+        if _detail_has_own_price(o, uid):
+            skipped_existing += 1
+            continue
+        fresh.append(o)
+    matched, match_errs = match_and_price(api, fresh, cond.conditions, cond.max_amount)
+    grabbed, quoted, skipped_detail, exec_errs = grab_and_bid(api, matched, skip_ids=already)
     return {
         "total": len(orders),
         "candidates": len(candidates),
         "matched": len(matched),
         "grabbed": grabbed,
         "quoted": quoted,
+        "skipped": skipped_existing + skipped_detail,
         "errors": (match_errs + exec_errs)[:30],
     }

@@ -7,8 +7,10 @@
 
 import json
 import os
-import requests
+from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
+
+import requests
 
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
@@ -19,6 +21,28 @@ def _ssl_verify() -> bool:
 
 
 BIDDING_API = "https://jingjiaxia.com"
+
+
+def _bid_record_order_id(item: Any) -> Optional[str]:
+    """从已报价记录里取订单 ID；不用记录自身 id（那是报价记录 id）。"""
+    if not isinstance(item, dict):
+        return None
+    for k in ("orderId", "order_id"):
+        v = item.get(k)
+        if v is not None and str(v).strip() != "":
+            return str(v).strip()
+    order = item.get("order")
+    if isinstance(order, dict):
+        for k in ("id", "orderId", "order_id"):
+            v = order.get(k)
+            if v is not None and str(v).strip() != "":
+                return str(v).strip()
+    elif order is not None and str(order).strip() != "":
+        return str(order).strip()
+    v = item.get("id")
+    if v is not None and str(v).strip() != "":
+        return str(v).strip()
+    return None
 
 
 class BiddingHeroAPI:
@@ -163,6 +187,42 @@ class BiddingHeroAPI:
         if data.get("code") is not None and data.get("code") != 0:
             raise RuntimeError(data.get("msg", "查询已报价列表失败"))
         return data.get("data", {}) or {}
+
+    def list_my_bidding_order_ids(self, page_size: int = 200, max_pages: int = 50) -> set:
+        """当前仍在竞价中、已有自己报价的订单 ID 集合（字符串）。失败时返回空集。"""
+        ids = set()
+        fetched = 0
+        today = date.today()
+        after = (today - timedelta(days=90)).isoformat()
+        before = today.isoformat()
+        try:
+            for page in range(1, max_pages + 1):
+                data = self.get_my_bids(
+                    page_index=page,
+                    page_size=page_size,
+                    status="bidding",
+                    created_at_after=after,
+                    created_at_before=before,
+                )
+                results = data.get("results") if isinstance(data, dict) else None
+                if not isinstance(results, list) or not results:
+                    break
+                fetched += len(results)
+                for item in results:
+                    oid = _bid_record_order_id(item)
+                    if oid:
+                        ids.add(oid)
+                count = data.get("count")
+                try:
+                    if count is not None and fetched >= int(count):
+                        break
+                except (TypeError, ValueError):
+                    pass
+                if len(results) < page_size:
+                    break
+        except Exception:
+            return ids
+        return ids
 
     # ------------------------- 3. 详情接口 -------------------------
 
