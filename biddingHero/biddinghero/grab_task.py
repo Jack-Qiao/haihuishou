@@ -6,16 +6,33 @@
 2. 按 brand_name(别名过滤)、cate_name、machine_level_name、model_name、order_channel_name 筛选
 3. 对命中订单查详情(=抢单) + 拉验机报告取内存，匹配条件行按成色报价
 4. 已有自己报价的订单跳过，不再改价
-5. 不管报价是否成功，继续下一个
+5. 剩余不足 30 秒的订单不抢
+6. 不管报价是否成功，继续下一个
 """
 
 import re
+import time
 import unicodedata
+from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from .api import BiddingHeroAPI
 
+
+# 自动抢单：剩余时间少于此秒数的订单不抢（含已截止）
+MIN_REMAINING_SECONDS = 30
+# 与列表页倒计时字段对齐，两套命名都认
+_DEADLINE_KEYS = [
+    "deadline_time", "deadlineTime", "deadline_time", "deadlineTime",
+    "expire_at", "expireAt", "expire_at", "expireAt",
+    "end_time", "endTime", "end_time", "endTime",
+    "deadline",
+]
+_REMAINING_KEYS = [
+    "remain_seconds", "remaining_seconds", "left_seconds",
+    "remain_time", "remaining_time", "countdown",
+]
 
 # 竞价侠成色 9 档 + 保底价
 GRADE_NAMES = ("全新", "靓机", "小花", "大花", "外爆", "内爆", "功能异常", "维修更换", "无法开机")
@@ -45,6 +62,66 @@ def _pick(order: Dict[str, Any], keys: List[str], default: str = "") -> str:
         if v is not None and str(v).strip() != "":
             return str(v).strip()
     return default
+
+
+def _parse_deadline_epoch(v: Any) -> Optional[float]:
+    """把截止时间解析成 epoch 秒；无法识别则返回 None。"""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        n = float(v)
+        if n > 1e12:
+            return n / 1000.0
+        if n > 1e9:
+            return n
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    if s.isdigit() or (s.replace(".", "", 1).isdigit() and s.count(".") < 2):
+        n = float(s)
+        if n > 1e12:
+            return n / 1000.0
+        if n > 1e9:
+            return n
+        return None
+    iso = s.replace(" ", "T", 1)
+    try:
+        return datetime.fromisoformat(iso).timestamp()
+    except ValueError:
+        pass
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(s[:19], fmt).timestamp()
+        except ValueError:
+            continue
+    return None
+
+
+def _remaining_seconds(order: Dict[str, Any]) -> Optional[float]:
+    raw = _pick(order, _DEADLINE_KEYS)
+    if raw:
+        ts = _parse_deadline_epoch(raw)
+        if ts is not None:
+            return ts - time.time()
+    # 有的列表直接给剩余秒数
+    rem_raw = _pick(order, _REMAINING_KEYS)
+    if rem_raw:
+        try:
+            n = float(str(rem_raw).strip())
+            if n < 1e6:
+                return n
+        except (TypeError, ValueError):
+            pass
+    return None
+
+
+def _deadline_too_soon(order: Dict[str, Any]) -> bool:
+    """剩余时间已知且不足 MIN_REMAINING_SECONDS 时不抢。解析不到截止时间则不因此跳过。"""
+    rem = _remaining_seconds(order)
+    if rem is None:
+        return False
+    return rem < MIN_REMAINING_SECONDS
 
 
 def extract_storage_from_report(report: Dict[str, Any]) -> str:
@@ -284,11 +361,12 @@ def grab_and_bid(
     api: BiddingHeroAPI,
     matched: List[Tuple[Dict[str, Any], str]],
     skip_ids: Optional[set] = None,
-) -> Tuple[int, int, int, List[str]]:
-    """竞价侠：详情=抢单 → 出价。已有自己报价的跳过；不管报价是否成功，继续下一个。"""
+) -> Tuple[int, int, int, int, List[str]]:
+    """竞价侠：详情=抢单 → 出价。已有自己报价、剩余不足 30 秒的跳过；不管报价是否成功，继续下一个。"""
     grabbed = 0
     quoted = 0
     skipped = 0
+    skipped_short = 0
     errors: List[str] = []
     already = {str(x) for x in (skip_ids or set()) if x is not None and str(x).strip()}
     uid = api.user_id
@@ -299,11 +377,18 @@ def grab_and_bid(
         if str(oid) in already:
             skipped += 1
             continue
+        # 查详情即抢单，剩余不足 30 秒时不要调详情
+        if _deadline_too_soon(o):
+            skipped_short += 1
+            continue
         try:
             detail = api.get_order_detail(oid)
             grabbed += 1
         except Exception as e:
             errors.append("orderId=%s 抢单(详情)失败: %s" % (oid, str(e)))
+            continue
+        if _deadline_too_soon(detail):
+            skipped_short += 1
             continue
         if _detail_has_own_price(detail, uid):
             already.add(str(oid))
@@ -315,7 +400,7 @@ def grab_and_bid(
             already.add(str(oid))
         except Exception as e:
             errors.append("orderId=%s 出价失败: %s" % (oid, str(e)))
-    return grabbed, quoted, skipped, errors
+    return grabbed, quoted, skipped, skipped_short, errors
 
 
 def normalize_conditions(raw: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], Optional[str]]:
@@ -347,7 +432,7 @@ def execute_task(
     cond: GrabCondition,
     page_size: int = 3000,
 ) -> Dict[str, Any]:
-    """整轮流程：拉全量列表 → 过滤 → 匹配 → 抢单出价（已有自己报价的不改价）。"""
+    """整轮流程：拉全量列表 → 过滤 → 匹配 → 抢单出价（已有自己报价、剩余不足 30 秒的不抢）。"""
     listing = api.get_auction_list(page_index=1, page_size=page_size)
     orders = listing.get("results") if isinstance(listing, dict) else None
     if not isinstance(orders, list):
@@ -356,6 +441,7 @@ def execute_task(
     candidates = filter_auction_list(orders, cond)
     fresh: List[Dict[str, Any]] = []
     skipped_existing = 0
+    skipped_short = 0
     uid = api.user_id
     for o in candidates:
         oid = _pick(o, ["id", "orderId", "order_id"])
@@ -365,9 +451,14 @@ def execute_task(
         if _detail_has_own_price(o, uid):
             skipped_existing += 1
             continue
+        if _deadline_too_soon(o):
+            skipped_short += 1
+            continue
         fresh.append(o)
     matched, match_errs = match_and_price(api, fresh, cond.conditions, cond.max_amount)
-    grabbed, quoted, skipped_detail, exec_errs = grab_and_bid(api, matched, skip_ids=already)
+    grabbed, quoted, skipped_detail, skipped_short_bid, exec_errs = grab_and_bid(
+        api, matched, skip_ids=already
+    )
     return {
         "total": len(orders),
         "candidates": len(candidates),
@@ -375,5 +466,6 @@ def execute_task(
         "grabbed": grabbed,
         "quoted": quoted,
         "skipped": skipped_existing + skipped_detail,
+        "skipped_short": skipped_short + skipped_short_bid,
         "errors": (match_errs + exec_errs)[:30],
     }

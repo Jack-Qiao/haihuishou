@@ -621,6 +621,147 @@
       font-weight: 500;
     }
     .modal .form-row input:not([type="checkbox"]):not([type="radio"]) { }
+    #bidQuoteInfo {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    #bidQuoteInfo .bid-quote-meta {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-top: 2px;
+    }
+    #bidQuoteInfo .bid-quote-fields {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-width: 0;
+    }
+    #bidQuoteInfo .bid-quote-fields .form-row {
+      margin-bottom: 10px;
+      align-items: center;
+      min-height: 22px;
+    }
+    #bidQuoteInfo .bid-quote-fields .form-row:last-child { margin-bottom: 0; }
+    #bidQuoteInfo .bid-quote-meta > #bidStoreRemark.form-row {
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+    #bidProductName,
+    #bidOrderId {
+      min-width: 0;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    #bidProductName:hover,
+    #bidOrderId:hover {
+      color: var(--accent);
+    }
+    /* 风险提醒：绝对悬浮，不占文档流 */
+    #bidRiskBanner {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 6;
+      width: 400px;
+      max-width: min(400px, 52%);
+      margin: 0;
+      pointer-events: none;
+    }
+    #bidRiskBanner.hidden { display: none !important; }
+    .detail-risk-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 14px 16px;
+      min-height: 64px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(255, 244, 232, 0.97) 0%, rgba(255, 228, 200, 0.96) 100%);
+      color: #9a3412;
+      box-shadow: 0 8px 24px rgba(154, 52, 18, 0.14), 0 2px 6px rgba(0, 0, 0, 0.04);
+      backdrop-filter: blur(6px);
+      pointer-events: auto;
+    }
+    .detail-risk-banner .risk-ico {
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      margin-top: 0;
+      border-radius: 50%;
+      background: #ea580c;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 24px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.35);
+    }
+    .detail-risk-banner .risk-body { flex: 1 1 auto; min-width: 0; }
+    .detail-risk-banner .risk-title {
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+    .detail-risk-banner .risk-text {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #b45309;
+    }
+    #bidStoreRemark.form-row {
+      align-items: flex-start;
+      padding: 6px 10px;
+      margin-left: -10px;
+      margin-right: -4px;
+      border-radius: 6px;
+      background: #edf4ea;
+    }
+    #bidStoreRemark.hidden { display: none !important; }
+    #bidStoreRemark > label {
+      color: var(--text-muted);
+      padding-top: 1px;
+    }
+    #bidStoreRemarkText {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    #bidQuoteImages {
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-start;
+      max-width: 280px;
+    }
+    #bidQuoteImages.hidden { display: none !important; }
+    #bidQuoteImages img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      cursor: zoom-in;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #bidQuoteImages img:hover {
+      transform: scale(1.04);
+      box-shadow: var(--shadow);
+    }
     .modal-actions {
       display: flex;
       gap: 10px;
@@ -702,6 +843,79 @@
     /* 市场价格参考：修正 heading 间距，使其与基本一致 */
     #bidDetailBlock .ref-price-block > .detail-section-title { margin-top: 14px; }
     .inspection-report-block { margin-top: 16px; }
+
+    .detail-alert-card {
+      margin: 12px 0;
+      padding: 12px 14px;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .detail-alert-card .alert-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text);
+    }
+    .detail-alert-card .alert-bar {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      flex: 0 0 auto;
+    }
+    .detail-alert-card .alert-body {
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .detail-alert-card.remark .alert-bar { background: #3b82f6; }
+    .detail-alert-card.remark .alert-body {
+      background: #eef5ff;
+      border-left: 3px solid #3b82f6;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .detail-alert-card.abnormal {
+      border-color: #f0c2b8;
+      background: linear-gradient(180deg, #fffafa 0%, #fff5f3 100%);
+    }
+    .detail-alert-card.abnormal .alert-head { color: var(--accent); }
+    .detail-alert-card.abnormal .alert-bar { background: var(--accent); }
+    .detail-alert-card.abnormal .alert-body {
+      background: #fff1ed;
+      border-left: 3px solid var(--accent);
+      padding: 4px 0 4px 12px;
+    }
+    .detail-alert-card.abnormal .abnormal-row {
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+      padding: 7px 0;
+      border-bottom: 1px dashed rgba(200, 50, 29, 0.2);
+    }
+    .detail-alert-card.abnormal .abnormal-row:last-child { border-bottom: none; }
+    .detail-alert-card.abnormal .abnormal-k {
+      flex: 0 0 88px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .detail-alert-card.abnormal .abnormal-v {
+      flex: 1 1 auto;
+      min-width: 0;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .detail-grid .cell .v.abnormal {
+      color: var(--accent);
+      font-weight: 700;
+    }
     .detail-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
     .detail-title { font-size: 16px; font-weight: 700; color: var(--text); }
     .detail-deadline { margin: 0 0 0 auto; }
@@ -808,9 +1022,29 @@
       text-align: center; max-width: 120px; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
     }
-    /* 详情弹窗加宽 */
+    /* 详情弹窗：单滚动条；头部/风险/底部固定，仅详情区滚动 */
     #bidModal .modal {
-      max-width: 96vw; width: 900px;
+      max-width: 96vw;
+      width: 900px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-height: min(90vh, 920px);
+    }
+    #bidModal .modal > h3,
+    #bidModal #bidQuoteInfo,
+    #bidModal #bidQuoteListSection,
+    #bidModal .modal > .form-row,
+    #bidModal #bidMsg,
+    #bidModal .modal-actions {
+      flex-shrink: 0;
+    }
+    #bidModal #bidDetailBlock {
+      flex: 1 1 auto;
+      min-height: 140px;
+      max-height: none;
+      overflow: auto;
+      margin-bottom: 12px;
     }
 
     /* ---------- 登录页 ---------- */
@@ -1554,6 +1788,37 @@
     .form-row-align-top { align-items: flex-start; }
     .form-row-align-top label { padding-top: 6px; }
     .schedule-field-wrap { flex: 1; min-width: 0; }
+
+    /* ---------- 悬浮刷新 ---------- */
+    #fabRefresh {
+      position: fixed;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(182, 166, 132, 0.75);
+      border-radius: 50%;
+      background: linear-gradient(180deg, #fffdf6 0%, var(--gold-soft) 45%, var(--gold) 100%);
+      color: #6b4f1a;
+      box-shadow: 0 4px 14px rgba(120, 90, 40, 0.18), 0 1px 0 rgba(255,255,255,0.65) inset;
+      cursor: grab;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: box-shadow 0.15s ease, transform 0.08s ease;
+    }
+    #fabRefresh:hover {
+      background: linear-gradient(180deg, #fff 0%, #f3e3bc 40%, #e0b04a 100%);
+      box-shadow: 0 6px 18px rgba(120, 90, 40, 0.24), 0 1px 0 rgba(255,255,255,0.75) inset;
+      color: #5a4010;
+    }
+    #fabRefresh:active, #fabRefresh.dragging { cursor: grabbing; transform: scale(1.04); }
+    #fabRefresh svg { width: 22px; height: 22px; pointer-events: none; stroke-width: 2.4; }
+    #fabRefresh.spinning svg { animation: fab-spin 0.7s linear infinite; }
+    @keyframes fab-spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
@@ -1818,6 +2083,13 @@
         </div>
       </div>
     </div>
+
+    <button type="button" id="fabRefresh" title="刷新当前列表" aria-label="刷新当前列表">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-2.6-6.3"></path>
+        <polyline points="21 4 21 9 16 9"></polyline>
+      </svg>
+    </button>
   </div>
 
   <!-- 出价弹窗 -->
@@ -1825,13 +2097,23 @@
     <div class="modal">
       <h3 id="bidModalTitle">提交报价</h3>
       <div id="bidQuoteInfo" class="hidden">
-        <div class="form-row">
-          <label>产品名称</label>
-          <span id="bidProductName">-</span>
-        </div>
-        <div class="form-row">
-          <label>订单 ID</label>
-          <span id="bidOrderId">-</span>
+        <div id="bidQuoteImages" class="hidden" aria-label="商品图片"></div>
+        <div class="bid-quote-meta">
+          <div class="bid-quote-fields">
+            <div class="form-row">
+              <label>产品名称</label>
+              <span id="bidProductName" title="点击复制">-</span>
+            </div>
+            <div class="form-row">
+              <label>订单 ID</label>
+              <span id="bidOrderId" title="点击复制">-</span>
+            </div>
+          </div>
+          <div id="bidRiskBanner" class="hidden" aria-live="polite"></div>
+          <div id="bidStoreRemark" class="form-row hidden" title="门店备注">
+            <label>门店备注</label>
+            <span id="bidStoreRemarkText"></span>
+          </div>
         </div>
       </div>
       <div id="bidDetailBlock" class="detail-block hidden">加载详情中…</div>
@@ -2230,6 +2512,7 @@
         $('loginStatus').textContent = '已登录：' + (name || ('用户 ' + (state.userId || '')));
         refreshAuctionList();
         refreshGrabOrderIds();
+        setTimeout(placeFabRefreshDefault, 80);
       }
 
       function setLoggedOut() {
@@ -2280,6 +2563,63 @@
           if (typeof renderScheduleTaskList === 'function') renderScheduleTaskList();
           if (typeof loadScheduleGrabbedCount === 'function') loadScheduleGrabbedCount();
         }
+        if (typeof placeFabRefreshDefault === 'function') {
+          setTimeout(placeFabRefreshDefault, 0);
+        }
+      }
+
+      function fabHasSavedPos() {
+        try {
+          var saved = JSON.parse(localStorage.getItem('biddinghero_fab_refresh_pos_v2') || 'null');
+          return saved && typeof saved.left === 'number' && typeof saved.top === 'number';
+        } catch (_) { return false; }
+      }
+
+      function getFabDefaultPos(size) {
+        size = size || 48;
+        var panel = document.querySelector('.tab-panel:not(.hidden)');
+        if (!panel) {
+          return { left: window.innerWidth - size - 24, top: window.innerHeight - size - 72 };
+        }
+        var tableWrap = panel.querySelector('.table-wrap');
+        var pagination = panel.querySelector('.pagination');
+        if (tableWrap && pagination) {
+          var tr = tableWrap.getBoundingClientRect();
+          var pr = pagination.getBoundingClientRect();
+          return {
+            left: Math.min(tr.right, pr.right) - size - 18,
+            top: pr.top - size - 8,
+          };
+        }
+        var pr2 = panel.getBoundingClientRect();
+        return { left: pr2.right - size - 20, top: pr2.bottom - size - 20 };
+      }
+
+      function clampFabPos(left, top, size) {
+        size = size || 48;
+        var maxL = Math.max(0, window.innerWidth - size);
+        var maxT = Math.max(0, window.innerHeight - size);
+        return {
+          left: Math.min(maxL, Math.max(0, left)),
+          top: Math.min(maxT, Math.max(0, top)),
+        };
+      }
+
+      function applyFabPos(el, left, top) {
+        if (!el) return;
+        var size = el.offsetWidth || 48;
+        var p = clampFabPos(left, top, size);
+        el.style.left = p.left + 'px';
+        el.style.top = p.top + 'px';
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+      }
+
+      function placeFabRefreshDefault() {
+        var el = $('fabRefresh');
+        if (!el || fabHasSavedPos()) return;
+        var pos = getFabDefaultPos(el.offsetWidth || 48);
+        applyFabPos(el, pos.left, pos.top);
       }
 
       // ---------- 报价中列表 Tab ----------
@@ -2331,6 +2671,7 @@
           var full = map[String(item)];
           if (full) normalized.push(full);
         }
+        normalized = sortByDeadlineNewestFirst(normalized);
         if (!normalized.length) {
           tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:24px;">暂无数据</td></tr>';
         } else {
@@ -2409,6 +2750,25 @@
             renderAuctionTable();
             showMsg($('auctionMsg'), '', '');
           });
+        });
+      }
+
+      // 截止时间（ms）；无法解析返回 NaN
+      function orderDeadlineMs(o) {
+        return parseTs(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
+      }
+
+      // 按截止时间排序：新的（更晚截止）在前；无截止时间的排最后
+      function sortByDeadlineNewestFirst(list) {
+        return (list || []).slice().sort(function (a, b) {
+          var ma = orderDeadlineMs(a);
+          var mb = orderDeadlineMs(b);
+          var aOk = isFinite(ma);
+          var bOk = isFinite(mb);
+          if (aOk && bOk) return mb - ma;
+          if (aOk) return -1;
+          if (bOk) return 1;
+          return 0;
         });
       }
 
@@ -2499,7 +2859,7 @@
 
       function renderAuctionTable() {
         var tbody = $('auctionTbody');
-        var filtered = applyAuctionFilters(state.auctionList || []);
+        var filtered = sortByDeadlineNewestFirst(applyAuctionFilters(state.auctionList || []));
         var total = filtered.length;
         state.auctionTotal = total;
         var pageSize = state.auctionPageSize || 20;
@@ -2698,6 +3058,9 @@
         $('bidQuoteInfo').classList.remove('hidden');
         $('bidProductName').textContent = ctx.name || '-';
         $('bidOrderId').textContent = ctx.orderId != null ? ctx.orderId : '-';
+        renderBidStoreRemark('');
+        renderBidHeaderImages([]);
+        renderBidRiskBanner(false);
         $('bidDetailBlock').classList.remove('hidden');
         $('bidDetailBlock').classList.add('plain');
         $('bidDetailBlock').textContent = '加载详情中…';
@@ -2734,10 +3097,15 @@
         return api('/api/order-detail?' + params.toString()).then(function (r) {
           if (r && r.success) {
             var detail = (r.data && r.data.detail) || {};
+            var report = (r.data && r.data.report) || null;
+            // 商品图片在左；门店备注在订单 ID 下方；风险提醒悬浮在右侧
+            renderBidHeaderImages(collectDetailImageUrls(detail));
+            renderBidStoreRemark(pickStoreRemark(detail, report));
+            renderBidRiskBanner(hasRepeatedInquiryFromDetail(detail, report));
             // 格式化展示详情
-            renderOrderDetail(detail);
-            // 追加验机报告（若存在）
-            renderInspectionReport((r.data && r.data.report) || null);
+            renderOrderDetail(detail, report);
+            // 追加验机报告（含异常提醒）
+            renderInspectionReport(report);
             // 更新 grab_order_ids
             var grabIds = (r.data && r.data.grabIds) || [];
             state.grabOrderIds = grabIds;
@@ -2766,7 +3134,7 @@
               // 传本机成色和存储，用于高亮匹配的参考价单元格
               var curGrade = (detail.machine_level_name || detail.quality || detail.color_grade || '').replace(/\s+/g, '');
               var curStorage = '';
-              var _report = (r.data && r.data.report) || null;
+              var _report = report;
               if (_report) {
                 var _rd = _report.report_data || {};
                 var _items = Array.isArray(_rd.inspection_items) ? _rd.inspection_items : [];
@@ -2788,6 +3156,9 @@
             var db = $('bidDetailBlock');
             db.classList.add('plain');
             db.textContent = (r && r.message) || '获取详情失败';
+            renderBidHeaderImages([]);
+            renderBidStoreRemark('');
+            renderBidRiskBanner(false);
           }
         });
       }
@@ -2961,8 +3332,146 @@
         return wrap;
       }
 
+      function collectDetailImageUrls(detail) {
+        if (!detail || typeof detail !== 'object') return [];
+        var imgKeys = ['images', 'pic_list', 'picList', 'pics', 'photos', 'image_list', 'imageList', 'report_images'];
+        var allImgUrls = [];
+        imgKeys.forEach(function (ik) {
+          var iv = detail[ik];
+          if (!iv) return;
+          if (typeof iv === 'string') {
+            iv.split(',').forEach(function (u) {
+              u = u.trim();
+              if (u) allImgUrls.push(u);
+            });
+          } else if (Array.isArray(iv)) {
+            iv.forEach(function (item) {
+              if (typeof item === 'string' && item) {
+                allImgUrls.push(item);
+              } else if (item && typeof item === 'object') {
+                var url = item.url || item.image || item.src || item.pic || item.path || '';
+                if (url) allImgUrls.push(url);
+              }
+            });
+          }
+        });
+        var coverImg = detail.cover_image || detail.coverImage || detail.order_cover || detail.orderCover || '';
+        if (coverImg && allImgUrls.indexOf(coverImg) === -1) {
+          allImgUrls.unshift(coverImg);
+        }
+        return allImgUrls;
+      }
+
+      function renderBidHeaderImages(urls) {
+        var box = $('bidQuoteImages');
+        if (!box) return;
+        urls = Array.isArray(urls) ? urls.filter(Boolean) : [];
+        if (!urls.length) {
+          box.innerHTML = '';
+          box.classList.add('hidden');
+          return;
+        }
+        box.innerHTML = urls.map(function (url) {
+          return '<img src="' + escapeHtml(url) + '" loading="lazy" onclick="openImgLightbox(this.src)" alt="商品图片" />';
+        }).join('');
+        box.classList.remove('hidden');
+      }
+
+      function renderBidStoreRemark(text) {
+        var box = $('bidStoreRemark');
+        var textEl = $('bidStoreRemarkText');
+        if (!box || !textEl) return;
+        var v = text != null ? String(text).trim() : '';
+        if (!v) {
+          textEl.textContent = '';
+          box.classList.add('hidden');
+          return;
+        }
+        textEl.textContent = v;
+        box.classList.remove('hidden');
+      }
+
+      // 预览样式开关：true 时强制显示风险提醒
+      var FORCE_SHOW_RISK_BANNER = false;
+
+      function renderBidRiskBanner(show) {
+        var box = $('bidRiskBanner');
+        if (!box) return;
+        if (FORCE_SHOW_RISK_BANNER) show = true;
+        if (!show) {
+          box.innerHTML = '';
+          box.classList.add('hidden');
+          return;
+        }
+        box.innerHTML =
+          '<div class="detail-risk-banner">'
+          + '<span class="risk-ico" aria-hidden="true">!</span>'
+          + '<div class="risk-body">'
+          + '<div class="risk-title">多次查询风险提醒</div>'
+          + '<div class="risk-text">该设备近期有多次询价（可能存在风险），请务必谨慎出价！</div>'
+          + '</div></div>';
+        box.classList.remove('hidden');
+      }
+
       // ---------- 格式化商品详情 ----------
-      function renderOrderDetail(detail) {
+      function reportBasic(report) {
+        if (!report || typeof report !== 'object') return null;
+        var rd = report.report_data || report.reportData;
+        if (!rd || typeof rd !== 'object') return null;
+        return rd.basic || rd.Basic || null;
+      }
+
+      function hasRepeatedInquiryRisk(src) {
+        if (!src || typeof src !== 'object') return false;
+        var tags = src.risk_tag || src.riskTag || src.risk_tags || src.riskTags;
+        if (typeof tags === 'string') tags = [tags];
+        if (!Array.isArray(tags)) return false;
+        return tags.some(function (t) {
+          var s = String(t || '').trim();
+          return s === 'repeatedInquiry' || s === 'repeated_inquiry' || /多次(询价|查询)/.test(s);
+        });
+      }
+
+      function hasRepeatedInquiryFromDetail(detail, report) {
+        var basic = reportBasic(report);
+        return hasRepeatedInquiryRisk(detail)
+          || hasRepeatedInquiryRisk(report)
+          || hasRepeatedInquiryRisk(report && report.report_data)
+          || hasRepeatedInquiryRisk(basic);
+      }
+
+      function pickStoreRemark(detail, report) {
+        var basic = reportBasic(report);
+        var sources = [detail, report, report && report.report_data, basic, detail && detail.order];
+        for (var i = 0; i < sources.length; i++) {
+          var s = sources[i];
+          if (!s || typeof s !== 'object') continue;
+          var v = s.store_remark || s.storeRemark || s.shop_remark || s.shopRemark;
+          if (v != null && String(v).trim()) return String(v).trim();
+        }
+        return '';
+      }
+
+      function collectAbnormalItems(report) {
+        if (!report || typeof report !== 'object') return [];
+        var rd = report.report_data || {};
+        var items = Array.isArray(rd.inspection_items) ? rd.inspection_items
+          : (Array.isArray(report.inspection_items) ? report.inspection_items : []);
+        var out = [];
+        items.forEach(function (it) {
+          if (!it || typeof it !== 'object') return;
+          if (it.is_abnormal !== true && it.isAbnormal !== true) return;
+          var k = it.key_name != null ? String(it.key_name).trim()
+            : (it.keyName != null ? String(it.keyName).trim() : '');
+          var v = it.value_name != null ? String(it.value_name).trim()
+            : (it.valueName != null ? String(it.valueName).trim() : '');
+          if (!k && !v) return;
+          out.push({ key: k || '异常项', value: v || '-' });
+        });
+        return out;
+      }
+
+      function renderOrderDetail(detail, report) {
         var db = $('bidDetailBlock');
         db.classList.remove('plain');
         if (!detail || typeof detail !== 'object') {
@@ -3014,12 +3523,14 @@
           highest_price:1, current_price:1, currentPrice:1, purchase_price:1, reference_price:1 };
         // 需要跳过的键（长文本/大对象另行渲染）
         var SKIP = { images:1, pic_list:1, picList:1, pics:1, photos:1,
-          quote_list:1, quoteList:1, bid_list:1, bidList:1, records:1, bids:1 };
+          quote_list:1, quoteList:1, bid_list:1, bidList:1, records:1, bids:1,
+          risk_tag:1, riskTag:1, risk_tags:1, riskTags:1 };
         // 内部字段/封面图，不进入字段网格（封面单独展示）
         var HIDE = { id:1, order_cover:1, orderCover:1, cover_image:1, coverImage:1,
           is_audit_mode:1, third_party_response:1, thirdPartyResponse:1, error_message:1,
           platform:1, order:1, bidder:1, bid_source:1, order_channel:1,
-          status:1, status_name:1, order_id:1 };
+          status:1, status_name:1, order_id:1,
+          store_remark:1, storeRemark:1, shop_remark:1, shopRemark:1 };
         // 时间类字段：统一格式为 YYYY-MM-DD HH:mm:ss
         var TIME_KEYS = { created_at:1, createdAt:1, updated_at:1, updatedAt:1,
           submitted_at:1, submittedAt:1, sign_time:1, signTime:1,
@@ -3027,6 +3538,7 @@
           deadline_time:1, deadlineTime:1, created_time:1 };
 
         var buf = [];
+
         // —— 顶部：型号 + 状态 + 右侧倒计时 ——
         var title = detail.order_title || detail.model_name || detail.modelName
           || detail.productName || detail.title || '';
@@ -3065,44 +3577,6 @@
         if (cells.length) {
           buf.push('<div class="detail-section-title">基本信息</div>');
           buf.push('<div class="detail-grid">' + cells.join('') + '</div>');
-        }
-
-        // —— 图片展示：images / pic_list / pics / photos 等 ——
-        var imgKeys = ['images', 'pic_list', 'picList', 'pics', 'photos', 'image_list', 'imageList', 'report_images'];
-        var allImgUrls = [];
-        imgKeys.forEach(function (ik) {
-          var iv = detail[ik];
-          if (!iv) return;
-          if (typeof iv === 'string') {
-            // 逗号分隔的 URL
-            iv.split(',').forEach(function (u) {
-              u = u.trim();
-              if (u) allImgUrls.push(u);
-            });
-          } else if (Array.isArray(iv)) {
-            iv.forEach(function (item) {
-              if (typeof item === 'string' && item) {
-                allImgUrls.push(item);
-              } else if (item && typeof item === 'object') {
-                // 对象形式：{url, image, src, ...}
-                var url = item.url || item.image || item.src || item.pic || item.path || '';
-                if (url) allImgUrls.push(url);
-              }
-            });
-          }
-        });
-        // 封面图也加入展示
-        var coverImg = detail.cover_image || detail.coverImage || detail.order_cover || detail.orderCover || '';
-        if (coverImg && allImgUrls.indexOf(coverImg) === -1) {
-          allImgUrls.unshift(coverImg);
-        }
-        if (allImgUrls.length) {
-          buf.push('<div class="detail-section-title">商品图片</div>');
-          buf.push('<div class="detail-images">');
-          allImgUrls.forEach(function (url) {
-            buf.push('<img src="' + escapeHtml(url) + '" loading="lazy" onclick="openImgLightbox(this.src)" />');
-          });
-          buf.push('</div>');
         }
 
         // 嵌套对象（如 user、address 等）拉平：同样只显示有中文标签的键
@@ -3171,6 +3645,22 @@
 
         var rd = report.report_data || {};
 
+        // —— 报告异常提醒（is_abnormal === true） ——
+        var abnormalItems = collectAbnormalItems(report);
+        if (abnormalItems.length) {
+          var abCard = document.createElement('div');
+          abCard.className = 'detail-alert-card abnormal';
+          var rowsHtml = abnormalItems.map(function (it) {
+            return '<div class="abnormal-row">'
+              + '<span class="abnormal-k">' + escapeHtml(it.key) + '</span>'
+              + '<span class="abnormal-v">' + escapeHtml(it.value) + '</span>'
+              + '</div>';
+          }).join('');
+          abCard.innerHTML = '<div class="alert-head"><span class="alert-bar" aria-hidden="true"></span>报告异常提醒</div>'
+            + '<div class="alert-body">' + rowsHtml + '</div>';
+          wrap.appendChild(abCard);
+        }
+
         // —— 验机报告图片（report.report_data.images 或 report.images: [{url, title}, ...]） ——
         var reportImages = Array.isArray(rd.images) ? rd.images
           : (Array.isArray(report.images) ? report.images : []);
@@ -3221,8 +3711,9 @@
             if (!it) return;
             var v = it.value_name != null ? String(it.value_name) : '';
             if (!v) return;
+            var abCls = (it.is_abnormal === true || it.isAbnormal === true) ? ' v abnormal' : 'v';
             headerCells.push('<div class="cell"><span class="k">' + escapeHtml(hk.label) + '</span>'
-              + '<span class="v">' + escapeHtml(v) + '</span></div>');
+              + '<span class="' + abCls + '">' + escapeHtml(v) + '</span></div>');
           });
 
           // 列表下方：所有 matched === true 的项（若字段缺失则全部列出）
@@ -3244,8 +3735,9 @@
                 });
               }
               if (!k && !v) return;
+              var abCls = (it.is_abnormal === true || it.isAbnormal === true) ? ' v abnormal' : 'v';
               listCells.push('<div class="cell"><span class="k">' + escapeHtml(k || '-') + '</span>'
-                + '<span class="v">' + escapeHtml(v || '-') + '</span></div>');
+                + '<span class="' + abCls + '">' + escapeHtml(v || '-') + '</span></div>');
             });
           }
 
@@ -3274,20 +3766,23 @@
 
           // 检测项内嵌图片
           if (inspImgUrls.length) {
-            var imgTitle = document.createElement('div');
-            imgTitle.className = 'detail-section-title';
-            imgTitle.textContent = '检测项图片';
-            wrap.appendChild(imgTitle);
-            var imgWrap = document.createElement('div');
-            imgWrap.className = 'detail-images';
-            imgWrap.innerHTML = inspImgUrls.map(function (url) {
+            var imgTitle2 = document.createElement('div');
+            imgTitle2.className = 'detail-section-title';
+            imgTitle2.textContent = '检测项图片';
+            wrap.appendChild(imgTitle2);
+            var imgWrap2 = document.createElement('div');
+            imgWrap2.className = 'detail-images';
+            imgWrap2.innerHTML = inspImgUrls.map(function (url) {
               return '<img src="' + escapeHtml(url) + '" loading="lazy" onclick="openImgLightbox(this.src)" />';
             }).join('');
-            wrap.appendChild(imgWrap);
+            wrap.appendChild(imgWrap2);
           }
         }
 
-        db.appendChild(wrap);
+        // 仅有异常提醒、无其他验机内容时也展示
+        if (wrap.childNodes.length) {
+          db.appendChild(wrap);
+        }
       }
 
       function submitBid() {
@@ -3338,6 +3833,86 @@
         });
       }
 
+      function refreshCurrentList() {
+        var fab = $('fabRefresh');
+        if (fab) fab.classList.add('spinning');
+        var done = function () { if (fab) fab.classList.remove('spinning'); };
+        var p = null;
+        if (!$('tabPanelAuction').classList.contains('hidden')) {
+          state.auctionPage = 1;
+          p = refreshAuctionList();
+        } else if (!$('tabPanelGrab').classList.contains('hidden')) {
+          p = refreshGrabList();
+        } else if (!$('tabPanelMyBids').classList.contains('hidden')) {
+          state.myBidsPage = 1;
+          p = refreshMyBids();
+        } else if (typeof loadScheduleGrabbedCount === 'function') {
+          p = loadScheduleGrabbedCount();
+        }
+        return Promise.resolve(p).catch(function () {}).then(done);
+      }
+
+      function bindFabRefresh() {
+        var el = $('fabRefresh');
+        if (!el) return;
+        var posKey = 'biddinghero_fab_refresh_pos_v2';
+        var dragging = false;
+        var moved = false;
+        var startX = 0, startY = 0, origLeft = 0, origTop = 0;
+
+        function savePos() {
+          var r = el.getBoundingClientRect();
+          try { localStorage.setItem(posKey, JSON.stringify({ left: r.left, top: r.top })); } catch (_) {}
+        }
+        if (fabHasSavedPos()) {
+          try {
+            var saved = JSON.parse(localStorage.getItem(posKey) || 'null');
+            applyFabPos(el, saved.left, saved.top);
+          } catch (_) { placeFabRefreshDefault(); }
+        } else {
+          placeFabRefreshDefault();
+        }
+
+        el.addEventListener('pointerdown', function (e) {
+          if (e.button != null && e.button !== 0) return;
+          dragging = true;
+          moved = false;
+          el.setPointerCapture(e.pointerId);
+          var r = el.getBoundingClientRect();
+          startX = e.clientX;
+          startY = e.clientY;
+          origLeft = r.left;
+          origTop = r.top;
+          el.classList.add('dragging');
+        });
+        el.addEventListener('pointermove', function (e) {
+          if (!dragging) return;
+          var dx = e.clientX - startX;
+          var dy = e.clientY - startY;
+          if (!moved && (dx * dx + dy * dy) < 25) return;
+          moved = true;
+          applyFabPos(el, origLeft + dx, origTop + dy);
+        });
+        function endDrag(e) {
+          if (!dragging) return;
+          dragging = false;
+          el.classList.remove('dragging');
+          try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+          if (moved) savePos();
+          else refreshCurrentList();
+        }
+        el.addEventListener('pointerup', endDrag);
+        el.addEventListener('pointercancel', endDrag);
+        window.addEventListener('resize', function () {
+          if (fabHasSavedPos()) {
+            var r = el.getBoundingClientRect();
+            applyFabPos(el, r.left, r.top);
+          } else {
+            placeFabRefreshDefault();
+          }
+        });
+      }
+
       // ---------- 事件绑定 ----------
       function bindEvents() {
         $('btnLogin').addEventListener('click', doLogin);
@@ -3346,6 +3921,7 @@
         document.querySelectorAll('.tab-nav-item').forEach(function (el) {
           el.addEventListener('click', function () { switchTab(el.getAttribute('data-tab')); });
         });
+        bindFabRefresh();
         $('btnRefreshAuction').addEventListener('click', function () { state.auctionPage = 1; refreshAuctionList(); });
         $('btnResetAuction').addEventListener('click', function () {
           state.filters = { cate: [], brand: [], channel: [], quality: [] };
@@ -3448,6 +4024,37 @@
         $('btnBidSubmit').addEventListener('click', submitBid);
         $('bidModal').addEventListener('click', function (e) {
           if (e.target === $('bidModal')) { closeBidModal(); refreshVisibleLists(); }
+        });
+        ['bidProductName', 'bidOrderId'].forEach(function (id) {
+          var el = $(id);
+          if (!el) return;
+          el.addEventListener('click', function () {
+            var txt = (el.textContent || '').trim();
+            if (txt && txt !== '-') copyText(txt, el);
+          });
+        });
+
+        // Esc：优先关灯箱，再关最上层弹窗
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape') return;
+          var lightboxes = document.querySelectorAll('.img-lightbox');
+          if (lightboxes.length) {
+            lightboxes[lightboxes.length - 1].remove();
+            e.preventDefault();
+            return;
+          }
+          var scheduleModal = $('scheduleTaskModal');
+          if (scheduleModal && !scheduleModal.classList.contains('hidden')) {
+            closeScheduleTaskModal();
+            e.preventDefault();
+            return;
+          }
+          var bidModal = $('bidModal');
+          if (bidModal && !bidModal.classList.contains('hidden')) {
+            closeBidModal();
+            refreshVisibleLists();
+            e.preventDefault();
+          }
         });
       }
 
@@ -4050,6 +4657,7 @@
             var d = r.data;
             var text = '共 ' + (d.total || 0) + ' 条，抢单 ' + (d.grabbed || 0) + '，报价 ' + (d.quoted || 0);
             if (d.skipped) text += '，跳过已报价 ' + d.skipped;
+            if (d.skipped_short) text += '，剩余不足30秒跳过 ' + d.skipped_short;
             if (!isAuto) toast('执行完成：' + text, 'success');
             if (d.errors && d.errors.length) console.warn('execute-task errors', d.errors);
           } else {
