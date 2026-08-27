@@ -500,8 +500,8 @@
     .cell-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .thumb {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       object-fit: cover;
       border-radius: 4px;
       border: 1px solid var(--border);
@@ -510,12 +510,44 @@
       display: block;
     }
     .thumb-empty {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       border-radius: 4px;
       border: 1px dashed var(--border);
       background: var(--surface-2);
       display: block;
+    }
+    .thumb-wrap {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+      vertical-align: middle;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .thumb-wrap .thumb,
+    .thumb-wrap .thumb-empty {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 0;
+    }
+    .ai-badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      padding: 1px 4px 2px;
+      font-size: 9px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: #5b21b6;
+      background: rgba(216, 180, 254, 0.95);
+      border-radius: 4px 0 4px 0;
+      pointer-events: none;
+      white-space: nowrap;
     }
     .deadline {
       display: flex;
@@ -672,6 +704,11 @@
       max-width: min(400px, 52%);
       margin: 0;
       pointer-events: none;
+    }
+    #bidRiskBanner:not(.hidden) {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     #bidRiskBanner.hidden { display: none !important; }
     .detail-risk-banner {
@@ -843,6 +880,18 @@
     /* 市场价格参考：修正 heading 间距，使其与基本一致 */
     #bidDetailBlock .ref-price-block > .detail-section-title { margin-top: 14px; }
     .inspection-report-block { margin-top: 16px; }
+    .ai-report-block { margin-top: 14px; }
+    .ai-report-block .detail-section-title {
+      color: #7c3aed;
+      border-left-color: #7c3aed;
+    }
+    .ai-report-block .detail-grid .cell .k {
+      color: var(--text);
+    }
+    .ai-report-block .detail-grid .cell .v,
+    .ai-report-block .detail-grid .cell .v.strong {
+      color: #7c3aed;
+    }
 
     .detail-alert-card {
       margin: 12px 0;
@@ -883,8 +932,11 @@
       font-weight: 600;
     }
     .detail-alert-card.abnormal {
-      border-color: #f0c2b8;
-      background: linear-gradient(180deg, #fffafa 0%, #fff5f3 100%);
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      padding-left: 0;
+      padding-right: 0;
     }
     .detail-alert-card.abnormal .alert-head { color: var(--accent); }
     .detail-alert-card.abnormal .alert-bar { background: var(--accent); }
@@ -1921,6 +1973,14 @@
               <span class="chip" data-value="无法开机">无法开机</span>
             </div>
           </div>
+          <div class="filter-group">
+            <div class="g-title">AI质检</div>
+            <div class="filter-chips" data-group="aiReport" data-mode="single">
+              <span class="chip" data-value="all">全部</span>
+              <span class="chip" data-value="1">AI已质检</span>
+              <span class="chip" data-value="0">AI未质检</span>
+            </div>
+          </div>
           <div class="filter-actions">
             <button type="button" class="btn btn-ghost btn-small" id="btnFilterReset">重置</button>
             <button type="button" class="btn btn-primary btn-small" id="btnFilterApply">确定</button>
@@ -2444,7 +2504,7 @@
       function bindCopyOnClick(root) {
         root.addEventListener('click', function (e) {
           var td = e.target.closest('td');
-          if (td && !td.querySelector('.cell-actions') && !td.querySelector('.thumb') && !td.querySelector('img.thumb')) {
+          if (td && !td.querySelector('.cell-actions') && !td.querySelector('.thumb') && !td.querySelector('img.thumb') && !td.querySelector('.thumb-wrap')) {
             var txt = (td.textContent || '').trim();
             if (txt && txt !== '-' && txt !== '暂无数据') copyText(txt, td);
             return;
@@ -2498,8 +2558,8 @@
         grabOrderIds: [],  // 报价中列表：只有此列表中包含的 orderId 才展示报价数据列表详情
         grabList: [],      // 报价中列表原始数据（供「报价中」Tab 渲染）
         currentBid: null,  // 当前正在处理的出价上下文
-        filters: { cate: [], brand: [], channel: [], quality: [] },
-        draftFilters: { cate: [], brand: [], channel: [], quality: [] },
+        filters: { cate: [], brand: [], channel: [], quality: [], aiReport: ['all'] },
+        draftFilters: { cate: [], brand: [], channel: [], quality: [], aiReport: ['all'] },
       };
 
       // ---------- 登录 / 登出 ----------
@@ -2683,9 +2743,7 @@
             var quality = pick(o, ['machine_level_name','quality','color_grade','colorGrade','grade']);
             var channel = pick(o, ['order_channel_name','channelName','channel']);
             var img = pick(o, ['cover_image','coverImage','image','pic'], '');
-            var thumb = img && img !== '-'
-              ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="openImgLightbox(this.src)" loading="lazy" />'
-              : '<span class="thumb-empty"></span>';
+            var thumb = renderListThumb(img, orderHasAiReport(o));
             var deadline = fmtDeadlineHtml(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
             var actions = '<div class="cell-actions">'
               + '<button class="btn btn-small" data-action="detail" data-oid="' + escapeHtml(oid) + '">查看详情</button>'
@@ -2772,11 +2830,28 @@
         });
       }
 
-      // 应用筛选条件，返回过滤后的数组（多选：组内 OR，组间 AND）
+      // 列表缩略图：has_ai_report 时左上角叠「AI已质检」
+      function orderHasAiReport(o) {
+        if (!o || typeof o !== 'object') return false;
+        var v = o.has_ai_report != null ? o.has_ai_report : o.hasAiReport;
+        return v === true || v === 1 || v === '1' || v === 'true';
+      }
+
+      function renderListThumb(img, hasAi) {
+        var inner = img && img !== '-'
+          ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="openImgLightbox(this.src)" loading="lazy" />'
+          : '<span class="thumb-empty"></span>';
+        var badge = hasAi ? '<span class="ai-badge" title="AI已质检">AI已质检</span>' : '';
+        return '<span class="thumb-wrap">' + badge + inner + '</span>';
+      }
+
+      // 应用筛选条件，返回过滤后的数组（多选：组内 OR，组间 AND；AI质检为单选）
       function applyAuctionFilters(list) {
         var f = state.filters || {};
+        var aiMode = (f.aiReport && f.aiReport[0]) || 'all';
         var hasAny = (f.cate && f.cate.length) || (f.brand && f.brand.length)
-                  || (f.channel && f.channel.length) || (f.quality && f.quality.length);
+                  || (f.channel && f.channel.length) || (f.quality && f.quality.length)
+                  || (aiMode === '1' || aiMode === '0');
         if (!hasAny) return list.slice();
         return list.filter(function (o) {
           if (f.cate && f.cate.length) {
@@ -2806,6 +2881,8 @@
             for (var i = 0; i < f.quality.length; i++) { if (v.indexOf(f.quality[i]) !== -1) { hit = true; break; } }
             if (!hit) return false;
           }
+          if (aiMode === '1' && !orderHasAiReport(o)) return false;
+          if (aiMode === '0' && orderHasAiReport(o)) return false;
           return true;
         });
       }
@@ -2823,6 +2900,9 @@
         add('品牌', f.brand);
         add('货源', f.channel);
         add('成色', f.quality);
+        var aiMode = (f.aiReport && f.aiReport[0]) || 'all';
+        if (aiMode === '1') parts.push('<span class="tag-sm">AI质检: AI已质检</span>');
+        else if (aiMode === '0') parts.push('<span class="tag-sm">AI质检: AI未质检</span>');
         var el = $('filterSummary');
         if (el) el.innerHTML = parts.length ? parts.join('') : '<span style="color:var(--text-muted);">全部</span>';
       }
@@ -2833,6 +2913,7 @@
         document.querySelectorAll('.filter-chips').forEach(function (group) {
           var key = group.getAttribute('data-group');
           var picked = d[key] || [];
+          if (key === 'aiReport' && !picked.length) picked = ['all'];
           group.querySelectorAll('.chip').forEach(function (c) {
             var v = c.getAttribute('data-value') || '';
             c.classList.toggle('active', picked.indexOf(v) !== -1);
@@ -2842,11 +2923,14 @@
 
       function openFilter() {
         // 打开时以已生效的筛选为基础做草稿
+        var ai = (state.filters.aiReport && state.filters.aiReport.length)
+          ? state.filters.aiReport.slice() : ['all'];
         state.draftFilters = {
           cate: (state.filters.cate || []).slice(),
           brand: (state.filters.brand || []).slice(),
           channel: (state.filters.channel || []).slice(),
           quality: (state.filters.quality || []).slice(),
+          aiReport: ai,
         };
         syncFilterChipsFromDraft();
         $('filterPanel').classList.add('open');
@@ -2879,9 +2963,7 @@
             var quality = pick(o, ['machine_level_name','quality','color_grade','colorGrade','grade']);
             var channel = pick(o, ['order_channel_name','channelName','channel']);
             var img = pick(o, ['cover_image','coverImage','image','pic'], '');
-            var thumb = img && img !== '-'
-              ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="openImgLightbox(this.src)" loading="lazy" />'
-              : '<span class="thumb-empty"></span>';
+            var thumb = renderListThumb(img, orderHasAiReport(o));
             var deadline = fmtDeadlineHtml(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
             var quoting = orderIsQuoting(oid);
             var statusTag = quoting
@@ -2988,9 +3070,7 @@
             var deadline = fmtDeadlineHtml(pick(o, ['deadline_time','deadlineTime','expire_at','expireAt','end_time','endTime','deadline'], ''));
             var img = pick(o, ['order_cover','cover_image','coverImage','image','pic'], '')
                    || pick(auc, ['cover_image','coverImage','image','pic'], '');
-            var thumb = img && img !== '-'
-              ? '<img class="thumb" src="' + escapeHtml(img) + '" onclick="openImgLightbox(this.src)" loading="lazy" />'
-              : '<span class="thumb-empty"></span>';
+            var thumb = renderListThumb(img, orderHasAiReport(o) || orderHasAiReport(auc));
             return '<tr>'
               + '<td>' + escapeHtml(oid) + '</td>'
               + '<td>' + thumb + '</td>'
@@ -3098,12 +3178,15 @@
           if (r && r.success) {
             var detail = (r.data && r.data.detail) || {};
             var report = (r.data && r.data.report) || null;
+            var aiReport = (r.data && r.data.aiReport) || null;
             // 商品图片在左；门店备注在订单 ID 下方；风险提醒悬浮在右侧
             renderBidHeaderImages(collectDetailImageUrls(detail));
             renderBidStoreRemark(pickStoreRemark(detail, report));
-            renderBidRiskBanner(hasRepeatedInquiryFromDetail(detail, report));
+            renderBidRiskBanner(collectRiskTagsFromDetail(detail, report));
             // 格式化展示详情
             renderOrderDetail(detail, report);
+            // AI 质检结果（有数据才展示）
+            renderAiReport(aiReport);
             // 追加验机报告（含异常提醒）
             renderInspectionReport(report);
             // 更新 grab_order_ids
@@ -3391,25 +3474,46 @@
         box.classList.remove('hidden');
       }
 
-      // 预览样式开关：true 时强制显示风险提醒
+      // 预览样式开关：true 时强制显示全部已知风险提醒
       var FORCE_SHOW_RISK_BANNER = false;
 
-      function renderBidRiskBanner(show) {
+      var RISK_TAG_DEFS = {
+        repeatedInquiry: {
+          title: '多次询价风险提醒',
+          text: '该设备近期有多次询价（可能存在风险），请务必谨慎出价！'
+        },
+        historyDeal: {
+          title: '三方成交案例提醒',
+          text: '该设备命中平台三方成交案例库，请结合案例信息谨慎出价！'
+        }
+      };
+
+      function renderBidRiskBanner(tags) {
         var box = $('bidRiskBanner');
         if (!box) return;
-        if (FORCE_SHOW_RISK_BANNER) show = true;
-        if (!show) {
+        var list = Array.isArray(tags) ? tags.slice() : [];
+        if (FORCE_SHOW_RISK_BANNER) {
+          list = Object.keys(RISK_TAG_DEFS);
+        }
+        var html = [];
+        for (var i = 0; i < list.length; i++) {
+          var def = RISK_TAG_DEFS[list[i]];
+          if (!def) continue;
+          html.push(
+            '<div class="detail-risk-banner">'
+            + '<span class="risk-ico" aria-hidden="true">!</span>'
+            + '<div class="risk-body">'
+            + '<div class="risk-title">' + escapeHtml(def.title) + '</div>'
+            + '<div class="risk-text">' + escapeHtml(def.text) + '</div>'
+            + '</div></div>'
+          );
+        }
+        if (!html.length) {
           box.innerHTML = '';
           box.classList.add('hidden');
           return;
         }
-        box.innerHTML =
-          '<div class="detail-risk-banner">'
-          + '<span class="risk-ico" aria-hidden="true">!</span>'
-          + '<div class="risk-body">'
-          + '<div class="risk-title">多次查询风险提醒</div>'
-          + '<div class="risk-text">该设备近期有多次询价（可能存在风险），请务必谨慎出价！</div>'
-          + '</div></div>';
+        box.innerHTML = html.join('');
         box.classList.remove('hidden');
       }
 
@@ -3421,23 +3525,48 @@
         return rd.basic || rd.Basic || null;
       }
 
-      function hasRepeatedInquiryRisk(src) {
-        if (!src || typeof src !== 'object') return false;
-        var tags = src.risk_tag || src.riskTag || src.risk_tags || src.riskTags;
-        if (typeof tags === 'string') tags = [tags];
-        if (!Array.isArray(tags)) return false;
-        return tags.some(function (t) {
-          var s = String(t || '').trim();
-          return s === 'repeatedInquiry' || s === 'repeated_inquiry' || /多次(询价|查询)/.test(s);
-        });
+      function normalizeRiskTag(t) {
+        var s = String(t || '').trim();
+        if (!s) return '';
+        if (s === 'repeatedInquiry' || s === 'repeated_inquiry' || /多次(询价|查询)/.test(s)) {
+          return 'repeatedInquiry';
+        }
+        if (s === 'historyDeal' || s === 'history_deal' || /三方成交|成交案例/.test(s)) {
+          return 'historyDeal';
+        }
+        return '';
       }
 
-      function hasRepeatedInquiryFromDetail(detail, report) {
+      function collectRiskTagsFromSrc(src) {
+        if (!src || typeof src !== 'object') return [];
+        var tags = src.risk_tag || src.riskTag || src.risk_tags || src.riskTags;
+        if (typeof tags === 'string') tags = [tags];
+        if (!Array.isArray(tags)) return [];
+        var out = [];
+        var seen = {};
+        for (var i = 0; i < tags.length; i++) {
+          var key = normalizeRiskTag(tags[i]);
+          if (!key || seen[key] || !RISK_TAG_DEFS[key]) continue;
+          seen[key] = true;
+          out.push(key);
+        }
+        return out;
+      }
+
+      function collectRiskTagsFromDetail(detail, report) {
         var basic = reportBasic(report);
-        return hasRepeatedInquiryRisk(detail)
-          || hasRepeatedInquiryRisk(report)
-          || hasRepeatedInquiryRisk(report && report.report_data)
-          || hasRepeatedInquiryRisk(basic);
+        var sources = [detail, report, report && report.report_data, basic];
+        var out = [];
+        var seen = {};
+        for (var i = 0; i < sources.length; i++) {
+          var tags = collectRiskTagsFromSrc(sources[i]);
+          for (var j = 0; j < tags.length; j++) {
+            if (seen[tags[j]]) continue;
+            seen[tags[j]] = true;
+            out.push(tags[j]);
+          }
+        }
+        return out;
       }
 
       function pickStoreRemark(detail, report) {
@@ -3629,6 +3758,74 @@
           return '<div style="padding:6px 0; border-bottom:1px dashed var(--border);">' + line + '</div>';
         }).join('');
         content.innerHTML = buf;
+      }
+
+      // ---------- AI 质检结果 ----------
+      function pickAiReportResult(aiReport) {
+        if (!aiReport || typeof aiReport !== 'object') return null;
+        var results = aiReport.results;
+        if (!Array.isArray(results) || !results.length) {
+          // 兼容直接返回单条
+          if (aiReport.ppv || aiReport.machine_level_name || aiReport.machineLevelName
+              || aiReport.market_price != null || aiReport.marketPrice != null) {
+            return aiReport;
+          }
+          return null;
+        }
+        return results[0] || null;
+      }
+
+      function renderAiReport(aiReport) {
+        var db = $('bidDetailBlock');
+        if (!db) return;
+        var old = db.querySelector('.ai-report-block');
+        if (old) old.remove();
+        var item = pickAiReportResult(aiReport);
+        if (!item || typeof item !== 'object') return;
+
+        var level = item.machine_level_name || item.machineLevelName || '';
+        var marketPrice = item.market_price != null ? item.market_price
+          : (item.marketPrice != null ? item.marketPrice
+            : (item.raw_data && (item.raw_data.marketPrice != null ? item.raw_data.marketPrice : item.raw_data.market_price)));
+        var ppv = Array.isArray(item.ppv) ? item.ppv
+          : (item.raw_data && Array.isArray(item.raw_data.ppv) ? item.raw_data.ppv : []);
+        var cells = [];
+        if (level) {
+          cells.push('<div class="cell"><span class="k">质检结果</span>'
+            + '<span class="v">' + escapeHtml(String(level)) + '</span></div>');
+        }
+        if (marketPrice != null && marketPrice !== '') {
+          var priceTxt = fmtMoney(marketPrice);
+          if (priceTxt && priceTxt !== '-') {
+            cells.push('<div class="cell"><span class="k">市场价格</span>'
+              + '<span class="v strong">' + escapeHtml(priceTxt) + '</span></div>');
+          }
+        }
+        ppv.forEach(function (it) {
+          if (!it || typeof it !== 'object') return;
+          var k = it.ppnName != null ? String(it.ppnName).trim()
+            : (it.ppn_name != null ? String(it.ppn_name).trim() : '');
+          var v = it.ppvName != null ? String(it.ppvName).trim()
+            : (it.ppv_name != null ? String(it.ppv_name).trim() : '');
+          if (!k && !v) return;
+          cells.push('<div class="cell"><span class="k">' + escapeHtml(k || '-') + '</span>'
+            + '<span class="v">' + escapeHtml(v || '-') + '</span></div>');
+        });
+        if (!cells.length) return;
+
+        var wrap = document.createElement('div');
+        wrap.className = 'ai-report-block';
+        wrap.innerHTML = '<div class="detail-section-title">AI质检结果</div>'
+          + '<div class="detail-grid">' + cells.join('') + '</div>';
+        // 插到详情内容最前（标题行之后若有 head，则跟在其后）
+        var head = db.querySelector('.detail-head');
+        if (head && head.nextSibling) {
+          db.insertBefore(wrap, head.nextSibling);
+        } else if (db.firstChild) {
+          db.insertBefore(wrap, db.firstChild);
+        } else {
+          db.appendChild(wrap);
+        }
       }
 
       // ---------- 验机报告（合并进 bidDetailBlock 尾部） ----------
@@ -3924,8 +4121,8 @@
         bindFabRefresh();
         $('btnRefreshAuction').addEventListener('click', function () { state.auctionPage = 1; refreshAuctionList(); });
         $('btnResetAuction').addEventListener('click', function () {
-          state.filters = { cate: [], brand: [], channel: [], quality: [] };
-          state.draftFilters = { cate: [], brand: [], channel: [], quality: [] };
+          state.filters = { cate: [], brand: [], channel: [], quality: [], aiReport: ['all'] };
+          state.draftFilters = { cate: [], brand: [], channel: [], quality: [], aiReport: ['all'] };
           document.querySelectorAll('.filter-chips .chip').forEach(function (c) { c.classList.remove('active'); });
           state.auctionPage = 1;
           updateFilterSummary();
@@ -3963,10 +4160,18 @@
         });
         document.querySelectorAll('.filter-chips').forEach(function (group) {
           var key = group.getAttribute('data-group');
+          var single = group.getAttribute('data-mode') === 'single';
           group.addEventListener('click', function (e) {
             var chip = e.target.closest && e.target.closest('.chip');
             if (!chip || !group.contains(chip)) return;
             var v = chip.getAttribute('data-value') || '';
+            if (single) {
+              state.draftFilters[key] = [v];
+              group.querySelectorAll('.chip').forEach(function (c) {
+                c.classList.toggle('active', (c.getAttribute('data-value') || '') === v);
+              });
+              return;
+            }
             var arr = state.draftFilters[key] || (state.draftFilters[key] = []);
             var idx = arr.indexOf(v);
             if (idx === -1) arr.push(v); else arr.splice(idx, 1);
@@ -3974,21 +4179,25 @@
           });
         });
         $('btnFilterReset').addEventListener('click', function () {
-          state.draftFilters = { cate: [], brand: [], channel: [], quality: [] };
+          state.draftFilters = { cate: [], brand: [], channel: [], quality: [], aiReport: ['all'] };
           syncFilterChipsFromDraft();
         });
-        $('btnFilterApply').addEventListener('click', function () {
+        function applyFilterDraft() {
+          var ai = (state.draftFilters.aiReport && state.draftFilters.aiReport.length)
+            ? state.draftFilters.aiReport.slice() : ['all'];
           state.filters = {
             cate: (state.draftFilters.cate || []).slice(),
             brand: (state.draftFilters.brand || []).slice(),
             channel: (state.draftFilters.channel || []).slice(),
             quality: (state.draftFilters.quality || []).slice(),
+            aiReport: ai,
           };
           state.auctionPage = 1;
           updateFilterSummary();
           renderAuctionTable();
           closeFilter();
-        });
+        }
+        $('btnFilterApply').addEventListener('click', applyFilterDraft);
 
         $('auctionTbody').addEventListener('click', function (e) {
           var t = e.target;
@@ -4034,8 +4243,16 @@
           });
         });
 
-        // Esc：优先关灯箱，再关最上层弹窗
+        // Esc：优先关灯箱，再关弹窗/筛选；Enter：筛选面板打开时确认
         document.addEventListener('keydown', function (e) {
+          var filterOpen = $('filterPanel') && $('filterPanel').classList.contains('open');
+          if (e.key === 'Enter' && filterOpen) {
+            var tag = (e.target && e.target.tagName) || '';
+            if (tag === 'TEXTAREA' || (tag === 'INPUT' && e.target.type !== 'button' && e.target.type !== 'submit')) return;
+            e.preventDefault();
+            applyFilterDraft();
+            return;
+          }
           if (e.key !== 'Escape') return;
           var lightboxes = document.querySelectorAll('.img-lightbox');
           if (lightboxes.length) {
@@ -4053,6 +4270,11 @@
           if (bidModal && !bidModal.classList.contains('hidden')) {
             closeBidModal();
             refreshVisibleLists();
+            e.preventDefault();
+            return;
+          }
+          if (filterOpen) {
+            closeFilter();
             e.preventDefault();
           }
         });

@@ -304,6 +304,34 @@ class BiddingHeroAPI:
         except Exception:
             return {}
 
+    def get_ai_reports(self, order_id: Any) -> Dict[str, Any]:
+        """AI 质检报告：/api/base/ai-reports/?order_id=..."""
+        if not self._token:
+            raise ValueError("获取 AI 质检报告需要 token，请先登录")
+        url = self.base_url + "/api/base/ai-reports/"
+        r = requests.get(
+            url,
+            params={"order_id": str(order_id)},
+            headers=self._headers(with_token=True),
+            timeout=self.timeout,
+            verify=self.verify,
+        )
+        r.raise_for_status()
+        try:
+            data = r.json() if r.text.strip() else {}
+        except (ValueError, json.JSONDecodeError):
+            raise RuntimeError("AI 质检报告接口返回非 JSON")
+        if data.get("code") is not None and data.get("code") != 0:
+            raise RuntimeError(data.get("msg", "获取 AI 质检报告失败"))
+        return data.get("data", data) or {}
+
+    def get_ai_reports_safe(self, order_id: Any) -> Dict[str, Any]:
+        """详情流程里拉 AI 质检失败不阻断详情展示。"""
+        try:
+            return self.get_ai_reports(order_id)
+        except Exception:
+            return {}
+
     def cancel_grab_order(self, order_id: Any) -> Dict[str, Any]:
         """取消抢单。"""
         if not self._token:

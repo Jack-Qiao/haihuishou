@@ -189,6 +189,7 @@ def api_order_detail():
     try:
         data = api.get_order_detail(order_id)
         report = api.get_order_report_safe(order_id)
+        ai_report = api.get_ai_reports_safe(order_id)
         # 再拉一次报价中列表，返回给前端做同步
         grab_ids: List[Any] = []
         try:
@@ -204,6 +205,7 @@ def api_order_detail():
             "data": {
                 "detail": data,
                 "report": report,
+                "aiReport": ai_report,
                 "grabList": grab_list,
                 "grabIds": grab_ids,
             },
