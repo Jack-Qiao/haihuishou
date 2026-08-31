@@ -8,8 +8,10 @@ import os
 import re
 import sys
 import threading
+import time
 import unicodedata
-from typing import Any, Dict
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from flask import Flask, jsonify, render_template, request, send_file, session
 
@@ -28,6 +30,85 @@ COLOR_GRADE_ID_TO_NAME = {
 COLOR_GRADE_NAME_TO_ID = {v: k for k, v in COLOR_GRADE_ID_TO_NAME.items()}
 # 成色 ID 列表，报价时用 order.colorGrade 与条件中的 ID key 对比
 COLOR_GRADE_IDS = (1001, 1002, 1003, 1004, 1005)
+
+# 自动抢单：剩余时间少于此秒数的订单不抢（含已截止）
+MIN_REMAINING_SECONDS = 30
+_DEADLINE_KEYS = (
+    "deadlineTime", "deadline_time", "expireAt", "expire_at",
+    "endTime", "end_time", "deadline",
+)
+_REMAINING_KEYS = (
+    "countdown", "remainSeconds", "remainingSeconds", "leftSeconds",
+    "remain_seconds", "remaining_seconds", "left_seconds",
+    "remainTime", "remainingTime",
+)
+
+
+def _pick_order_field(order: Dict[str, Any], keys) -> str:
+    for k in keys:
+        v = order.get(k)
+        if v is not None and str(v).strip() != "":
+            return str(v).strip()
+    return ""
+
+
+def _parse_deadline_epoch(v: Any) -> Optional[float]:
+    """把截止时间解析成 epoch 秒；无法识别则返回 None。"""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        n = float(v)
+        if n > 1e12:
+            return n / 1000.0
+        if n > 1e9:
+            return n
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    if s.isdigit() or (s.replace(".", "", 1).isdigit() and s.count(".") < 2):
+        n = float(s)
+        if n > 1e12:
+            return n / 1000.0
+        if n > 1e9:
+            return n
+        return None
+    iso = s.replace(" ", "T", 1)
+    try:
+        return datetime.fromisoformat(iso).timestamp()
+    except ValueError:
+        pass
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(s[:19], fmt).timestamp()
+        except ValueError:
+            continue
+    return None
+
+
+def _remaining_seconds(order: Dict[str, Any]) -> Optional[float]:
+    raw = _pick_order_field(order, _DEADLINE_KEYS)
+    if raw:
+        ts = _parse_deadline_epoch(raw)
+        if ts is not None:
+            return ts - time.time()
+    rem_raw = _pick_order_field(order, _REMAINING_KEYS)
+    if rem_raw:
+        try:
+            n = float(str(rem_raw).strip())
+            if n < 1e6:
+                return n
+        except (TypeError, ValueError):
+            pass
+    return None
+
+
+def _deadline_too_soon(order: Dict[str, Any]) -> bool:
+    """剩余时间已知且不足 MIN_REMAINING_SECONDS 时不抢。解析不到截止时间则不因此跳过。"""
+    rem = _remaining_seconds(order)
+    if rem is None:
+        return False
+    return rem < MIN_REMAINING_SECONDS
 
 
 def _normalize_storage(s):
@@ -103,7 +184,8 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
     :param lst: 订单列表（来自查询列表接口）
     :param conditions: 归一化后的抢单条件
     :param use_conditions_list: 是否为新格式（含保底价/成色价）
-    :return: [(order, quote_amount or None), ...]，quote_amount 为 None 时仅抢单不报价
+    :return: ([(order, quote_amount), ...], skipped_short)
+             quote_amount 为报价金额；skipped_short 为剩余不足 30 秒跳过的条数
     """
     def _quote_from_cond(order, cond):
         """
@@ -171,10 +253,16 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
         return None
 
     matched = []
+    skipped_short = 0
     for o in lst:
+        if not isinstance(o, dict):
+            continue
         record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
         order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
         if record_id is None or order_id is None:
+            continue
+        if _deadline_too_soon(o):
+            skipped_short += 1
             continue
         if use_conditions_list:
             res = _find_condition_and_quote(o)
@@ -191,7 +279,7 @@ def _execute_task_match_orders(lst, conditions, use_conditions_list):
             if q and str(q).strip():
                 matched.append((o, str(q).strip()))
             # 旧格式报价为空则不抢单
-    return matched
+    return matched, skipped_short
 
 
 def _execute_task_grab_and_quote(matched, api, user_id, remark):
@@ -201,15 +289,20 @@ def _execute_task_grab_and_quote(matched, api, user_id, remark):
     :param api: HaihuishouAPI 实例（已 set_token）
     :param user_id: 用户 ID
     :param remark: 报价备注
-    :return: (grabbed, quoted, errors)
+    :return: (grabbed, quoted, skipped_short, errors)
     """
     grabbed = 0
     quoted = 0
+    skipped_short = 0
     errors = []
     for o, quote_for_submit in matched:
         record_id = o.get("recordId") or o.get("grabOrderId") or o.get("productId") or o.get("id")
         order_id = o.get("orderId") or o.get("orderNo") or o.get("orderSn")
         if quote_for_submit is None or not str(quote_for_submit).strip():
+            continue
+        # 匹配到实际抢单之间可能耗时，再次检查剩余时间
+        if _deadline_too_soon(o):
+            skipped_short += 1
             continue
         try:
             raw = api.grab_order(record_id=record_id, order_id=order_id, user_id=user_id)
@@ -232,7 +325,7 @@ def _execute_task_grab_and_quote(matched, api, user_id, remark):
             quoted += 1
         except Exception as e:
             errors.append("recordId=%s: %s" % (record_id, str(e)))
-    return grabbed, quoted, errors
+    return grabbed, quoted, skipped_short, errors
 
 
 # 打包成 exe 时模板在 sys._MEIPASS 下
@@ -752,11 +845,17 @@ def api_execute_task():
     )
     try:
         lst, api = _execute_task_fetch_order_list(cond, token, user_id)
-        matched = _execute_task_match_orders(lst, conditions, use_conditions_list)
-        grabbed, quoted, errors = _execute_task_grab_and_quote(matched, api, user_id, remark)
+        matched, skipped_short_match = _execute_task_match_orders(lst, conditions, use_conditions_list)
+        grabbed, quoted, skipped_short_grab, errors = _execute_task_grab_and_quote(matched, api, user_id, remark)
         return jsonify({
             "success": True,
-            "data": {"grabbed": grabbed, "quoted": quoted, "total": len(lst), "errors": errors[:20]},
+            "data": {
+                "grabbed": grabbed,
+                "quoted": quoted,
+                "total": len(lst),
+                "skipped_short": skipped_short_match + skipped_short_grab,
+                "errors": errors[:20],
+            },
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 200

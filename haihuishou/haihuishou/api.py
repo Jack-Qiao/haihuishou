@@ -137,16 +137,29 @@ class HaihuishouAPI:
     # ------------------------- 2. 厂商与分类 -------------------------
 
     def get_manufacturer_list(self) -> List[Dict[str, str]]:
-        """获取厂商列表。"""
+        """获取厂商列表。需 body 传 userId（不传则 manufacturerList 为 null）。"""
+        uid = self._user_id
+        if not uid:
+            raise ValueError("获取厂商列表需要 userId，请先登录")
         url = f"{self.base_hsd}/api/syscategory/getmanufacturerdata"
         r = requests.post(
-            url, json={}, headers=self._headers(with_token=False), timeout=self.timeout, verify=self.verify
+            url,
+            json={"userId": uid},
+            headers=self._headers(with_token=bool(self._token)),
+            timeout=self.timeout,
+            verify=self.verify,
         )
         r.raise_for_status()
         data = r.json()
         if data.get("code") != 1:
             raise RuntimeError(data.get("message", "获取厂商列表失败"))
-        return data.get("data", {}).get("manufacturerList", [])
+        raw = data.get("data")
+        if isinstance(raw, list):
+            return raw
+        if not isinstance(raw, dict):
+            return []
+        lst = raw.get("manufacturerList")
+        return lst if isinstance(lst, list) else []
 
     def get_sys_category(self) -> List[Dict[str, Any]]:
         """获取电子产品类型（如手机、平板、笔记本）。"""

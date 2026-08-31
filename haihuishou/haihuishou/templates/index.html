@@ -2204,7 +2204,7 @@
         const manListEl = document.getElementById('manufacturersList');
         if (manListEl && Array.isArray(manufacturerList)) {
           manListEl.innerHTML = manufacturerList.map(function (m) {
-            var name = (m.manufacturerName || m.name || m.value || m.key || '').trim() || '-';
+            var name = (m.manufacturerName || m.name || m.text || m.value || m.key || '').trim() || '-';
             var esc = name.replace(/"/g, '&quot;').replace(/</g, '&lt;');
             return '<label class="tag"><input type="checkbox" data-name="' + esc + '"> ' + esc + '</label>';
           }).join('');
@@ -2591,7 +2591,7 @@
         var manListEl = document.getElementById('scheduleManufacturersList');
         if (manListEl && Array.isArray(manufacturerList) && manufacturerList.length) {
           manListEl.innerHTML = manufacturerList.map(function (m) {
-            var name = (m.manufacturerName || m.name || m.value || m.key || '').trim() || '-';
+            var name = (m.manufacturerName || m.name || m.text || m.value || m.key || '').trim() || '-';
             var esc = name.replace(/"/g, '&quot;').replace(/</g, '&lt;');
             return '<label class="tag"><input type="checkbox" data-name="' + esc + '"> ' + esc + '</label>';
           }).join('');
@@ -2630,7 +2630,8 @@
           if (toggleBtn) toggleBtn.setAttribute('data-collapsed-label', '展开品牌');
           if (txt) txt.textContent = '展开品牌';
         }
-        scheduleOptionsLoaded = true;
+        // 厂商有数据才标记已加载；为空时下次进 Tab 会重试
+        scheduleOptionsLoaded = Array.isArray(manufacturerList) && manufacturerList.length > 0;
       } catch (e) { showMsg(msg, String(e), 'error'); }
     }
     var SCHEDULE_STORAGE_KEY = 'haihuishou_scheduled_tasks';
@@ -3410,6 +3411,7 @@
         if (r.success && r.data) {
           var d = r.data;
           var text = '共 ' + (d.total || 0) + ' 条，抢单 ' + (d.grabbed || 0) + '，报价 ' + (d.quoted || 0);
+          if (d.skipped_short) text += '，剩余不足30秒跳过 ' + d.skipped_short;
           if (!isAuto) {
             showMsg(msg, '执行完成：' + text + (d.errors && d.errors.length ? '；部分失败见控制台' : ''), 'success');
           }
