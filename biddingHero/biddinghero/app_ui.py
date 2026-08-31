@@ -283,7 +283,7 @@ def api_order_report():
 
 @app.route("/api/execute-task", methods=["POST"])
 def api_execute_task():
-    """执行自动抢单任务。body: taskName, categoryNames[], brandNames[], channelNames[], maxAmount, conditions[]。"""
+    """执行自动抢单任务。body: taskName, categoryNames[], brandNames[], channelNames[], maxAmount, requireAiReport, conditions[]。"""
     api = _api_with_session()
     if not api.token:
         return jsonify({"success": False, "message": "请先登录"}), 401
@@ -307,6 +307,12 @@ def api_execute_task():
         max_amount = float(max_amount_raw) if max_amount_raw else None
     except ValueError:
         return task_err("最大金额格式错误")
+    # 默认要求 AI 识别；仅显式 false/0/"false" 时关闭
+    require_ai_raw = data.get("requireAiReport", True)
+    if isinstance(require_ai_raw, str):
+        require_ai_report = require_ai_raw.strip().lower() not in ("0", "false", "no", "off")
+    else:
+        require_ai_report = bool(require_ai_raw)
     conditions_raw = data.get("conditions") or []
     conditions, err = normalize_conditions(conditions_raw)
     if err:
@@ -325,6 +331,7 @@ def api_execute_task():
         grade_names=grade_names,
         model_names=model_names,
         max_amount=max_amount,
+        require_ai_report=require_ai_report,
         conditions=conditions,
     )
     try:

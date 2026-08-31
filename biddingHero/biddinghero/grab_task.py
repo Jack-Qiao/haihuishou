@@ -3,7 +3,7 @@
 
 流程：
 1. 查询 auction_list，拿到全量数据
-2. 按 brand_name(别名过滤)、cate_name、machine_level_name、model_name、order_channel_name 筛选
+2. 按 brand_name(别名过滤)、cate_name、machine_level_name、model_name、order_channel_name、AI质检 筛选
 3. 对命中订单查详情(=抢单) + 拉验机报告取内存，匹配条件行按成色报价
 4. 已有自己报价的订单跳过，不再改价
 5. 剩余不足 30 秒的订单不抢
@@ -164,6 +164,7 @@ class GrabCondition:
     grade_names: List[str] = field(default_factory=list)          # machine_level_name 过滤（全匹配）
     model_names: List[str] = field(default_factory=list)          # model_name 过滤（全匹配）
     max_amount: Optional[float] = None                            # 最大金额上限，超过不出价
+    require_ai_report: bool = True                                # True=仅抢 has_ai_report 的订单
     conditions: List[Dict[str, Any]] = field(default_factory=list)
 
 
@@ -196,8 +197,16 @@ def _canonical_brand(name: str) -> str:
     return n
 
 
+def _order_has_ai_report(order: Dict[str, Any]) -> bool:
+    """列表字段 has_ai_report / hasAiReport 为真时视为已 AI 质检。"""
+    v = order.get("has_ai_report")
+    if v is None:
+        v = order.get("hasAiReport")
+    return v is True or v == 1 or v == "1" or v == "true"
+
+
 def filter_auction_list(orders: List[Dict[str, Any]], cond: GrabCondition) -> List[Dict[str, Any]]:
-    """按 brand(别名)/cate/grade/model/channel 对 auction_list 做筛选。"""
+    """按 brand(别名)/cate/grade/model/channel/AI质检 对 auction_list 做筛选。"""
     cate_set = {_norm_filter(c) for c in (cond.category_names or []) if c}
     brand_set = {_norm_filter(b) for b in (cond.brand_names or []) if b}
     channel_set = {_norm_filter(c) for c in (cond.channel_names or []) if c}
@@ -229,6 +238,8 @@ def filter_auction_list(orders: List[Dict[str, Any]], cond: GrabCondition) -> Li
             v = _norm_filter(_pick(o, ["order_channel_name", "channelName", "channel"]))
             if v not in channel_set:
                 continue
+        if cond.require_ai_report and not _order_has_ai_report(o):
+            continue
         out.append(o)
     return out
 

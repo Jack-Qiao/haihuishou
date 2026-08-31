@@ -1437,6 +1437,21 @@
     }
     #btnScheduleQuickLocate { font-weight: 600; }
 
+    .schedule-ai-check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .schedule-ai-check-label input[type="checkbox"] {
+      margin: 0;
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+
     .schedule-task-modal #btnScheduleCancelEdit { display: inline-block !important; }
 
     .schedule-task-modal .brands-chosen {
@@ -2215,6 +2230,10 @@
             <option value="30">30秒/次</option>
             <option value="60">60秒/次</option>
           </select>
+          <label class="schedule-ai-check-label" style="margin-left:20px;" title="勾选后仅抢已做 AI 质检的商品；取消则不限">
+            <input type="checkbox" id="scheduleRequireAiReport" checked>
+            AI识别
+          </label>
           <label class="schedule-quick-locate-label" style="margin-left:20px;">快速定位</label>
           <input type="text" id="scheduleQuickLocate" class="schedule-quick-locate-input" placeholder="输入机型模糊搜索（辅助，不入参）" style="width:180px;" autocomplete="off" data-auxiliary="true">
           <button type="button" class="btn btn-primary btn-small" id="btnScheduleQuickLocate" title="定位到匹配的条件行（辅助功能，不入参）">定位</button>
@@ -4581,6 +4600,9 @@
         renderScheduleConditionsRows(task.conditions && task.conditions.length ? task.conditions : [{}]);
         var freqSelect = $('scheduleTaskFrequency');
         if (freqSelect) freqSelect.value = task.frequency || '3';
+        var aiCb = $('scheduleRequireAiReport');
+        // 旧任务无该字段时默认勾选
+        if (aiCb) aiCb.checked = task.requireAiReport !== false;
         var quickLocate = $('scheduleQuickLocate'); if (quickLocate) quickLocate.value = '';
         // 品类（单选）
         var catNames = (task.categoryNames && task.categoryNames.length) ? task.categoryNames : [];
@@ -4612,6 +4634,7 @@
         $('scheduleTaskName').value = '';
         renderScheduleConditionsRows([{}]);
         var freqSelect = $('scheduleTaskFrequency'); if (freqSelect) freqSelect.value = '3';
+        var aiCb = $('scheduleRequireAiReport'); if (aiCb) aiCb.checked = true;
         // 品类默认「手机」
         document.querySelectorAll('input[name="scheduleTaskCate"]').forEach(function (r) {
           r.checked = (r.getAttribute('data-name') || '') === '手机';
@@ -4641,13 +4664,15 @@
           .map(function (cb) { return (cb.getAttribute('data-name') || '').trim(); })
           .filter(Boolean);
         var freqEl = $('scheduleTaskFrequency');
+        var aiCb = $('scheduleRequireAiReport');
         return {
           name: name,
           categoryNames: categoryNames,
           brandNames: brandNames,
           channelNames: channelNames,
           conditions: validConditions,
-          frequency: freqEl ? freqEl.value : '3'
+          frequency: freqEl ? freqEl.value : '3',
+          requireAiReport: aiCb ? !!aiCb.checked : true
         };
       }
 
@@ -4670,6 +4695,7 @@
           var brandStr = (t.brandNames && t.brandNames.length) ? t.brandNames.join('、') : '全部品牌';
           var chStr = (t.channelNames && t.channelNames.length) ? t.channelNames.join('、') : '全部货源';
           var freqStr = freqLabels[t.frequency] || t.frequency || '3秒/次';
+          var aiStr = t.requireAiReport !== false ? '仅AI识别' : '不限AI';
           var isRunning = !!scheduleTaskTimers[t.id];
           var isStarting = !!scheduleTaskStarting[t.id];
           var actions;
@@ -4694,7 +4720,7 @@
             });
             return parts.join(' ');
           }
-          var basicStr = '品类: ' + catStr + ' | 品牌: ' + brandStr + ' | 货源: ' + chStr + ' | 频率: ' + freqStr;
+          var basicStr = '品类: ' + catStr + ' | 品牌: ' + brandStr + ' | 货源: ' + chStr + ' | 频率: ' + freqStr + ' | AI识别: ' + aiStr;
           var bodyHtml = '<div class="schedule-task-card-body-line">' + escapeHtml(basicStr) + '</div>';
           if (conds.length > 0) {
             bodyHtml += '<div class="schedule-task-conditions-block">';
@@ -4794,6 +4820,7 @@
           existing.channelNames = t.channelNames;
           existing.conditions = t.conditions;
           existing.frequency = t.frequency;
+          existing.requireAiReport = t.requireAiReport !== false;
           saveScheduledTasks();
           clearScheduleEditMode();
           clearScheduleTaskForm();
@@ -4805,7 +4832,8 @@
           scheduledTasks.push({
             id: id, name: t.name,
             categoryNames: t.categoryNames, brandNames: t.brandNames, channelNames: t.channelNames,
-            conditions: t.conditions, frequency: t.frequency
+            conditions: t.conditions, frequency: t.frequency,
+            requireAiReport: t.requireAiReport !== false
           });
           saveScheduledTasks();
           clearScheduleTaskForm();
@@ -4872,6 +4900,7 @@
               brandNames: task.brandNames || [],
               channelNames: task.channelNames || [],
               maxAmount: getScheduleMaxAmount(),
+              requireAiReport: task.requireAiReport !== false,
               conditions: conds.length ? conds : undefined
             }
           });
@@ -5025,6 +5054,7 @@
                 existing.channelNames = [];
                 existing.conditions = mapConditions(conditions);
                 existing.frequency = '3';
+                if (existing.requireAiReport === undefined) existing.requireAiReport = true;
                 overwritten++;
                 return;
               }
@@ -5035,7 +5065,8 @@
                 brandNames: matchedBrand ? [matchedBrand] : [],
                 channelNames: [],
                 conditions: mapConditions(conditions),
-                frequency: '3'
+                frequency: '3',
+                requireAiReport: true
               });
               added++;
             });
